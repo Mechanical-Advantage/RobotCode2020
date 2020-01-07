@@ -10,8 +10,13 @@ package frc.robot;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
+import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
+
+import java.util.concurrent.Callable;
+
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -28,14 +33,21 @@ public class RobotContainer {
 
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
 
-  private final OI oi;
+  private OI oi;
+  private final Callable<OI> oiAccess = () -> oi;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // TODO panel identification by controller name
-    oi = new OIConsole(cameraSubsystem);
+    String joystickName = new Joystick(0).getName();
+    switch (joystickName) {
+    case "Logitech Attack 3":
+      oi = new OIConsole(cameraSubsystem);
+      break;
+    default:
+      oi = new OIHandheld();
+    }
   }
 
   /**
