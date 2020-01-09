@@ -5,6 +5,7 @@ import frc.robot.Constants.RobotType;
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -80,6 +81,7 @@ public class CameraSystem extends SubsystemBase {
     }
     CameraServer.getInstance().getServer().setSource(frontCamera);
     System.out.println("Switching to front camera");
+    SmartDashboard.putString("Current Camera", "Front");
   }
 
   public void useSecondCamera() {
@@ -96,6 +98,7 @@ public class CameraSystem extends SubsystemBase {
       }
       CameraServer.getInstance().getServer().setSource(secondCamera);
       System.out.println("Switching to second camera");
+      SmartDashboard.putString("Current Camera", "Second");
     }
   }
 }

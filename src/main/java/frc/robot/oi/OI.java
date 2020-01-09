@@ -1,5 +1,7 @@
 package frc.robot.oi;
 
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 /**
  * Acts as an interface to multiple OI configurations
  */
@@ -10,44 +12,41 @@ public abstract class OI {
                                                        // rumble
     public static final double lowRumbleFactor = 0.15; // Multiplied by high frequency rumble power to calculate low
                                                        // frequency rumble power
+    static final Trigger dummyTrigger = new Trigger();
 
-    public double getLeftAxis() {
+    public double getLeftDriveY() {
         return 0;
     }
 
-    public double getRightAxis() {
+    public double getLeftDriveX() {
         return 0;
     }
 
-    public double getSingleDriveAxisLeft() {
+    public double getRightDriveY() {
         return 0;
     }
 
-    public double getSingleDriveAxisRight() {
+    public double getRightDriveX() {
         return 0;
     }
 
-    public double getLeftHorizDriveAxis() {
+    public double getLeftDriveTrigger() {
         return 0;
     }
 
-    public double getRightHorizDriveAxis() {
+    public double getRightDriveTrigger() {
         return 0;
     }
 
-    public boolean getOpenLoop() {
+    public boolean hasDriveTriggers() {
         return false;
     }
 
-    public void toggleOpenLoop() {
-    };
+    // All OIs are required to implement an open loop switch and drive disable.
 
-    public boolean getDriveEnabled() {
-        return false;
-    }
+    public abstract Trigger getOpenLoopSwitch();
 
-    public void toggleDriveEnabled() {
-    };
+    public abstract Trigger getDriveDisableSwitch();
 
     public boolean getSniperMode() {
         return false;
@@ -65,29 +64,46 @@ public abstract class OI {
         return false;
     }
 
-    public void reverseJoysticks(boolean reverse) {
-    }
-
-    public boolean isShiftingEnabled() {
+    public boolean hasDualSniperMode() {
         return false;
     }
 
-    public double getSliderLevel() {
-        return 0;
+    public Trigger getShiftDisableSwitch() {
+        return dummyTrigger;
+    }
+
+    public Trigger getHighGearButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getLowGearButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getToggleGearButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getJoysticksForwardButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getJoysticksReverseButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getFrontCameraButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getSecondCameraButton() {
+        return dummyTrigger;
     }
 
     public void setRumble(OIRumbleType type, double value) {
     }
 
     public void resetRumble() {
-    }
-
-    public double getLeftOperatorStickY() {
-        return 0;
-    }
-
-    public double getRightOperatorStickY() {
-        return 0;
     }
 
     public double getDeadband() {
@@ -104,9 +120,5 @@ public abstract class OI {
 
     public static enum OIRumbleType {
         DRIVER_LEFT, DRIVER_RIGHT, OPERATOR_LEFT, OPERATOR_RIGHT
-    }
-
-    public static enum OIType {
-        CONSOLE, HANDHELD
     }
 }

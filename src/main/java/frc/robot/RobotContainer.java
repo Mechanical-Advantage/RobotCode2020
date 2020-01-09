@@ -18,6 +18,8 @@ import java.util.concurrent.Callable;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -35,19 +37,56 @@ public class RobotContainer {
 
   private OI oi;
   private final Callable<OI> oiAccess = () -> oi;
+  private String lastJoystickName;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+  }
+
+  public void updateOIType() {
     String joystickName = new Joystick(0).getName();
-    switch (joystickName) {
-    case "Logitech Attack 3":
-      oi = new OIConsole(cameraSubsystem);
-      break;
-    default:
-      oi = new OIHandheld();
+    if (joystickName != lastJoystickName) {
+      // Button mapping must be cleared before instantiating new OI because the new OI
+      // might need to map buttons internally
+      CommandScheduler.getInstance().clearButtons();
+      switch (joystickName) {
+      case "Logitech Attack 3":
+        oi = new OIConsole(cameraSubsystem);
+        break;
+      default:
+        oi = new OIHandheld();
+      }
+      lastJoystickName = joystickName;
     }
+  }
+
+  /**
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by instantiating a {@link GenericHID} or one of its subclasses
+   * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then
+   * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   */
+  private void configureInputs() {
+    Command driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY, oi::getLeftDriveTrigger,
+        oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi.hasDriveTriggers(), oi::getSniperMode,
+        oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh, oi.hasDualSniperMode());
+    driveSubsystem.setDefaultCommand(driveCommand);
+    oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.getReversed(false)));
+    oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.getReversed(true)));
+
+    oi.getHighGearButton()
+        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem));
+    oi.getLowGearButton()
+        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.LOW), driveSubsystem));
+    oi.getToggleGearButton().whenActive(
+        new InstantCommand(() -> driveSubsystem.switchGear(driveSubsystem.getCurrentGear.invert()), driveSubsystem));
+
+    // Since useFrontCamera/useSecondCamera don't need arguments they can be passed
+    // directly to InstantCommand
+    oi.getFrontCameraButton().whenActive(new InstantCommand(cameraSubsystem::useFrontCamera, cameraSubsystem));
+    oi.getSecondCameraButton().whenActive(new InstantCommand(cameraSubsystem::useSecondCamera, cameraSubsystem));
   }
 
   /**
