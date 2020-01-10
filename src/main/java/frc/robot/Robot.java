@@ -80,6 +80,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    robotContainer.updateOIType();
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -104,6 +105,7 @@ public class Robot extends TimedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    robotContainer.updateOIType();
   }
 
   /**

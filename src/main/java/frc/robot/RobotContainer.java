@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import frc.robot.Constants.RobotType;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
@@ -32,17 +33,33 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
+  private final DriveTrainBase driveSubsystem;
 
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
 
   private OI oi;
-  private final Callable<OI> oiAccess = () -> oi;
   private String lastJoystickName;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    // The subsystems can't be recreated when OI changes so provide them with a
+    // Callable to access the current value from whatever OI is current
+    Callable<Boolean> openLoopSwitchAccess = () -> oi.getOpenLoopSwitch().get();
+    Callable<Boolean> driveDisableSwitchAccess = () -> oi.getDriveDisableSwitch().get();
+    switch (Constants.getRobot()) {
+    case ROBOT_2020:
+    case ROBOT_2020_DRIVE:
+      driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess);
+      break;
+    case ROBOT_2019:
+    case ORIGINAL_ROBOT_2018:
+    case REBOT:
+    case NOTBOT:
+      driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess);
+      break;
+    }
   }
 
   public void updateOIType() {
@@ -76,6 +93,12 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(driveCommand);
     oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.getReversed(false)));
     oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.getReversed(true)));
+    // The DriveTrain will enforce the switches but this makes sure they are applied
+    // immediately
+    oi.getDriveDisableSwitch().whenActive(new InstantCommand(driveSubsystem::disableDrive));
+    oi.getDriveDisableSwitch().whenInactive(new InstantCommand(driveSubsystem::enableDrive));
+    oi.getOpenLoopSwitch().whenActive(new InstantCommand(driveSubsystem::useOpenLoop));
+    oi.getOpenLoopSwitch().whenInactive(new InstantCommand(driveSubsystem::useClosedLoop));
 
     oi.getHighGearButton()
         .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem));
