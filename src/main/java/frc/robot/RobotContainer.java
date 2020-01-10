@@ -14,6 +14,7 @@ import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.LimelightInterface;
 
 import java.util.concurrent.Callable;
 
@@ -33,6 +34,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
+  private final LimelightInterface limelight = new LimelightInterface();
   private final DriveTrainBase driveSubsystem;
 
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
