@@ -18,7 +18,10 @@ import frc.robot.subsystems.LimelightInterface;
 
 import java.util.concurrent.Callable;
 
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -36,6 +39,8 @@ public class RobotContainer {
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private final DriveTrainBase driveSubsystem;
+
+  private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
 
