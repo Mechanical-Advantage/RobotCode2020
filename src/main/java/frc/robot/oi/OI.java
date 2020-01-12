@@ -100,6 +100,10 @@ public abstract class OI {
         return dummyTrigger;
     }
 
+    public Trigger getVisionTestButton() {
+        return dummyTrigger;
+    }
+
     public void setRumble(OIRumbleType type, double value) {
     }
 

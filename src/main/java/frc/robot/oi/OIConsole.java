@@ -67,10 +67,12 @@ public class OIConsole extends OI {
   private Button highGear = new JoystickButton(leftController, 5);
   private Button lowGear = new JoystickButton(leftController, 4);
 
+  private Button visionTestButton = new JoystickButton(rightController, 8);
+
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
 
-  public OIConsole(CameraSystem cameraSubsystem) {
+  public OIConsole() {
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
 
@@ -158,6 +160,11 @@ public class OIConsole extends OI {
   @Override
   public Trigger getSecondCameraButton() {
     return secondCameraButton;
+  }
+
+  @Override
+  public Trigger getVisionTestButton() {
+    return visionTestButton;
   }
 
   @Override

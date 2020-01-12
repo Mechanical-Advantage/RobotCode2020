@@ -9,6 +9,7 @@ package frc.robot;
 
 import frc.robot.Constants.RobotType;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.LimelightTest;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
@@ -38,7 +39,7 @@ public class RobotContainer {
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
-  private final DriveTrainBase driveSubsystem;
+  // private final DriveTrainBase driveSubsystem;
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -58,13 +59,15 @@ public class RobotContainer {
     switch (Constants.getRobot()) {
     case ROBOT_2020:
     case ROBOT_2020_DRIVE:
-      driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess);
+      // driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess,
+      // openLoopSwitchAccess);
       break;
     case ROBOT_2019:
     case ORIGINAL_ROBOT_2018:
     case REBOT:
     case NOTBOT:
-      driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess);
+      // driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess,
+      // openLoopSwitchAccess);
       break;
     }
   }
@@ -77,12 +80,13 @@ public class RobotContainer {
       CommandScheduler.getInstance().clearButtons();
       switch (joystickName) {
       case "Logitech Attack 3":
-        oi = new OIConsole(cameraSubsystem);
+        oi = new OIConsole();
         break;
       default:
         oi = new OIHandheld();
       }
       lastJoystickName = joystickName;
+      configureInputs();
     }
   }
 
@@ -93,31 +97,46 @@ public class RobotContainer {
    * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureInputs() {
-    DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
-        oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger,
-        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh,
-        oi.hasDualSniperMode());
-    driveSubsystem.setDefaultCommand(driveCommand);
-    oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.getReversed(false)));
-    oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.getReversed(true)));
+    // DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX,
+    // oi::getLeftDriveY,
+    // oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY,
+    // oi::getRightDriveTrigger,
+    // oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel,
+    // oi::getSniperLow, oi::getSniperHigh,
+    // oi.hasDualSniperMode());
+    // driveSubsystem.setDefaultCommand(driveCommand);
+    // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
+    // driveCommand.getReversed(false)));
+    // oi.getJoysticksReverseButton().whenActive(new InstantCommand(() ->
+    // driveCommand.getReversed(true)));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
-    oi.getDriveDisableSwitch().whenActive(new InstantCommand(driveSubsystem::disableDrive));
-    oi.getDriveDisableSwitch().whenInactive(new InstantCommand(driveSubsystem::enableDrive));
-    oi.getOpenLoopSwitch().whenActive(new InstantCommand(driveSubsystem::useOpenLoop));
-    oi.getOpenLoopSwitch().whenInactive(new InstantCommand(driveSubsystem::useClosedLoop));
+    // oi.getDriveDisableSwitch().whenActive(new
+    // InstantCommand(driveSubsystem::disableDrive));
+    // oi.getDriveDisableSwitch().whenInactive(new
+    // InstantCommand(driveSubsystem::enableDrive));
+    // oi.getOpenLoopSwitch().whenActive(new
+    // InstantCommand(driveSubsystem::useOpenLoop));
+    // oi.getOpenLoopSwitch().whenInactive(new
+    // InstantCommand(driveSubsystem::useClosedLoop));
 
-    oi.getHighGearButton()
-        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem));
-    oi.getLowGearButton()
-        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.LOW), driveSubsystem));
-    oi.getToggleGearButton().whenActive(
-        new InstantCommand(() -> driveSubsystem.switchGear(driveSubsystem.getCurrentGear.invert()), driveSubsystem));
+    // oi.getHighGearButton()
+    // .whenActive(new InstantCommand(() ->
+    // driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem));
+    // oi.getLowGearButton()
+    // .whenActive(new InstantCommand(() ->
+    // driveSubsystem.switchGear(DriveGear.LOW), driveSubsystem));
+    // oi.getToggleGearButton().whenActive(
+    // new InstantCommand(() ->
+    // driveSubsystem.switchGear(driveSubsystem.getCurrentGear.invert()),
+    // driveSubsystem));
 
     // Since useFrontCamera/useSecondCamera don't need arguments they can be passed
     // directly to InstantCommand
     oi.getFrontCameraButton().whenActive(new InstantCommand(cameraSubsystem::useFrontCamera, cameraSubsystem));
     oi.getSecondCameraButton().whenActive(new InstantCommand(cameraSubsystem::useSecondCamera, cameraSubsystem));
+
+    oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
   }
 
   /**

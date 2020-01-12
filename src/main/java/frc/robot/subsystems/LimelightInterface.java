@@ -108,7 +108,7 @@ public class LimelightInterface extends SubsystemBase {
   }
 
   public void useAsDriverCam(boolean driverCam) {
-    camMode.setBoolean(driverCam);
+    camMode.setDouble(driverCam ? 1.0 : 0.0);
   }
 
   /**
@@ -135,7 +135,7 @@ public class LimelightInterface extends SubsystemBase {
    * @return whether there is a valid target
    */
   public boolean hasValidTarget() {
-    return targetValid.getValue().equals(1);
+    return targetValid.getDouble(0) != 0.0;
   }
 
   /**
@@ -163,7 +163,7 @@ public class LimelightInterface extends SubsystemBase {
    * @param enable whether to enable snapshots
    */
   public void enableSnapshots(boolean enable) {
-    snapshot.setBoolean(enable);
+    snapshot.setDouble(enable ? 1.0 : 0.0);
   }
 
   /**
