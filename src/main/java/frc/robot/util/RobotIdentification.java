@@ -38,7 +38,7 @@ public class RobotIdentification {
                 System.out.println("Identified MAC address as " + robot);
             }
             return robot;
-        } catch (SocketException err) {
+        } catch (SocketException | NullPointerException err) {
             DriverStation.reportError("Failed to read MAC", false);
             return null;
         }
