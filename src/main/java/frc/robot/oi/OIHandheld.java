@@ -1,7 +1,5 @@
 package frc.robot.oi;
 
-import java.util.concurrent.Callable;
-
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
@@ -14,8 +12,8 @@ public class OIHandheld extends OI {
     private boolean driveEnabled = true;
     private boolean openLoop = true;
 
-    private Trigger openLoopSwitch = new FakeSwitch(false, () -> openLoop);
-    private Trigger driveDisableSwitch = new FakeSwitch(true, () -> driveEnabled);
+    private Trigger openLoopSwitch = new Trigger(() -> openLoop);
+    private Trigger driveDisableSwitch = new Trigger(() -> driveEnabled).negate();
 
     // map driver controller to ID 0 and operator controller to ID 1 in driver
     // station
@@ -31,8 +29,8 @@ public class OIHandheld extends OI {
         resetRumble();
         // The toggle buttons are not exposed and this class fakes having a disable
         // switch
-        toggleDriveEnabled.whenPressed(new InstantCommand(this::toggleDriveEnabled));
-        toggleOpenLoop.whenPressed(new InstantCommand(this::toggleOpenLoop));
+        toggleDriveEnabled.whenPressed(new InstantCommand(() -> driveEnabled = !driveEnabled));
+        toggleOpenLoop.whenPressed(new InstantCommand(() -> openLoop = !openLoop));
     }
 
     @Override
@@ -97,17 +95,9 @@ public class OIHandheld extends OI {
         return openLoopSwitch;
     }
 
-    private void toggleOpenLoop() {
-        openLoop = !openLoop;
-    }
-
     @Override
     public Trigger getDriveDisableSwitch() {
         return driveDisableSwitch;
-    }
-
-    private void toggleDriveEnabled() {
-        driveEnabled = !driveEnabled;
     }
 
     @Override
@@ -144,39 +134,5 @@ public class OIHandheld extends OI {
     @Override
     public double getDeadband() {
         return 0.09;
-    }
-
-    /**
-     * A trigger that gets its input from a Callable.
-     */
-    private static class FakeSwitch extends Trigger {
-
-        private boolean invert;
-        private Callable<Boolean> input;
-
-        /**
-         * Creates a new FakeSwitch
-         * 
-         * @param invert Whether to invert the input
-         * @param input  The Callable used to get the current value
-         */
-        public FakeSwitch(boolean invert, Callable<Boolean> input) {
-            this.invert = invert;
-            this.input = input;
-        }
-
-        @Override
-        public boolean get() {
-            try {
-                Boolean state = input.call();
-                return invert ? !state : state;
-            } catch (Exception e) {
-                // Since this is just used to retrieve the value of a primitive this block
-                // should never run.
-                e.printStackTrace();
-                // Assume the switch is set
-                return true;
-            }
-        }
     }
 }

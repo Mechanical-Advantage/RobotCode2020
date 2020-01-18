@@ -7,25 +7,28 @@
 
 package frc.robot;
 
-import frc.robot.Constants.RobotType;
+import java.util.function.BooleanSupplier;
+
+import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
+import frc.robot.oi.DummyOI;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightInterface;
-
-import java.util.concurrent.Callable;
-
-import com.kauailabs.navx.frc.AHRS;
-
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -39,13 +42,13 @@ public class RobotContainer {
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
-  // private final DriveTrainBase driveSubsystem;
+  private DriveTrainBase driveSubsystem;
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
 
-  private OI oi;
+  private OI oi = new DummyOI();
   private String lastJoystickName;
 
   /**
@@ -53,9 +56,10 @@ public class RobotContainer {
    */
   public RobotContainer() {
     // The subsystems can't be recreated when OI changes so provide them with a
-    // Callable to access the current value from whatever OI is current
-    Callable<Boolean> openLoopSwitchAccess = () -> oi.getOpenLoopSwitch().get();
-    Callable<Boolean> driveDisableSwitchAccess = () -> oi.getDriveDisableSwitch().get();
+    // BooleanSupplier to access the current value from whatever OI is current
+    BooleanSupplier openLoopSwitchAccess = () -> oi.getOpenLoopSwitch().get();
+    BooleanSupplier driveDisableSwitchAccess = () -> oi.getDriveDisableSwitch().get();
+    BooleanSupplier shiftLockSwitchAccess = () -> oi.getShiftLockSwitch().get();
     switch (Constants.getRobot()) {
     case ROBOT_2020:
     case ROBOT_2020_DRIVE:
@@ -82,8 +86,13 @@ public class RobotContainer {
       case "Logitech Attack 3":
         oi = new OIConsole();
         break;
-      default:
+      case "XBox 360 Controller": // Check this name
+      case "Logitech F310 Gamepad":
         oi = new OIHandheld();
+        break;
+      default:
+        oi = new DummyOI();
+        break;
       }
       lastJoystickName = joystickName;
       configureInputs();
@@ -106,30 +115,26 @@ public class RobotContainer {
     // oi.hasDualSniperMode());
     // driveSubsystem.setDefaultCommand(driveCommand);
     // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
-    // driveCommand.getReversed(false)));
+    // driveCommand.setReversed(false)));
     // oi.getJoysticksReverseButton().whenActive(new InstantCommand(() ->
-    // driveCommand.getReversed(true)));
+    // driveCommand.setReversed(true)));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
-    // oi.getDriveDisableSwitch().whenActive(new
-    // InstantCommand(driveSubsystem::disableDrive));
-    // oi.getDriveDisableSwitch().whenInactive(new
-    // InstantCommand(driveSubsystem::enableDrive));
-    // oi.getOpenLoopSwitch().whenActive(new
-    // InstantCommand(driveSubsystem::useOpenLoop));
-    // oi.getOpenLoopSwitch().whenInactive(new
-    // InstantCommand(driveSubsystem::useClosedLoop));
+    // neutralOutput is safer than stop since it prevents the motors from running
+    oi.getDriveDisableSwitch().whenActive(new InstantCommand(driveSubsystem::neutralOutput, driveSubsystem));
+    // This prevents the drive train from running in the old mode and since behavior
+    // changes anyway stopping if the current command isn't calling drive is
+    // reasonable. A brief neutralOutput while driving won't cause a noticable
+    // change anyway
+    oi.getOpenLoopSwitch().whenActive(new InstantCommand(driveSubsystem::neutralOutput));
+    oi.getOpenLoopSwitch().whenInactive(new InstantCommand(driveSubsystem::neutralOutput));
 
-    // oi.getHighGearButton()
-    // .whenActive(new InstantCommand(() ->
-    // driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem));
-    // oi.getLowGearButton()
-    // .whenActive(new InstantCommand(() ->
-    // driveSubsystem.switchGear(DriveGear.LOW), driveSubsystem));
-    // oi.getToggleGearButton().whenActive(
-    // new InstantCommand(() ->
-    // driveSubsystem.switchGear(driveSubsystem.getCurrentGear.invert()),
-    // driveSubsystem));
+    oi.getHighGearButton()
+        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem));
+    oi.getLowGearButton()
+        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.LOW), driveSubsystem));
+    oi.getToggleGearButton().whenActive(
+        new InstantCommand(() -> driveSubsystem.switchGear(driveSubsystem.getCurrentGear().invert()), driveSubsystem));
 
     // Since useFrontCamera/useSecondCamera don't need arguments they can be passed
     // directly to InstantCommand
