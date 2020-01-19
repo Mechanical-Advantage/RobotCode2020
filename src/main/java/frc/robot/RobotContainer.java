@@ -97,13 +97,10 @@ public class RobotContainer {
    * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureInputs() {
-    // DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX,
-    // oi::getLeftDriveY,
-    // oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY,
-    // oi::getRightDriveTrigger,
-    // oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel,
-    // oi::getSniperLow, oi::getSniperHigh,
-    // oi.hasDualSniperMode());
+    DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
+        oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger,
+        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh,
+        oi.hasDualSniperMode());
     // driveSubsystem.setDefaultCommand(driveCommand);
     // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
     // driveCommand.getReversed(false)));
