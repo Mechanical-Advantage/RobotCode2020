@@ -10,6 +10,7 @@ package frc.robot;
 import frc.robot.Constants.RobotType;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
+import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
@@ -23,6 +24,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -39,9 +41,11 @@ public class RobotContainer {
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
-  // private final DriveTrainBase driveSubsystem;
+  private final DriveTrainBase driveSubsystem;
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
+
+  private final SendableChooser<JoystickMode> joystickModeChooser;
 
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
 
@@ -98,10 +102,10 @@ public class RobotContainer {
    */
   private void configureInputs() {
     DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
-        oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger,
+        oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi::getDeadband,
         oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh,
-        oi.hasDualSniperMode());
-    // driveSubsystem.setDefaultCommand(driveCommand);
+        oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+    driveSubsystem.setDefaultCommand(driveCommand);
     // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
     // driveCommand.getReversed(false)));
     // oi.getJoysticksReverseButton().whenActive(new InstantCommand(() ->

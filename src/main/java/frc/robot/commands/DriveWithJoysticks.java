@@ -7,9 +7,13 @@
 
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Robot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class DriveWithJoysticks extends CommandBase {
   /**
@@ -20,14 +24,47 @@ public class DriveWithJoysticks extends CommandBase {
   // of current gear
   private static final double rightStickScale = 0.5; // Factor of right stick when added
 
-  public DriveWithJoysticks(// add types
-  leftDriveX, leftDriveY, leftDriveTrigger, rightDriveX, rightDriveY, rightDriveTrigger, 
-  hasDriveTriggers, sniperMode, sniperLevel, sniperLow, sniperHigh, hasDualSniperMode) {
+  private DoubleSupplier oiLeftDriveX;
+  private DoubleSupplier oiLeftDriveY;
+  private DoubleSupplier oiLeftDriveTrigger;
+  private DoubleSupplier oiRightDriveX;
+  private DoubleSupplier oiRightDriveY;
+  private DoubleSupplier oiRightDriveTrigger;
+  private DoubleSupplier oiGetDeadband;
+  private BooleanSupplier oiHasDriveTriggers;
+  private BooleanSupplier oiSniperMode;
+  private DoubleSupplier oiSniperLevel;
+  private BooleanSupplier oiSniperLow;
+  private BooleanSupplier oiSniperHigh;
+  private BooleanSupplier oiHasDualSniperMode;
+  private DriveTrainBase driveSubsystem;
+  private SendableChooser<JoystickMode> joystickChooser;
+
+  public DriveWithJoysticks(DoubleSupplier leftDriveX, DoubleSupplier leftDriveY, DoubleSupplier leftDriveTrigger,
+      DoubleSupplier rightDriveX, DoubleSupplier rightDriveY, DoubleSupplier rightDriveTrigger,
+      DoubleSupplier getDeadband, BooleanSupplier hasDriveTriggers, BooleanSupplier sniperMode,
+      DoubleSupplier sniperLevel, BooleanSupplier sniperLow, BooleanSupplier sniperHigh,
+      BooleanSupplier hasDualSniperMode, SendableChooser<JoystickMode> joystickModeChooser,
+      DriveTrainBase driveSubsys) {
     // Use requires() here to declare subsystem dependencies
     // eg. requires(chassis);
-    super("DriveWithJoystick");
-    requires(Robot.driveSubsystem);
-
+    super();
+    addRequirements(driveSubsystem);
+    oiLeftDriveX = leftDriveX;
+    oiLeftDriveY = leftDriveY;
+    oiLeftDriveTrigger = leftDriveTrigger;
+    oiRightDriveX = rightDriveX;
+    oiRightDriveY = rightDriveY;
+    oiRightDriveTrigger = rightDriveTrigger;
+    oiGetDeadband = getDeadband;
+    oiHasDriveTriggers = hasDriveTriggers;
+    oiSniperMode = sniperMode;
+    oiSniperLevel = sniperLevel;
+    oiSniperLow = sniperLow;
+    oiSniperHigh = sniperHigh;
+    oiHasDualSniperMode = hasDualSniperMode;
+    joystickChooser = joystickModeChooser;
+    driveSubsystem = driveSubsys;
   }
 
   // Called when the command is initially scheduled.
@@ -39,7 +76,7 @@ public class DriveWithJoysticks extends CommandBase {
   private double processJoystickAxis(double joystickAxis) {
     // cube to improve low speed control, multiply by -1 because negative joystick
     // means forward, 0 if within deadband
-    return Math.abs(joystickAxis) > Robot.oi.getDeadband() ? joystickAxis * Math.abs(joystickAxis) * -1 : 0;
+    return Math.abs(joystickAxis) > oiGetDeadband.getAsDouble() ? joystickAxis * Math.abs(joystickAxis) * -1 : 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -48,28 +85,33 @@ public class DriveWithJoysticks extends CommandBase {
     double joystickLeft = 0, joystickRight = 0;
     double baseDrive;
     double totalTurn;
-    switch (Robot.joystickModeChooser.getSelected()) {
+    switch (joystickChooser.getSelected()) {
     case Tank:
-      joystickRight = processJoystickAxis(Robot.oi.getRightAxis());
-      joystickLeft = processJoystickAxis(Robot.oi.getLeftAxis());
+      joystickRight = processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getRightAxis() */);
+      joystickLeft = processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getLeftAxis() */);
       break;
     case SplitArcade:
-      baseDrive = processJoystickAxis(Robot.oi.getSingleDriveAxisLeft());
-      joystickRight = baseDrive + processJoystickAxis(Robot.oi.getRightHorizDriveAxis());
+      baseDrive = processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisLeft() */);
+      joystickRight = baseDrive
+          + processJoystickAxis(oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */);
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive - processJoystickAxis(Robot.oi.getRightHorizDriveAxis());
+      joystickLeft = baseDrive
+          - processJoystickAxis(oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */);
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case SplitArcadeRightDrive:
-      baseDrive = processJoystickAxis(Robot.oi.getSingleDriveAxisRight());
-      joystickRight = baseDrive + processJoystickAxis(Robot.oi.getLeftHorizDriveAxis());
+      baseDrive = processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisRight() */);
+      joystickRight = baseDrive
+          + processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive - processJoystickAxis(Robot.oi.getLeftHorizDriveAxis());
+      joystickLeft = baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case Trigger:
-      baseDrive = (Robot.oi.getLeftTrigger() - Robot.oi.getRightTrigger()) * -1;
-      totalTurn = Robot.oi.getLeftHorizDriveAxis() + (Robot.oi.getRightHorizDriveAxis() * rightStickScale);
+      baseDrive = (oiLeftDriveTrigger.getAsDouble()
+          /* Robot.oi.getLeftTrigger() */ - oiRightDriveTrigger.getAsDouble() /* Robot.oi.getRightTrigger() */ ) * -1;
+      totalTurn = oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */
+          + (oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */ * rightStickScale);
       joystickRight = baseDrive + processJoystickAxis(totalTurn);
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
       joystickLeft = baseDrive - processJoystickAxis(totalTurn);
