@@ -49,11 +49,29 @@ public abstract class DriveTrainBase extends SubsystemBase {
   private DriveControlMode currentControlMode = DriveControlMode.STANDARD_DRIVE; // enum defined at end of file
   private DriveGear currentGear = null;
 
+  /*
+   * Profile Slots:
+   * 
+   * 0 - Low gear
+   * 
+   * 1 - High gear
+   * 
+   * These are used regardless of the subclass type and are managed entirely by
+   * the base class (the subclass shouldn't need to care about this mapping)
+   */
+
   public DriveTrainBase(BooleanSupplier driveDisableSwitchAccess, BooleanSupplier openLoopSwitchAccess,
       BooleanSupplier shiftLockSwitchAccess) {
     this.driveDisableSwitchAccess = driveDisableSwitchAccess;
     this.openLoopSwitchAccess = openLoopSwitchAccess;
     this.shiftLockSwitchAccess = shiftLockSwitchAccess;
+  }
+
+  /**
+   * Creates solenoids and configures profile slots. Required before using
+   * methods.
+   */
+  protected void initialize() {
     if (dualGear) {
       leftGearSolenoid = new DoubleSolenoid(leftGearPCM, leftGearSolenoid1, leftGearSolenoid2);
       rightGearSolenoid = new DoubleSolenoid(rightGearPCM, rightGearSolenoid1, rightGearSolenoid2);
@@ -237,7 +255,19 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * @param f     F
    * @param iZone Integral zone
    */
-  public abstract void setPID(double p, double i, double d, double f, int iZone);
+  public void setPID(double p, double i, double d, double f, int iZone) {
+    int slot;
+    if (currentControlMode == DriveControlMode.STANDARD_DRIVE && (currentGear == DriveGear.LOW || !dualGear)) {
+      slot = 0;
+    } else if (currentControlMode == DriveControlMode.STANDARD_DRIVE && currentGear == DriveGear.HIGH) {
+      slot = 1;
+    } else {
+      slot = -1;
+    }
+    if (slot >= 0) {
+      setPID(slot, p, i, d, f, iZone);
+    }
+  }
 
   /**
    * Sets the PID parameters for the given slot on the talon, used during setup
@@ -251,13 +281,45 @@ public abstract class DriveTrainBase extends SubsystemBase {
    */
   protected abstract void setPID(int slotIdx, double p, double i, double d, double f, int iZone);
 
-  public abstract double getP();
+  public double getP() {
+    if (currentGear == DriveGear.HIGH) {
+      return kPHigh;
+    } else {
+      return kPLow;
+    }
+  }
 
-  public abstract double getI();
+  public double getI() {
+    if (currentGear == DriveGear.HIGH) {
+      return kIHigh;
+    } else {
+      return kILow;
+    }
+  }
 
-  public abstract double getD();
+  public double getD() {
+    if (currentGear == DriveGear.HIGH) {
+      return kDHigh;
+    } else {
+      return kDLow;
+    }
+  }
 
-  public abstract void getF();
+  public double getF() {
+    if (currentGear == DriveGear.HIGH) {
+      return kFHigh;
+    } else {
+      return kFLow;
+    }
+  }
+
+  public int getIZone() {
+    if (currentGear == DriveGear.HIGH) {
+      return kIZoneHigh;
+    } else {
+      return kIZoneLow;
+    }
+  }
 
   public abstract void changeStatusRate(int ms);
 

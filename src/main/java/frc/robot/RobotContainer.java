@@ -27,6 +27,7 @@ import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 
@@ -70,8 +71,7 @@ public class RobotContainer {
     case ORIGINAL_ROBOT_2018:
     case REBOT:
     case NOTBOT:
-      // driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess,
-      // openLoopSwitchAccess);
+      driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
       break;
     }
   }
@@ -86,7 +86,7 @@ public class RobotContainer {
       case "Logitech Attack 3":
         oi = new OIConsole();
         break;
-      case "XBox 360 Controller": // Check this name
+      case "XBox 360 Controller": // TODO Check this name
       case "Logitech F310 Gamepad":
         oi = new OIHandheld();
         break;
