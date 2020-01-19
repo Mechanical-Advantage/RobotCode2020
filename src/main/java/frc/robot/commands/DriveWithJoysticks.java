@@ -13,7 +13,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Robot;
+import frc.robot.subsystems.drive.DriveTrainBase;
 
 public class DriveWithJoysticks extends CommandBase {
   /**
@@ -31,21 +31,20 @@ public class DriveWithJoysticks extends CommandBase {
   private DoubleSupplier oiRightDriveY;
   private DoubleSupplier oiRightDriveTrigger;
   private DoubleSupplier oiGetDeadband;
-  private BooleanSupplier oiHasDriveTriggers;
+  private boolean oiHasDriveTriggers;
   private BooleanSupplier oiSniperMode;
   private DoubleSupplier oiSniperLevel;
   private BooleanSupplier oiSniperLow;
   private BooleanSupplier oiSniperHigh;
-  private BooleanSupplier oiHasDualSniperMode;
+  private boolean oiHasDualSniperMode;
   private DriveTrainBase driveSubsystem;
   private SendableChooser<JoystickMode> joystickChooser;
 
   public DriveWithJoysticks(DoubleSupplier leftDriveX, DoubleSupplier leftDriveY, DoubleSupplier leftDriveTrigger,
       DoubleSupplier rightDriveX, DoubleSupplier rightDriveY, DoubleSupplier rightDriveTrigger,
-      DoubleSupplier getDeadband, BooleanSupplier hasDriveTriggers, BooleanSupplier sniperMode,
-      DoubleSupplier sniperLevel, BooleanSupplier sniperLow, BooleanSupplier sniperHigh,
-      BooleanSupplier hasDualSniperMode, SendableChooser<JoystickMode> joystickModeChooser,
-      DriveTrainBase driveSubsys) {
+      DoubleSupplier getDeadband, boolean hasDriveTriggers, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
+      BooleanSupplier sniperLow, BooleanSupplier sniperHigh, boolean hasDualSniperMode,
+      SendableChooser<JoystickMode> joystickModeChooser, DriveTrainBase driveSubsystem) {
     // Use requires() here to declare subsystem dependencies
     // eg. requires(chassis);
     super();
@@ -64,7 +63,7 @@ public class DriveWithJoysticks extends CommandBase {
     oiSniperHigh = sniperHigh;
     oiHasDualSniperMode = hasDualSniperMode;
     joystickChooser = joystickModeChooser;
-    driveSubsystem = driveSubsys;
+    this.driveSubsystem = driveSubsystem;
   }
 
   // Called when the command is initially scheduled.
@@ -121,7 +120,7 @@ public class DriveWithJoysticks extends CommandBase {
 
       break;
     }
-    Robot.driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
+    driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
 
   }
 

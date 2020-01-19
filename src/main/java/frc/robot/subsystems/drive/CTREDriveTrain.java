@@ -72,6 +72,12 @@ public class CTREDriveTrain extends DriveTrainBase {
       leftFollower1 = new TalonSRX(13);
       rightMaster = new TalonSRX(2);
       rightFollower1 = new TalonSRX(0);
+      leftGearSolenoid1 = 0;
+      leftGearSolenoid2 = 1;
+      leftGearPCM = 1;
+      rightGearSolenoid1 = 2;
+      rightGearSolenoid2 = 3;
+      rightGearPCM = 0;
       maxVelocityLow = 106;
       maxVelocityHigh = 230;
       minVelocityLow = 3.25971;
@@ -101,6 +107,9 @@ public class CTREDriveTrain extends DriveTrainBase {
       rightMaster = new TalonSRX(3);
       rightFollower1 = new VictorSPX(2);
       rightFollower2 = new VictorSPX(1);
+      ptoSolenoid1 = 3;
+      ptoSolenoid2 = 2;
+      ptoPCM = 1;
       maxVelocityLow = 170.566392;
       minVelocityLow = 7.4622796;
       sixMotorDrive = true;
