@@ -15,9 +15,12 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.DriveWithJoysticks;
+import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
 import frc.robot.oi.DummyOI;
@@ -47,6 +50,8 @@ public class RobotContainer {
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
+  private final SendableChooser<JoystickMode> joystickModeChooser = new SendableChooser<JoystickMode>();
+
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
 
   private OI oi = new DummyOI();
@@ -74,6 +79,13 @@ public class RobotContainer {
       driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
       break;
     }
+
+    joystickModeChooser.addOption("Tank", JoystickMode.Tank);
+    if (oi.hasDriveTriggers()) {
+      joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
+    }
+    joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
+    joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
   }
 
   public void updateOIType() {
@@ -106,14 +118,11 @@ public class RobotContainer {
    * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureInputs() {
-    // DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX,
-    // oi::getLeftDriveY,
-    // oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY,
-    // oi::getRightDriveTrigger,
-    // oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel,
-    // oi::getSniperLow, oi::getSniperHigh,
-    // oi.hasDualSniperMode());
-    // driveSubsystem.setDefaultCommand(driveCommand);
+    DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
+        oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi::getDeadband,
+        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh,
+        oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+    driveSubsystem.setDefaultCommand(driveCommand);
     // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
     // driveCommand.setReversed(false)));
     // oi.getJoysticksReverseButton().whenActive(new InstantCommand(() ->
