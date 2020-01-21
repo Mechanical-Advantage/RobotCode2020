@@ -88,6 +88,9 @@ public class TurnToAngle extends CommandBase {
     default:
       break;
     }
+    turnController = new PIDController(kP, kI, kD);
+    turnController.setTolerance(toleranceDegrees);
+    turnController.enableContinuousInput(-180, 180);
     movingAverageFilter = LinearFilter.movingAverage(toleranceValuesToAverage);
   }
 
@@ -96,10 +99,7 @@ public class TurnToAngle extends CommandBase {
     if (driveTrain.isDualGear()) {
       driveTrain.switchGear(gear);
     }
-    turnController = new PIDController(kP, kI, kD);
-    turnController.setTolerance(toleranceDegrees);
-    turnController.enableContinuousInput(-180, 180);
-
+    turnController.reset();
     double currentTargetAngle = UtilFunctions
         .boundHalfDegrees(absoluteAngle ? targetAngle : ahrs.getYaw() + targetAngle);
     turnController.setSetpoint(currentTargetAngle);
