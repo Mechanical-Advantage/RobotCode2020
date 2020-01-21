@@ -60,6 +60,14 @@ public abstract class OI {
         return 0;
     }
 
+    public double getSniperHighLevel() {
+        return 0;
+    }
+
+    public double getSniperLowLevel() {
+        return 0;
+    }
+
     public boolean getSniperHigh() {
         return false;
     }

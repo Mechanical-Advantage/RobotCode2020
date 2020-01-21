@@ -34,6 +34,8 @@ public class DriveWithJoysticks extends CommandBase {
   private boolean oiHasDriveTriggers;
   private BooleanSupplier oiSniperMode;
   private DoubleSupplier oiSniperLevel;
+  private DoubleSupplier oiSniperHighLevel;
+  private DoubleSupplier oiSniperLowLevel;
   private BooleanSupplier oiSniperLow;
   private BooleanSupplier oiSniperHigh;
   private boolean oiHasDualSniperMode;
@@ -43,8 +45,9 @@ public class DriveWithJoysticks extends CommandBase {
   public DriveWithJoysticks(DoubleSupplier leftDriveX, DoubleSupplier leftDriveY, DoubleSupplier leftDriveTrigger,
       DoubleSupplier rightDriveX, DoubleSupplier rightDriveY, DoubleSupplier rightDriveTrigger,
       DoubleSupplier getDeadband, boolean hasDriveTriggers, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
-      BooleanSupplier sniperLow, BooleanSupplier sniperHigh, boolean hasDualSniperMode,
-      SendableChooser<JoystickMode> joystickModeChooser, DriveTrainBase driveSubsystem) {
+      DoubleSupplier sniperHighLevel, DoubleSupplier sniperLowLevel, BooleanSupplier sniperLow,
+      BooleanSupplier sniperHigh, boolean hasDualSniperMode, SendableChooser<JoystickMode> joystickModeChooser,
+      DriveTrainBase driveSubsystem) {
     // Use requires() here to declare subsystem dependencies
     // eg. requires(chassis);
     super();
@@ -59,6 +62,8 @@ public class DriveWithJoysticks extends CommandBase {
     oiHasDriveTriggers = hasDriveTriggers;
     oiSniperMode = sniperMode;
     oiSniperLevel = sniperLevel;
+    oiSniperHighLevel = sniperHighLevel;
+    oiSniperLowLevel = sniperLowLevel;
     oiSniperLow = sniperLow;
     oiSniperHigh = sniperHigh;
     oiHasDualSniperMode = hasDualSniperMode;
@@ -116,12 +121,36 @@ public class DriveWithJoysticks extends CommandBase {
       joystickLeft = baseDrive - processJoystickAxis(totalTurn);
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
-    case Sniper:
-
-      break;
     }
-    driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
+    if !(oiSniperMode.getAsBoolean()) {
+      driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
+    } else {
+      getMultiplierForSniperMode();
+      left = 
+      right =
+    }
+  }
 
+  public void getMultiplierForSniperMode() {
+    double lowLevel;
+    double highLevel;
+    double sniperLevel;
+
+    if (oiHasDualSniperMode) {
+      if (oiSniperHigh.getAsBoolean()) {
+        lowLevel = oiSniperLowLevel.getAsDouble();
+        left *= lowLevel;
+        right *= lowLevel;
+      } else {
+        highLevel = oiSniperHighLevel.getAsDouble();
+        left *= highLevel;
+        right *= highLevel;
+      }
+    } else {
+      sniperLevel = oiSniperLevel.getAsDouble();
+      left *= sniperLevel;
+      right *= sniperLevel;
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -142,6 +171,6 @@ public class DriveWithJoysticks extends CommandBase {
   }
 
   public static enum JoystickMode {
-    Tank, SplitArcade, SplitArcadeRightDrive, Trigger, Sniper;
+    Tank, SplitArcade, SplitArcadeRightDrive, Trigger;
   }
 }

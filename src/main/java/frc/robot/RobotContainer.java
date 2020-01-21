@@ -120,8 +120,8 @@ public class RobotContainer {
   private void configureInputs() {
     DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
         oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi::getDeadband,
-        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh,
-        oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperHighLevel, oi::getSniperLowLevel,
+        oi::getSniperLow, oi::getSniperHigh, oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
     // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
     // driveCommand.setReversed(false)));
