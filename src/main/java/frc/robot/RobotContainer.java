@@ -32,6 +32,7 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 
 /**
@@ -69,8 +70,7 @@ public class RobotContainer {
     switch (Constants.getRobot()) {
     case ROBOT_2020:
     case ROBOT_2020_DRIVE:
-      // driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess,
-      // openLoopSwitchAccess);
+      driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
       break;
     case ROBOT_2019:
     case ORIGINAL_ROBOT_2018:
