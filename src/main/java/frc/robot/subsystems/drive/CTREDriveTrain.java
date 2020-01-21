@@ -264,9 +264,21 @@ public class CTREDriveTrain extends DriveTrainBase {
   }
 
   @Override
+  public void resetStatusRate() {
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
+  }
+
+  @Override
+  public void changeSensorRate(int ms) {
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, ms, configTimeoutRuntime);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, ms, configTimeoutRuntime);
+  }
+
+  @Override
   public void resetSensorRate() {
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 20, configTimeoutRuntime);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 20, configTimeoutRuntime);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
   }
 
   @Override
