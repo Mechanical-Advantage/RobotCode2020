@@ -128,10 +128,8 @@ public class RobotContainer {
         oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperHighLevel, oi::getSniperLowLevel,
         oi::getSniperLow, oi::getSniperHigh, oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
-    // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
-    // driveCommand.setReversed(false)));
-    // oi.getJoysticksReverseButton().whenActive(new InstantCommand(() ->
-    // driveCommand.setReversed(true)));
+    oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(false)));
+    oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(true)));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
