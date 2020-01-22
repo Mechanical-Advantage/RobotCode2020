@@ -122,35 +122,28 @@ public class DriveWithJoysticks extends CommandBase {
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     }
-    if !(oiSniperMode.getAsBoolean()) {
-      driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
-    } else {
+    if (oiSniperMode.getAsBoolean()) {
       getMultiplierForSniperMode();
-      left = 
-      right =
+      double multiplierLevel = getMultiplierForSniperMode();
+      joystickLeft *= multiplierLevel;
+      joystickRight *= multiplierLevel;
     }
+
+    driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
   }
 
-  public void getMultiplierForSniperMode() {
-    double lowLevel;
-    double highLevel;
-    double sniperLevel;
-
+  public double getMultiplierForSniperMode() {
+    double level;
     if (oiHasDualSniperMode) {
       if (oiSniperHigh.getAsBoolean()) {
-        lowLevel = oiSniperLowLevel.getAsDouble();
-        left *= lowLevel;
-        right *= lowLevel;
+        level = oiSniperLowLevel.getAsDouble();
       } else {
-        highLevel = oiSniperHighLevel.getAsDouble();
-        left *= highLevel;
-        right *= highLevel;
+        level = oiSniperHighLevel.getAsDouble();
       }
     } else {
-      sniperLevel = oiSniperLevel.getAsDouble();
-      left *= sniperLevel;
-      right *= sniperLevel;
+      level = oiSniperLevel.getAsDouble();
     }
+    return level;
   }
 
   // Called once the command ends or is interrupted.

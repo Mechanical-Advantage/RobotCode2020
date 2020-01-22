@@ -11,6 +11,7 @@ import java.util.function.BooleanSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
@@ -96,13 +97,17 @@ public class RobotContainer {
       CommandScheduler.getInstance().clearButtons();
       switch (joystickName) {
       case "Logitech Attack 3":
+        System.out.println("Robot controller: Logitech Attack 3");
         oi = new OIConsole();
         break;
-      case "XBox 360 Controller": // TODO Check this name
-      case "Logitech F310 Gamepad":
+      case "Controller (XBOX 360 For Windows)":
+      case "Controller (Gamepad F310)":
+        System.out.println("Robot controller: XBOX 360 or Gamepad F310");
         oi = new OIHandheld();
         break;
       default:
+        DriverStation.reportWarning("Controller not recognized", false);
+
         oi = new DummyOI();
         break;
       }
