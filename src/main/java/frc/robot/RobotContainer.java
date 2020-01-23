@@ -24,6 +24,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -72,6 +73,8 @@ public class RobotContainer {
       // openLoopSwitchAccess);
       break;
     }
+    SmartDashboard.setDefaultNumber("Shooter Prototype/flywheel", 0);
+    SmartDashboard.setDefaultNumber("Shooter Prototype/rollers", 0);
   }
 
   public void updateOIType() {
@@ -140,9 +143,11 @@ public class RobotContainer {
 
     oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(() -> shooterPrototype.runFlywheel(0.5),
+    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(
+        () -> shooterPrototype.runFlywheel(SmartDashboard.getNumber("Shooter Prototype/flywheel", 0)),
         shooterPrototype);
-    oi.getShooterPrototypeRollerButton().whileActiveContinuous(() -> shooterPrototype.runRollers(1), shooterPrototype);
+    oi.getShooterPrototypeRollerButton().whileActiveContinuous(
+        () -> shooterPrototype.runRollers(SmartDashboard.getNumber("Shooter Prototype/rollers", 0)), shooterPrototype);
   }
 
   /**

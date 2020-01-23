@@ -10,22 +10,27 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterPrototype extends SubsystemBase {
+
+  private static final double defaultRampRate = 10;
 
   CANSparkMax flywheelMaster;
   CANSparkMax flywheelFollower;
   CANSparkMax rollerMaster;
   CANSparkMax rollerFollower;
 
+  private Double lastRampRate = null; // Force this to be updated once
+
   /**
    * Creates a new ShooterPrototype.
    */
   public ShooterPrototype() {
+    SmartDashboard.setDefaultNumber("Shooter Prototype/ramp rate", defaultRampRate); // Seconds to full power
     flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
-    flywheelMaster.setOpenLoopRampRate(5); // Seconds to full power
     flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
     flywheelFollower.follow(flywheelMaster, true);
     rollerMaster = new CANSparkMax(5, MotorType.kBrushless);
@@ -41,7 +46,11 @@ public class ShooterPrototype extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    double currentRampRate = SmartDashboard.getNumber("Shooter Prototype/ramp rate", defaultRampRate);
+    if (currentRampRate != lastRampRate) {
+      flywheelMaster.setOpenLoopRampRate(currentRampRate);
+      lastRampRate = currentRampRate;
+    }
   }
 
   public void runFlywheel(double power) {
