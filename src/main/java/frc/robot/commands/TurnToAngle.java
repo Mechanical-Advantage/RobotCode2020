@@ -81,7 +81,7 @@ public class TurnToAngle extends CommandBase {
     case ROBOT_2019:
       kP = 0.007;
       kI = 0;
-      kD = 0.015;
+      kD = 0; // 0.015
       toleranceDegrees = 1;
       toleranceValuesToAverage = 3;
       break;
