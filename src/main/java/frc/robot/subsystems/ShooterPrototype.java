@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ShooterPrototype extends SubsystemBase {
 
   private static final double defaultRampRate = 10;
+  private static final boolean invertFlywheel = false;
+  private static final boolean invertRollers = false;
 
   CANSparkMax flywheelMaster;
   CANSparkMax flywheelFollower;
@@ -54,10 +56,10 @@ public class ShooterPrototype extends SubsystemBase {
   }
 
   public void runFlywheel(double power) {
-    flywheelMaster.set(power);
+    flywheelMaster.set(power * (invertFlywheel ? -1 : 1));
   }
 
   public void runRollers(double power) {
-    rollerMaster.set(power);
+    rollerMaster.set(power * (invertRollers ? -1 : 1));
   }
 }
