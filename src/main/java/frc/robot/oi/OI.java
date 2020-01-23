@@ -104,6 +104,14 @@ public abstract class OI {
         return dummyTrigger;
     }
 
+    public Trigger getShooterPrototypeFlywheelButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getShooterPrototypeRollerButton() {
+        return dummyTrigger;
+    }
+
     public void setRumble(OIRumbleType type, double value) {
     }
 

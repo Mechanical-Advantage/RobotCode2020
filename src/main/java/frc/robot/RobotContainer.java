@@ -16,6 +16,7 @@ import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.ShooterPrototype;
 
 import java.util.concurrent.Callable;
 
@@ -40,6 +41,7 @@ public class RobotContainer {
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   // private final DriveTrainBase driveSubsystem;
+  private final ShooterPrototype shooterPrototype = new ShooterPrototype();
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -137,6 +139,10 @@ public class RobotContainer {
     oi.getSecondCameraButton().whenActive(new InstantCommand(cameraSubsystem::useSecondCamera, cameraSubsystem));
 
     oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
+
+    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(() -> shooterPrototype.runFlywheel(0.5),
+        shooterPrototype);
+    oi.getShooterPrototypeRollerButton().whileActiveContinuous(() -> shooterPrototype.runRollers(1), shooterPrototype);
   }
 
   /**
