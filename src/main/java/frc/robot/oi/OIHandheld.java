@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -26,6 +27,9 @@ public class OIHandheld extends OI {
     private POVButton joysticksReverse = new POVButton(driverController, 180);
     private JoystickButton toggleDriveEnabled = new JoystickButton(driverController, 7); // back button
     private JoystickButton toggleOpenLoop = new JoystickButton(driverController, 8); // start button
+
+    private Button shooterPrototypeFlywheelButton = new Button(driverController::getYButton);
+    private Button shooterPrototypeRollerButton = new POVButton(driverController, 270);
 
     public OIHandheld() {
         resetRumble();
@@ -139,6 +143,16 @@ public class OIHandheld extends OI {
     @Override
     public Trigger getJoysticksReverseButton() {
         return joysticksReverse;
+    }
+
+    @Override
+    public Trigger getShooterPrototypeFlywheelButton() {
+        return shooterPrototypeFlywheelButton;
+    }
+
+    @Override
+    public Trigger getShooterPrototypeRollerButton() {
+        return shooterPrototypeRollerButton;
     }
 
     @Override
