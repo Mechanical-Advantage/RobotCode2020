@@ -130,6 +130,8 @@ public class DriveDistanceOnHeading extends CommandBase {
    * @param heading  Heading to try to follow
    */
   public DriveDistanceOnHeading(DriveTrainBase driveTrain, AHRS ahrs, double distance, double heading) {
+    this.driveTrain = driveTrain;
+    this.ahrs = ahrs;
     addRequirements(driveTrain);
     targetDistance = distance;
     targetAngle = UtilFunctions.boundHalfDegrees(heading);
