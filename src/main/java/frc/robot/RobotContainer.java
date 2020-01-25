@@ -89,12 +89,12 @@ public class RobotContainer {
     }
     joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
     joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
-    SmartDashboard.putData(joystickModeChooser);
+    SmartDashboard.putData("Joystick Mode", joystickModeChooser);
 
     autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
     autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
     autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
-    SmartDashboard.putData(autoChooser);
+    SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
   public void updateOIType() {
