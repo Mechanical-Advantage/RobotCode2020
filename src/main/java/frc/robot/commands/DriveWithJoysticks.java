@@ -31,7 +31,6 @@ public class DriveWithJoysticks extends CommandBase {
   private DoubleSupplier oiRightDriveY;
   private DoubleSupplier oiRightDriveTrigger;
   private DoubleSupplier oiGetDeadband;
-  private boolean oiHasDriveTriggers;
   private BooleanSupplier oiSniperMode;
   private DoubleSupplier oiSniperLevel;
   private DoubleSupplier oiSniperHighLevel;
@@ -46,7 +45,7 @@ public class DriveWithJoysticks extends CommandBase {
 
   public DriveWithJoysticks(DoubleSupplier leftDriveX, DoubleSupplier leftDriveY, DoubleSupplier leftDriveTrigger,
       DoubleSupplier rightDriveX, DoubleSupplier rightDriveY, DoubleSupplier rightDriveTrigger,
-      DoubleSupplier getDeadband, boolean hasDriveTriggers, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
+      DoubleSupplier getDeadband, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
       DoubleSupplier sniperHighLevel, DoubleSupplier sniperLowLevel, BooleanSupplier sniperLow,
       BooleanSupplier sniperHigh, boolean hasDualSniperMode, SendableChooser<JoystickMode> joystickModeChooser,
       DriveTrainBase driveSubsystem) {
@@ -61,7 +60,6 @@ public class DriveWithJoysticks extends CommandBase {
     oiRightDriveY = rightDriveY;
     oiRightDriveTrigger = rightDriveTrigger;
     oiGetDeadband = getDeadband;
-    oiHasDriveTriggers = hasDriveTriggers;
     oiSniperMode = sniperMode;
     oiSniperLevel = sniperLevel;
     oiSniperHighLevel = sniperHighLevel;
@@ -92,71 +90,53 @@ public class DriveWithJoysticks extends CommandBase {
     double baseDrive;
     double totalTurn;
     switch (joystickChooser.getSelected()) {
-    // TODO check that joystickReversed values are correct.
-    // TODO shorten joysticksReversed logic so not as repetative.
+
     case Tank:
-      joystickRight = processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getRightAxis() */);
-      joystickLeft = processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getLeftAxis() */);
-      if (joysticksReversed) {
-        joystickRight *= -1;
-        joystickLeft *= -1;
-      }
+      joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+          : (processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getRightAxis() */));
+      joystickLeft = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+          : processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getLeftAxis() */);
       break;
     case SplitArcade:
-      baseDrive = processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisLeft() */);
-      joystickRight = baseDrive
-          + processJoystickAxis(oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */);
-      joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive
-          - processJoystickAxis(oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */);
-      joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
+      baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+          : processJoystickAxis(oiLeftDriveY.getAsDouble()) /* Robot.oi.getSingleDriveAxisLeft() */;
+      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
+          : baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble())/* Robot.oi.getRightHorizDriveAxis() */;
+      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
+          : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble()) /* Robot.oi.getRightHorizDriveAxis() */;
 
-      if (joysticksReversed) {
-        baseDrive *= -1;
-        joystickRight = baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble());
-        joystickRight = joystickRight > 1 ? 1 : joystickRight;
-        joystickLeft = baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble());
-        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-      }
+      joystickRight = joystickRight > 1 ? 1 : joystickRight;
+      joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case SplitArcadeRightDrive:
-      baseDrive = processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisRight() */);
-      joystickRight = baseDrive
-          + processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
-      joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
-      joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
+      baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+          : processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisRight() */);
+      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble()))
+          : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
+      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble()))
+          : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
 
-      if (joysticksReversed) {
-        baseDrive *= -1;
-        joystickRight = baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble());
-        joystickRight = joystickRight > 1 ? 1 : joystickRight;
-        joystickLeft = baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble());
-        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-      }
+      joystickRight = joystickRight > 1 ? 1 : joystickRight;
+      joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case Trigger:
-      baseDrive = (oiLeftDriveTrigger.getAsDouble()
-          /* Robot.oi.getLeftTrigger() */ - oiRightDriveTrigger.getAsDouble() /* Robot.oi.getRightTrigger() */ ) * -1;
+      baseDrive = joysticksReversed ? ((oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1)
+          : (oiLeftDriveTrigger.getAsDouble()
+              /* Robot.oi.getLeftTrigger() */ - oiRightDriveTrigger.getAsDouble() /* Robot.oi.getRightTrigger() */ )
+              * -1;
       totalTurn = oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */
           + (oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */ * rightStickScale);
-      joystickRight = baseDrive + processJoystickAxis(totalTurn);
+
+      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(totalTurn))
+          : baseDrive + processJoystickAxis(totalTurn);
+      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(totalTurn))
+          : baseDrive - processJoystickAxis(totalTurn);
+
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive - processJoystickAxis(totalTurn);
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-
-      if (joysticksReversed) {
-        baseDrive = (oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1;
-        totalTurn = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
-
-        joystickRight = baseDrive - processJoystickAxis(totalTurn);
-        joystickRight = joystickRight > 1 ? 1 : joystickRight;
-
-        joystickLeft = baseDrive + processJoystickAxis(totalTurn);
-        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-      }
       break;
     }
+
     if (oiSniperMode.getAsBoolean()) {
       getMultiplierForSniperMode();
       double multiplierLevel = getMultiplierForSniperMode();
@@ -168,17 +148,17 @@ public class DriveWithJoysticks extends CommandBase {
   }
 
   public double getMultiplierForSniperMode() {
-    double level;
+    double sniperLevel;
     if (oiHasDualSniperMode) {
       if (oiSniperHigh.getAsBoolean()) {
-        level = oiSniperLowLevel.getAsDouble();
+        sniperLevel = oiSniperHighLevel.getAsDouble();
       } else {
-        level = oiSniperHighLevel.getAsDouble();
+        sniperLevel = oiSniperLowLevel.getAsDouble();
       }
     } else {
-      level = oiSniperLevel.getAsDouble();
+      sniperLevel = oiSniperLevel.getAsDouble();
     }
-    return level;
+    return sniperLevel;
   }
 
   public void setReversed(boolean reverse) {

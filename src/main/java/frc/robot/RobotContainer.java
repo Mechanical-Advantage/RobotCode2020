@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -87,6 +88,7 @@ public class RobotContainer {
     }
     joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
     joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
+    SmartDashboard.putData(joystickModeChooser);
   }
 
   public void updateOIType() {
@@ -125,8 +127,8 @@ public class RobotContainer {
   private void configureInputs() {
     DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
         oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi::getDeadband,
-        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperHighLevel, oi::getSniperLowLevel,
-        oi::getSniperLow, oi::getSniperHigh, oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+        oi::getSniperMode, oi::getSniperLevel, oi::getSniperHighLevel, oi::getSniperLowLevel, oi::getSniperLow,
+        oi::getSniperHigh, oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
     oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(false)));
     oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(true)));
