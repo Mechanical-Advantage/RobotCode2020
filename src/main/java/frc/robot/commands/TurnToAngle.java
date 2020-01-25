@@ -29,6 +29,7 @@ public class TurnToAngle extends CommandBase {
   private PIDController turnController;
   private LinearFilter movingAverageFilter;
   private double targetAngle;
+  private double currentTargetAngle;
   private boolean absoluteAngle;
 
   public TurnToAngle(DriveTrainBase driveTrain, AHRS ahrs, double angle, boolean absoluteAngle, double tolerance) {
@@ -81,7 +82,7 @@ public class TurnToAngle extends CommandBase {
     case ROBOT_2019:
       kP = 0.007;
       kI = 0;
-      kD = 0; // 0.015
+      kD = 0.00015; // 0.015 in old command
       toleranceDegrees = 1;
       toleranceValuesToAverage = 3;
       break;
@@ -100,8 +101,7 @@ public class TurnToAngle extends CommandBase {
       driveTrain.switchGear(gear);
     }
     turnController.reset();
-    double currentTargetAngle = UtilFunctions
-        .boundHalfDegrees(absoluteAngle ? targetAngle : ahrs.getYaw() + targetAngle);
+    currentTargetAngle = UtilFunctions.boundHalfDegrees(absoluteAngle ? targetAngle : ahrs.getYaw() + targetAngle);
     turnController.setSetpoint(currentTargetAngle);
     movingAverageFilter.reset();
   }
@@ -114,6 +114,7 @@ public class TurnToAngle extends CommandBase {
       SmartDashboard.putNumber("Rate", ahrs.getRate());
       SmartDashboard.putNumber("Yaw", ahrs.getYaw());
       SmartDashboard.putNumber("Current Output", outputVelocity);
+      SmartDashboard.putNumber("Error", turnController.getPositionError());
     }
     driveTrain.drive(outputVelocity, outputVelocity * -1);
   }
@@ -122,7 +123,7 @@ public class TurnToAngle extends CommandBase {
   public boolean isFinished() {
     // The moving average and current value must both be within tolerance
     return turnController.atSetpoint()
-        && Math.abs(movingAverageFilter.calculate(ahrs.getYaw()) - targetAngle) <= toleranceDegrees;
+        && Math.abs(movingAverageFilter.calculate(ahrs.getYaw()) - currentTargetAngle) <= toleranceDegrees;
   }
 
   @Override
