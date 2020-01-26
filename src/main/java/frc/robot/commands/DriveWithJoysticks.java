@@ -90,7 +90,6 @@ public class DriveWithJoysticks extends CommandBase {
     double baseDrive;
     double totalTurn;
     switch (joystickChooser.getSelected()) {
-
     case Tank:
       joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
           : (processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getRightAxis() */));
@@ -138,7 +137,6 @@ public class DriveWithJoysticks extends CommandBase {
     }
 
     if (oiSniperMode.getAsBoolean()) {
-      getMultiplierForSniperMode();
       double multiplierLevel = getMultiplierForSniperMode();
       joystickLeft *= multiplierLevel;
       joystickRight *= multiplierLevel;
@@ -168,6 +166,7 @@ public class DriveWithJoysticks extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    SmartDashboard.putBoolean("Driver Control", false);
   }
 
   // Returns true when the command should end.
@@ -179,7 +178,6 @@ public class DriveWithJoysticks extends CommandBase {
   // Called when another command which requires one or more of the same
   // subsystems is scheduled to run
   protected void interrupted() {
-    SmartDashboard.putBoolean("Driver Control", false);
   }
 
   public static enum JoystickMode {
