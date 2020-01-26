@@ -92,39 +92,36 @@ public class DriveWithJoysticks extends CommandBase {
     switch (joystickChooser.getSelected()) {
     case Tank:
       joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
-          : (processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getRightAxis() */));
+          : (processJoystickAxis(oiLeftDriveY.getAsDouble()));
       joystickLeft = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
-          : processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getLeftAxis() */);
+          : processJoystickAxis(oiRightDriveY.getAsDouble());
       break;
     case SplitArcade:
       baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
-          : processJoystickAxis(oiLeftDriveY.getAsDouble()) /* Robot.oi.getSingleDriveAxisLeft() */;
+          : processJoystickAxis(oiLeftDriveY.getAsDouble());
       joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
-          : baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble())/* Robot.oi.getRightHorizDriveAxis() */;
+          : baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble());
       joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
-          : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble()) /* Robot.oi.getRightHorizDriveAxis() */;
+          : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble());
 
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case SplitArcadeRightDrive:
       baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
-          : processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisRight() */);
+          : processJoystickAxis(oiRightDriveY.getAsDouble());
       joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble()))
-          : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
+          : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble());
       joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble()))
-          : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
+          : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble());
 
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case Trigger:
       baseDrive = joysticksReversed ? ((oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1)
-          : (oiLeftDriveTrigger.getAsDouble()
-              /* Robot.oi.getLeftTrigger() */ - oiRightDriveTrigger.getAsDouble() /* Robot.oi.getRightTrigger() */ )
-              * -1;
-      totalTurn = oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */
-          + (oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */ * rightStickScale);
+          : (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble()) * -1;
+      totalTurn = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
 
       joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(totalTurn))
           : baseDrive + processJoystickAxis(totalTurn);
