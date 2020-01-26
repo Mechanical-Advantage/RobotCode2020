@@ -111,7 +111,7 @@ public class CTREDriveTrain extends DriveTrainBase {
       ptoSolenoid2 = 2;
       ptoPCM = 1;
       maxVelocityLow = 170.566392;
-      minVelocityLow = 7.4622796;
+      minVelocityLow = 8.8836662;
       sixMotorDrive = true;
       encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
       ticksPerRotation = 4096;
@@ -264,9 +264,21 @@ public class CTREDriveTrain extends DriveTrainBase {
   }
 
   @Override
+  public void resetStatusRate() {
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
+  }
+
+  @Override
+  public void changeSensorRate(int ms) {
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, ms, configTimeoutRuntime);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, ms, configTimeoutRuntime);
+  }
+
+  @Override
   public void resetSensorRate() {
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 20, configTimeoutRuntime);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 20, configTimeoutRuntime);
+    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
+    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
   }
 
   @Override

@@ -85,6 +85,11 @@ public abstract class DriveTrainBase extends SubsystemBase {
     }
   }
 
+  /**
+   * Gets the maximum velocity for the current robot in the current gear.
+   * 
+   * @return The maximum velocity in inches per second
+   */
   public double getMaxVelocity() {
     if (!dualGear || currentGear == DriveGear.LOW) {
       return maxVelocityLow;
@@ -94,7 +99,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Drive the robot with speed specified as inches per second
+   * Drives the robot with speed specified as inches per second
    * 
    * @param left  Left inches per second
    * @param right Right inches per second
@@ -104,7 +109,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Drive the robot with speed specified as inches per second
+   * Drives the robot with speed specified as inches per second
    * 
    * @param left  Left inches per second
    * @param right Right inches per second
@@ -143,7 +148,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
     double minNonZero = 0.1;
     if (isPercentage) {
       minVelocity /= getMaxVelocity();
-      minNonZero = 0.01;
+      minNonZero = 0.001;
     }
     if (input > minNonZero * -1 && input < minNonZero) {
       return 0;
@@ -157,7 +162,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Make the robot drive
+   * Drives the robot
    * 
    * @param left  Left percent speed
    * @param right Right percent speed
@@ -167,7 +172,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Make the robot drive
+   * Drives the robot.
    * 
    * @param left             Left percent speed
    * @param right            Right percent speed
@@ -203,28 +208,84 @@ public abstract class DriveTrainBase extends SubsystemBase {
     }
   }
 
+  /**
+   * Stops the drive. Note that this function may drive the motors opposite the
+   * current direction of motion to stop more quickly. Use neutralOutput() to
+   * completely stop output.
+   */
   public void stop() {
     drive(0, 0);
   }
 
+  /**
+   * Stops all power to the drive motors. This is different than stop() because it
+   * will never use motor power to stop more quickly.
+   */
   public abstract void neutralOutput();
 
+  /**
+   * Internal method to directly send an open loop setpoint to the motor
+   * controllers.
+   * 
+   * @param left  The left percent output (-1 to 1)
+   * @param right The right percent output (-1 to 1)
+   */
   protected abstract void driveOpenLoopLowLevel(double left, double right);
 
+  /**
+   * Internal method to directly send a closed loop setpoint to the motor
+   * controllers.
+   * 
+   * @param left  The left velocity (rotations per second)
+   * @param right The right velocity (rotations per second)
+   */
   protected abstract void driveClosedLoopLowLevel(double left, double right);
 
+  /**
+   * Enables or disables brake mode (shorting motor terminals to create braking
+   * force when the motor controller outputs 0V)
+   * 
+   * @param enable Whether to enable brake mode
+   */
   public abstract void enableBrakeMode(boolean enable);
 
+  /**
+   * Resets the encoder position returned by getRotations/getDistance functions
+   */
   public abstract void resetPosition();
 
+  /**
+   * Gets the number of rotations of the left side of the drive since the last
+   * call to resetPosition.
+   * 
+   * @return Number of rotations
+   */
   public abstract double getRotationsLeft();
 
+  /**
+   * Gets the number of rotations of the right side of the drive since the last
+   * call to resetPosition.
+   * 
+   * @return Number of rotations
+   */
   public abstract double getRotationsRight();
 
+  /**
+   * Gets the distance travelled of the right side of the drive since the last
+   * call to resetPosition.
+   * 
+   * @return Distance in inches
+   */
   public double getDistanceRight() {
     return wheelDiameter * Math.PI * getRotationsRight();
   }
 
+  /**
+   * Gets the distance travelled of the left side of the drive since the last call
+   * to resetPosition.
+   * 
+   * @return Distance in inches
+   */
   public double getDistanceLeft() {
     return wheelDiameter * Math.PI * getRotationsLeft();
   }
@@ -243,6 +304,11 @@ public abstract class DriveTrainBase extends SubsystemBase {
    */
   public abstract double getVelocityLeft();
 
+  /**
+   * Gets the average current for one motor.
+   * 
+   * @return The current of one motor in amps
+   */
   public abstract double getCurrent();
 
   /**
@@ -270,7 +336,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Sets the PID parameters for the given slot on the talon, used during setup
+   * Sets the PID parameters for the given slot on the motor controller
    * 
    * @param slotIdx Which slot to write to
    * @param p       P
@@ -321,14 +387,50 @@ public abstract class DriveTrainBase extends SubsystemBase {
     }
   }
 
+  /**
+   * Changes the time between status frames. This is how often the follower
+   * controllers will update their output.
+   * 
+   * @param ms How many milliseconds to wait between frames
+   */
   public abstract void changeStatusRate(int ms);
 
+  /**
+   * Resets the status rate to the default value.
+   */
+  public abstract void resetStatusRate();
+
+  /**
+   * Changes the time between sensor frames. This is how often the
+   * getRotations/getDistance/getVelocity functions will update.
+   * 
+   * @param ms How many milliseconds to wait between frames
+   */
+  public abstract void changeSensorRate(int ms);
+
+  /**
+   * Resets the sensor rate to the default value.
+   */
   public abstract void resetSensorRate();
 
+  /**
+   * Changes the time between control frames. This is how often a setpoint is sent
+   * to the controller.
+   * 
+   * @param ms How many milliseconds to wait between frames
+   */
   public abstract void changeControlRate(int ms);
 
+  /**
+   * Resets the control rate to the default value.
+   */
   public abstract void resetControlRate();
 
+  /**
+   * Changes which PID slot is selected on the motor controllers.
+   * 
+   * @param slotIdx Which slot (0-3)
+   */
   protected abstract void setProfileSlot(int slotIdx);
 
   public void switchGear(DriveGear gear) {
@@ -363,10 +465,18 @@ public abstract class DriveTrainBase extends SubsystemBase {
     }
   }
 
+  /**
+   * Gets whether the current robot has a two speed gearbox.
+   * 
+   * @return Whether gear switching is supported
+   */
   public boolean isDualGear() {
     return dualGear;
   }
 
+  /**
+   * Engages the PTO.
+   */
   public void enablePTO() {
     if (hasPTO) {
       currentControlMode = DriveControlMode.PTO;
@@ -375,6 +485,9 @@ public abstract class DriveTrainBase extends SubsystemBase {
     }
   }
 
+  /**
+   * Disengages the PTO.
+   */
   public void disablePTO() {
     if (currentControlMode == DriveControlMode.PTO) {
       neutralOutput();
@@ -383,6 +496,11 @@ public abstract class DriveTrainBase extends SubsystemBase {
     }
   }
 
+  /**
+   * Drives the PTO.
+   * 
+   * @param speed The percent speed (-1 to 1)
+   */
   public void runPTO(double speed) {
     if (!driveDisableSwitchAccess.getAsBoolean() && currentControlMode == DriveControlMode.PTO) {
       driveOpenLoopLowLevel(speed * PTOLeftSpeedAdjust, speed * PTORightSpeedAdjust);

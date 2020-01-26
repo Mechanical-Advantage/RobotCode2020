@@ -18,7 +18,7 @@ package frc.robot;
  * wherever the constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static final boolean tuningMode = false;
+    public static final boolean tuningMode = true;
     public static final RobotType defaultRobot = RobotType.NOTBOT;
     private static RobotType robot;
 

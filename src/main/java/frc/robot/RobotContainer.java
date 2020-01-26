@@ -21,10 +21,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
+import frc.robot.commands.TurnToAngle;
 import frc.robot.oi.DummyOI;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
@@ -54,7 +56,7 @@ public class RobotContainer {
 
   private final SendableChooser<JoystickMode> joystickModeChooser = new SendableChooser<JoystickMode>();
 
-  private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
+  private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
   private OI oi = new DummyOI();
   private String lastJoystickName;
@@ -88,7 +90,12 @@ public class RobotContainer {
     }
     joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
     joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
-    SmartDashboard.putData(joystickModeChooser);
+    SmartDashboard.putData("Joystick Mode", joystickModeChooser);
+
+    autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
+    autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
+    autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
+    SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
   public void updateOIType() {
@@ -164,7 +171,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return autoCommand;
+    return autoChooser.getSelected();
   }
 }
