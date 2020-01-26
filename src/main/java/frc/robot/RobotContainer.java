@@ -11,6 +11,7 @@ import java.util.function.BooleanSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
@@ -105,13 +106,17 @@ public class RobotContainer {
       CommandScheduler.getInstance().clearButtons();
       switch (joystickName) {
       case "Logitech Attack 3":
+        System.out.println("Robot controller: Logitech Attack 3");
         oi = new OIConsole();
         break;
-      case "XBox 360 Controller": // TODO Check this name
-      case "Logitech F310 Gamepad":
+      case "Controller (XBOX 360 For Windows)":
+      case "Controller (Gamepad F310)":
+        System.out.println("Robot controller: XBOX 360 or Gamepad F310");
         oi = new OIHandheld();
         break;
       default:
+        DriverStation.reportWarning("Controller not recognized", false);
+
         oi = new DummyOI();
         break;
       }
@@ -129,13 +134,11 @@ public class RobotContainer {
   private void configureInputs() {
     DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
         oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi::getDeadband,
-        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh,
-        oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+        oi::getSniperMode, oi::getSniperLevel, oi::getSniperHighLevel, oi::getSniperLowLevel, oi::getSniperLow,
+        oi::getSniperHigh, oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
-    // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
-    // driveCommand.setReversed(false)));
-    // oi.getJoysticksReverseButton().whenActive(new InstantCommand(() ->
-    // driveCommand.setReversed(true)));
+    oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(false)));
+    oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(true)));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
