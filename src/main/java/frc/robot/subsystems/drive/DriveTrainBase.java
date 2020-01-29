@@ -148,7 +148,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
     double minNonZero = 0.1;
     if (isPercentage) {
       minVelocity /= getMaxVelocity();
-      minNonZero = 0.01;
+      minNonZero = 0.001;
     }
     if (input > minNonZero * -1 && input < minNonZero) {
       return 0;

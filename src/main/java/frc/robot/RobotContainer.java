@@ -11,18 +11,22 @@ import java.util.function.BooleanSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
+import frc.robot.commands.TurnToAngle;
 import frc.robot.oi.DummyOI;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
@@ -52,7 +56,7 @@ public class RobotContainer {
 
   private final SendableChooser<JoystickMode> joystickModeChooser = new SendableChooser<JoystickMode>();
 
-  private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
+  private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
   private OI oi = new DummyOI();
   private String lastJoystickName;
@@ -86,6 +90,12 @@ public class RobotContainer {
     }
     joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
     joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
+    SmartDashboard.putData("Joystick Mode", joystickModeChooser);
+
+    autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
+    autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
+    autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
+    SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
   public void updateOIType() {
@@ -96,13 +106,17 @@ public class RobotContainer {
       CommandScheduler.getInstance().clearButtons();
       switch (joystickName) {
       case "Logitech Attack 3":
+        System.out.println("Robot controller: Logitech Attack 3");
         oi = new OIConsole();
         break;
-      case "XBox 360 Controller": // TODO Check this name
-      case "Logitech F310 Gamepad":
+      case "Controller (XBOX 360 For Windows)":
+      case "Controller (Gamepad F310)":
+        System.out.println("Robot controller: XBOX 360 or Gamepad F310");
         oi = new OIHandheld();
         break;
       default:
+        DriverStation.reportWarning("Controller not recognized", false);
+
         oi = new DummyOI();
         break;
       }
@@ -120,13 +134,11 @@ public class RobotContainer {
   private void configureInputs() {
     DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
         oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi::getDeadband,
-        oi.hasDriveTriggers(), oi::getSniperMode, oi::getSniperLevel, oi::getSniperLow, oi::getSniperHigh,
-        oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+        oi::getSniperMode, oi::getSniperLevel, oi::getSniperHighLevel, oi::getSniperLowLevel, oi::getSniperLow,
+        oi::getSniperHigh, oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
-    // oi.getJoysticksForwardButton().whenActive(new InstantCommand(() ->
-    // driveCommand.setReversed(false)));
-    // oi.getJoysticksReverseButton().whenActive(new InstantCommand(() ->
-    // driveCommand.setReversed(true)));
+    oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(false)));
+    oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(true)));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
@@ -159,7 +171,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return autoCommand;
+    return autoChooser.getSelected();
   }
 }
