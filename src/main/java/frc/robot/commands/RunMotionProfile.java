@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
@@ -30,11 +29,10 @@ import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveTrainBase;
-import frc.robot.util.UtilFunctions;
 
 public class RunMotionProfile extends SequentialCommandGroup {
 
-  private static final double kRamseteB = 0.02; // 0.05 seems to be equivalent to the recommendation for meters
+  private static final double kRamseteB = 0.01; // 0.05 seems to be equivalent to the recommendation for meters
   private static final double kRamseteZeta = 0.7;
   private static final double maxVoltage = 10; // WPILib docs suggest less than 12 because of voltage drop
 
@@ -67,7 +65,7 @@ public class RunMotionProfile extends SequentialCommandGroup {
       kA = 0.0182;
       trackWidth = 27.5932064868814;
       maxVelocity = 150;
-      maxAcceleration = 20;
+      maxAcceleration = 50;
     }
     driveKinematics = new DifferentialDriveKinematics(trackWidth);
     driveOdometry = new DifferentialDriveOdometry(initialPosition.getRotation(), initialPosition);
