@@ -27,6 +27,7 @@ import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.TurnToAngle;
+import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
@@ -95,6 +96,8 @@ public class RobotContainer {
     autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
     autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
     autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
+    autoChooser.addOption("Drive velocity", new VelocityPIDTuner(driveSubsystem));
+
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 

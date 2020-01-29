@@ -26,9 +26,9 @@ public class VelocityPIDTuner extends CommandBase {
   private TunableNumber F = new TunableNumber("Drive PID/F");
   private TunableNumber setpoint = new TunableNumber("Drive PID/setpoint");
 
-  public VelocityPIDTuner(DriveTrainBase driveSubsystem) {
-    super();
-    addRequirements(driveSubsystem);
+  public VelocityPIDTuner(DriveTrainBase drive) {
+    addRequirements(drive);
+    driveSubsystem = drive;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -53,7 +53,7 @@ public class VelocityPIDTuner extends CommandBase {
       SmartDashboard.putNumber("Drive velocity",
           (driveSubsystem.getVelocityLeft() + driveSubsystem.getVelocityRight()) / 2);
     } else {
-      driveSubsystem.stop();
+      driveSubsystem.neutralOutput();
     }
   }
 
