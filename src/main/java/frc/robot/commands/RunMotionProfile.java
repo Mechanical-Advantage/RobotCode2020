@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -32,7 +33,7 @@ import frc.robot.subsystems.drive.DriveTrainBase;
 
 public class RunMotionProfile extends SequentialCommandGroup {
 
-  private static final double kRamseteB = 0.01; // 0.05 seems to be equivalent to the recommendation for meters
+  private static final double kRamseteB = 0.0025; // 0.05 seems to be equivalent to the recommendation for meters
   private static final double kRamseteZeta = 0.7;
   private static final double maxVoltage = 10; // WPILib docs suggest less than 12 because of voltage drop
 
@@ -47,8 +48,10 @@ public class RunMotionProfile extends SequentialCommandGroup {
   private AHRS ahrs;
   private DifferentialDriveKinematics driveKinematics;
   private DifferentialDriveOdometry driveOdometry;
+  private Trajectory trajectory;
   private double initialDistanceLeft;
   private double initialDistanceRight;
+  private double startTime;
 
   /**
    * Creates a new RunMotionProfile.
@@ -82,12 +85,13 @@ public class RunMotionProfile extends SequentialCommandGroup {
       intermediatePoints = new ArrayList<Translation2d>(intermediatePoints);
       convertTranslationList(intermediatePoints);
     }
-    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(convertPose(initialPosition), intermediatePoints,
+    trajectory = TrajectoryGenerator.generateTrajectory(convertPose(initialPosition), intermediatePoints,
         convertPose(endPosition), config);
     addCommands(new InstantCommand(() -> {
       initialDistanceLeft = driveTrain.getDistanceLeft();
       initialDistanceRight = driveTrain.getDistanceRight();
       driveOdometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(ahrs.getYaw() * -1));
+      startTime = Timer.getFPGATimestamp();
     }, driveTrain));
     addCommands(new RamseteCommand(trajectory, this::getCurrentPose, new RamseteController(kRamseteB, kRamseteZeta),
         driveKinematics, driveTrain::driveInchesPerSec, driveTrain));
@@ -109,6 +113,12 @@ public class RunMotionProfile extends SequentialCommandGroup {
       SmartDashboard.putNumber("MP/PoseY", pose.getTranslation().getY());
       SmartDashboard.putNumber("MP/PoseX", pose.getTranslation().getX());
       SmartDashboard.putNumber("MP/PoseYaw", pose.getRotation().getDegrees());
+      Pose2d currentPose = trajectory.sample(Timer.getFPGATimestamp() - startTime).poseMeters;
+      Translation2d currentTranslation = currentPose.getTranslation();
+      SmartDashboard.putNumber("MP/PosError", pose.getTranslation().getDistance(currentTranslation));
+      SmartDashboard.putNumber("MP/PoseXError", pose.getTranslation().getX() - currentTranslation.getX());
+      SmartDashboard.putNumber("MP/PoseYError", pose.getTranslation().getY() - currentTranslation.getY());
+      SmartDashboard.putNumber("MP/AngleError", pose.getRotation().minus(currentPose.getRotation()).getDegrees());
     }
     return pose;
   }

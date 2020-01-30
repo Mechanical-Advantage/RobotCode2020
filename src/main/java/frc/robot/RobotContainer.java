@@ -101,7 +101,7 @@ public class RobotContainer {
     autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, ahrs,
         new Pose2d(0, 0, new Rotation2d(0)), 0, List.of(), new Pose2d(0, 60, new Rotation2d(0)), 0, false));
     autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, ahrs,
-        new Pose2d(0, 0, new Rotation2d(0)), 0, List.of(), new Pose2d(60, 60, Rotation2d.fromDegrees(90)), 0, false));
+        new Pose2d(0, 0, new Rotation2d(0)), 0, List.of(), new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
