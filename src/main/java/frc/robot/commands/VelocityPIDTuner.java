@@ -46,7 +46,6 @@ public class VelocityPIDTuner extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
     driveSubsystem.setPID(P.get(), I.get(), D.get(), F.get(), 0);
     if (SmartDashboard.getBoolean("Drive PID/enabled", false)) {
       driveSubsystem.driveInchesPerSec(setpoint.get(), setpoint.get() * (spin ? -1 : 1));
