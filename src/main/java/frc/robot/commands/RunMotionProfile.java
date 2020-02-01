@@ -90,7 +90,7 @@ public class RunMotionProfile extends SequentialCommandGroup {
     addCommands(new InstantCommand(() -> {
       initialDistanceLeft = driveTrain.getDistanceLeft();
       initialDistanceRight = driveTrain.getDistanceRight();
-      driveOdometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(ahrs.getYaw() * -1));
+      driveOdometry.resetPosition(initialPosition, Rotation2d.fromDegrees(ahrs.getYaw() * -1));
       startTime = Timer.getFPGATimestamp();
     }, driveTrain));
     addCommands(new RamseteCommand(trajectory, this::getCurrentPose, new RamseteController(kRamseteB, kRamseteZeta),
