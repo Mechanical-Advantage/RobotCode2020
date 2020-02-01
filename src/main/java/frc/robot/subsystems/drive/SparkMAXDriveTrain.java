@@ -12,6 +12,7 @@ import java.util.function.BooleanSupplier;
 import com.revrobotics.SparkMax;
 import com.revrobotics.CANSparkMax.ExternalFollower;
 import com.revrobotics.CANSparkMaxLowLevel;
+import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANEncoder;
@@ -49,8 +50,8 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   @Override
   public void neutralOutput() {
     // TODO Auto-generated method stub
-    leftleader.setVoltage(0);
-    rightleader.output(0);
+    leftleader.set(ticksPerRotation * 0);
+    rightleader.set(ticksPerRotation * 0);
   }
 
   @Override
@@ -138,42 +139,44 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   @Override
   public void changeStatusRate(int ms) {
     // TODO Auto-generated method stub
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, ms, configTimeoutRuntime);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, ms, configTimeoutRuntime);
+    leftleader.setStatusFramePeriod(StatusFrame.Status_1_General, ms, configTimeoutRuntime);
+    rightleader.setStatusFramePeriod(StatusFrame.Status_1_General, ms, configTimeoutRuntime);
   }
 
   @Override
   public void resetStatusRate() {
     // TODO Auto-generated method stub
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
+    leftleader.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
+    rightleader.setStatusFramePeriod(StatusFrame.Status_1_General, 10, configTimeoutRuntime);
   }
 
-  leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0,ms,configTimeoutRuntime);rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0,ms,configTimeoutRuntime);
-
-}
+  @Override
+  public void changeSensorRate(int ms) {
+    leftleader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, ms, configTimeoutRuntime);
+    rightleader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, ms, configTimeoutRuntime);
+  }
 
   @Override
   public void resetSensorRate() {
-    leftMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
-    rightMaster.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
+    leftleader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
+    rightleader.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 20, configTimeoutRuntime);
   }
 
   @Override
   public void changeControlRate(int ms) {
-    leftMaster.setControlFramePeriod(ControlFrame.Control_3_General, ms);
-    rightMaster.setControlFramePeriod(ControlFrame.Control_3_General, ms);
+    leftleader.setControlFramePeriod(ControlFrame.Control_3_General, ms);
+    rightleader.setControlFramePeriod(ControlFrame.Control_3_General, ms);
   }
 
   @Override
   public void resetControlRate() {
-    leftMaster.setControlFramePeriod(ControlFrame.Control_3_General, 10);
-    rightMaster.setControlFramePeriod(ControlFrame.Control_3_General, 10);
+    leftleader.setControlFramePeriod(ControlFrame.Control_3_General, 10);
+    rightleader.setControlFramePeriod(ControlFrame.Control_3_General, 10);
   }
 
   @Override
   protected void setProfileSlot(int slotIdx) {
-    leftMaster.selectProfileSlot(slotIdx, 0);
-    rightMaster.selectProfileSlot(slotIdx, 0);
+    leftleader.selectProfileSlot(slotIdx, 0);
+    rightleader.selectProfileSlot(slotIdx, 0);
   }
 }
