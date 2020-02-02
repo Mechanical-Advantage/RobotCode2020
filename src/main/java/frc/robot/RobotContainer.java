@@ -16,7 +16,8 @@ import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightInterface;
-import frc.robot.subsystems.ShooterPrototype;
+import frc.robot.subsystems.ShooterFlyWheel;
+import frc.robot.subsystems.ShooterRoller;
 
 import java.util.concurrent.Callable;
 
@@ -42,7 +43,8 @@ public class RobotContainer {
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   // private final DriveTrainBase driveSubsystem;
-  private final ShooterPrototype shooterPrototype = new ShooterPrototype();
+  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
+  private final ShooterRoller shooterRoller = new ShooterRoller();
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -73,8 +75,8 @@ public class RobotContainer {
       // openLoopSwitchAccess);
       break;
     }
-    SmartDashboard.setDefaultNumber("Shooter Prototype/flywheel", 0);
-    SmartDashboard.setDefaultNumber("Shooter Prototype/rollers", 0);
+    SmartDashboard.setDefaultNumber("ShooterFlyWheel/flywheel", 0);
+    SmartDashboard.setDefaultNumber("ShooterFlyWheel/rollers", 0);
   }
 
   public void updateOIType() {
@@ -144,10 +146,9 @@ public class RobotContainer {
     oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
     oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(
-        () -> shooterPrototype.runFlywheel(SmartDashboard.getNumber("Shooter Prototype/flywheel", 0)),
-        shooterPrototype);
+        () -> shooterFlyWheel.runFlywheel(SmartDashboard.getNumber("ShooterFlyWheel/flywheel", 0)), shooterFlyWheel);
     oi.getShooterPrototypeRollerButton().whileActiveContinuous(
-        () -> shooterPrototype.runRollers(SmartDashboard.getNumber("Shooter Prototype/rollers", 0)), shooterPrototype);
+        () -> shooterRoller.runRollers(SmartDashboard.getNumber("ShooterRoller/rollers", 0)), shooterRoller);
   }
 
   /**
