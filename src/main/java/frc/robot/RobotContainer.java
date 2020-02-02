@@ -37,6 +37,7 @@ import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
@@ -54,6 +55,7 @@ public class RobotContainer {
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
+  private RobotOdometry odometry;
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -86,6 +88,8 @@ public class RobotContainer {
       driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
       break;
     }
+    // Odometry must be instantiated after drive and AHRS
+    odometry = new RobotOdometry(driveSubsystem, ahrs);
 
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     if (oi.hasDriveTriggers()) {
@@ -98,10 +102,12 @@ public class RobotContainer {
     autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
     autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
     autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
-    autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, ahrs,
-        new Pose2d(0, 0, new Rotation2d(0)), 0, List.of(), new Pose2d(0, 60, new Rotation2d(0)), 0, false));
-    autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, ahrs,
-        new Pose2d(0, 0, new Rotation2d(0)), 0, List.of(), new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false));
+    autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+        new Pose2d(0, 60, new Rotation2d(0)), 0, false, true));
+    autoChooser.addOption("Drive to 5 feet absolute (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+        new Pose2d(0, 60, new Rotation2d(0)), 0, false, false));
+    autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+        new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
