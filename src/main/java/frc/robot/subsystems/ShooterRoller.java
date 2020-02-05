@@ -7,8 +7,6 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,18 +30,19 @@ public class ShooterRoller extends SubsystemBase {
 
   CANSparkMax rollerMaster;
   CANSparkMax rollerFollower;
-  private CANPIDController roller_pidController;
+  CANPIDController roller_pidController;
   CANEncoder flywheelEncoder;
 
   public double kP, kI, kD, kFF, kMaxOutput, kMinOutput, maxRPM;
 
   private Double lastRampRate = null; // Force this to be updated once
 
-  private TunableNumber P = new TunableNumber("Shooter PID/P");
-  private TunableNumber I = new TunableNumber("Shooter PID/I");
-  private TunableNumber D = new TunableNumber("Shooter PID/D");
-  private TunableNumber F = new TunableNumber("Shooter PID/F");
+  private TunableNumber P = new TunableNumber("Shooter Roller PID/P");
+  private TunableNumber I = new TunableNumber("Shooter Roller PID/I");
+  private TunableNumber D = new TunableNumber("Shooter Roller PID/D");
+  private TunableNumber F = new TunableNumber("Shooter Roller PID/F");
   private double setpoint;
+  private double multiplier;
 
   /**
    * Creates a new ShooterRoller.
@@ -151,7 +150,7 @@ public class ShooterRoller extends SubsystemBase {
   }
 
   public void setShooterRPM(double rpm) {
-    setpoint = rpm * 0.8;
+    setpoint = rpm * multiplier;
     // %
   }
 

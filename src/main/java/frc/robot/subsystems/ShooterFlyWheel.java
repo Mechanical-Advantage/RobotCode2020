@@ -30,16 +30,16 @@ public class ShooterFlyWheel extends SubsystemBase {
 
   CANSparkMax flywheelMaster;
   CANSparkMax flywheelFollower;
-  private CANPIDController flywheel_pidController;
+  CANPIDController flywheel_pidController;
   CANEncoder flywheelEncoder;
   public double kP, kI, kD, kFF, kMaxOutput, kMinOutput, maxRPM;
 
   private Double lastRampRate = null; // Force this to be updated once
 
-  private TunableNumber P = new TunableNumber("Shooter PID/P");
-  private TunableNumber I = new TunableNumber("Shooter PID/I");
-  private TunableNumber D = new TunableNumber("Shooter PID/D");
-  private TunableNumber F = new TunableNumber("Shooter PID/F");
+  private TunableNumber P = new TunableNumber("Shooter FlyWheel PID/P");
+  private TunableNumber I = new TunableNumber("Shooter FlyWheel PID/I");
+  private TunableNumber D = new TunableNumber("Shooter FlyWheel PID/D");
+  private TunableNumber F = new TunableNumber("Shooter FlyWheel PID/F");
   private double setpoint;
 
   /**
@@ -58,7 +58,6 @@ public class ShooterFlyWheel extends SubsystemBase {
     I.setDefault(0);
     D.setDefault(0);
     F.setDefault(0);
-    // setpoint.setDefault(0);
 
     // PID coefficients
     kP = P.get();
@@ -148,6 +147,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     SmartDashboard.putNumber("ProcessVariable", flywheelEncoder.getVelocity());
   }
 
+  // add open loop
   public void setShooterRPM(double rpm) {
     setpoint = rpm;
   }

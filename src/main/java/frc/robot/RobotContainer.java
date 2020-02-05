@@ -76,7 +76,7 @@ public class RobotContainer {
       break;
     }
     SmartDashboard.setDefaultNumber("ShooterFlyWheel/flywheel", 0);
-    SmartDashboard.setDefaultNumber("ShooterFlyWheel/rollers", 0);
+    SmartDashboard.setDefaultNumber("ShooterRoller/rollers", 0);
   }
 
   public void updateOIType() {
