@@ -29,6 +29,7 @@ import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.TurnToAngle;
@@ -102,6 +103,7 @@ public class RobotContainer {
       DriverStation.reportError("Timeout while waiting for NavX init", false);
     }
     odometry = new RobotOdometry(driveSubsystem, ahrs);
+    odometry.setDefaultCommand(new LimelightOdometry(limelight, odometry));
 
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     if (oi.hasDriveTriggers()) {

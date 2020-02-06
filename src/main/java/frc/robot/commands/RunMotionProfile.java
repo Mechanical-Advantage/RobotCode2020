@@ -165,9 +165,6 @@ public class RunMotionProfile extends CommandBase {
 
     if (Constants.tuningMode && followerStarted) {
       Pose2d pose = odometry.getCurrentPose();
-      SmartDashboard.putNumber("MP/PoseY", pose.getTranslation().getY());
-      SmartDashboard.putNumber("MP/PoseX", pose.getTranslation().getX());
-      SmartDashboard.putNumber("MP/PoseYaw", pose.getRotation().getDegrees());
       Pose2d currentPose = trajectory.sample(Timer.getFPGATimestamp() - startTime).poseMeters;
       Translation2d currentTranslation = currentPose.getTranslation();
       SmartDashboard.putNumber("MP/PosError", pose.getTranslation().getDistance(currentTranslation));

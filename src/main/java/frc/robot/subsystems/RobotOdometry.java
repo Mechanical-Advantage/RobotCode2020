@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.LatencyData;
 
@@ -47,11 +49,16 @@ public class RobotOdometry extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Translation2d translation = driveOdometry.update(getCurrentRotation(),
-        driveTrain.getDistanceLeft() - baseLeftDistance, driveTrain.getDistanceRight() - baseRightDistance)
-        .getTranslation();
+    Pose2d pose = driveOdometry.update(getCurrentRotation(), driveTrain.getDistanceLeft() - baseLeftDistance,
+        driveTrain.getDistanceRight() - baseRightDistance);
+    Translation2d translation = pose.getTranslation();
     xData.addDataPoint(translation.getX());
     yData.addDataPoint(translation.getY());
+    if (Constants.tuningMode) {
+      SmartDashboard.putNumber("Pose x", translation.getX());
+      SmartDashboard.putNumber("Pose y", translation.getY());
+      SmartDashboard.putNumber("Pose angle", pose.getRotation().getDegrees());
+    }
   }
 
   private Rotation2d getCurrentRotation() {
