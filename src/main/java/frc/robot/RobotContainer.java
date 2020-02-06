@@ -12,9 +12,11 @@ import java.util.function.BooleanSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -50,6 +52,8 @@ import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
  * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  private static final double navXWaitTime = 5; // Maximum number of seconds to wait for the navX to initialize
+
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
@@ -88,7 +92,15 @@ public class RobotContainer {
       driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
       break;
     }
-    // Odometry must be instantiated after drive and AHRS
+    // Odometry must be instantiated after drive and AHRS and after the NavX
+    // initializes
+    Timer navXTimer = new Timer();
+    while (ahrs.getByteCount() == 0 && navXTimer.get() <= navXWaitTime) {
+      Timer.delay(0.01);
+    }
+    if (navXTimer.get() >= navXWaitTime) {
+      DriverStation.reportError("Timeout while waiting for NavX init", false);
+    }
     odometry = new RobotOdometry(driveSubsystem, ahrs);
 
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
