@@ -17,7 +17,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableNumber;
@@ -102,6 +101,7 @@ public class ShooterFlyWheel extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // This method will be called once per scheduler run
     // read PID coefficients from SmartDashboard
     double p = P.get();
     double i = I.get();
@@ -147,7 +147,6 @@ public class ShooterFlyWheel extends SubsystemBase {
     SmartDashboard.putNumber("ProcessVariable", flywheelEncoder.getVelocity());
   }
 
-  // add open loop
   public void setShooterRPM(double rpm) {
     setpoint = rpm;
   }

@@ -17,7 +17,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.TunableNumber;
@@ -32,7 +31,6 @@ public class ShooterRoller extends SubsystemBase {
   CANSparkMax rollerFollower;
   CANPIDController roller_pidController;
   CANEncoder flywheelEncoder;
-
   public double kP, kI, kD, kFF, kMaxOutput, kMinOutput, maxRPM;
 
   private Double lastRampRate = null; // Force this to be updated once
@@ -104,7 +102,6 @@ public class ShooterRoller extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
     // read PID coefficients from SmartDashboard
     double p = P.get();
     double i = I.get();
@@ -135,18 +132,18 @@ public class ShooterRoller extends SubsystemBase {
       roller_pidController.setOutputRange(min, max);
       kMinOutput = min;
       kMaxOutput = max;
-
-      double currentRampRate = SmartDashboard.getNumber("Shooter Roller/ramp rate", defaultRampRate);
-      if (lastRampRate != null && currentRampRate != lastRampRate) {
-        rollerMaster.setOpenLoopRampRate(currentRampRate);
-        lastRampRate = currentRampRate;
-      }
-      SmartDashboard.putNumber("Shooter Roller/speed", getSpeed());
-
-      roller_pidController.setReference(setpoint, ControlType.kVelocity);
-
-      SmartDashboard.putNumber("SetPoint", setpoint);
     }
+
+    double currentRampRate = SmartDashboard.getNumber("Shooter Roller/ramp rate", defaultRampRate);
+    if (lastRampRate != null && currentRampRate != lastRampRate) {
+      rollerMaster.setOpenLoopRampRate(currentRampRate);
+      lastRampRate = currentRampRate;
+    }
+    SmartDashboard.putNumber("Shooter Roller/speed", getSpeed());
+
+    roller_pidController.setReference(setpoint, ControlType.kVelocity);
+
+    SmartDashboard.putNumber("SetPoint", setpoint);
   }
 
   public void setShooterRPM(double rpm) {
@@ -161,5 +158,4 @@ public class ShooterRoller extends SubsystemBase {
   public double getSpeed() {
     return flywheelEncoder.getVelocity() * 1.5;
   }
-
 }

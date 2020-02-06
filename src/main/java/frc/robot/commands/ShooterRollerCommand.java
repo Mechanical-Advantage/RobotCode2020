@@ -7,20 +7,16 @@
 
 package frc.robot.commands;
 
-import com.revrobotics.ControlType;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants;
 import frc.robot.subsystems.ShooterRoller;
 import frc.robot.util.TunableNumber;
 
 public class ShooterRollerCommand extends CommandBase {
 
-  private TunableNumber setpoint = new TunableNumber("Shooter Roller PID/setpoint");
+  private TunableNumber setPoint = new TunableNumber("Shooter Roller PID/setpoint");
   private final ShooterRoller shooterRoller = new ShooterRoller();
-  private double rpm;
-  private boolean tuningMode = false;
 
   /**
    * Creates a new ShooterRoller.
@@ -35,16 +31,15 @@ public class ShooterRollerCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(0);
-    shooterRoller.setShooterRPM(setpoint.get());
+    setPoint.setDefault(0);
+    shooterRoller.setShooterRPM(setPoint.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (tuningMode) {
-      setpoint.get();
-      // update setpoint
+    if (Constants.tuningMode) {
+      shooterRoller.setShooterRPM(setPoint.get());
     }
   }
 
