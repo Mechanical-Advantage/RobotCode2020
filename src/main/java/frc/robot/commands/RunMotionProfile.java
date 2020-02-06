@@ -163,7 +163,7 @@ public class RunMotionProfile extends CommandBase {
       startProfile();
     }
 
-    if (Constants.tuningMode) {
+    if (Constants.tuningMode && followerStarted) {
       Pose2d pose = odometry.getCurrentPose();
       SmartDashboard.putNumber("MP/PoseY", pose.getTranslation().getY());
       SmartDashboard.putNumber("MP/PoseX", pose.getTranslation().getX());
@@ -184,7 +184,9 @@ public class RunMotionProfile extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    followerCommand.cancel();
+    if (followerStarted) {
+      followerCommand.cancel();
+    }
     if (dynamicTrajectory) {
       trajectoryUpdated = false;
     }
@@ -219,7 +221,7 @@ public class RunMotionProfile extends CommandBase {
   }
 
   /**
-   * Start the profile follower command/
+   * Start the profile follower command.
    */
   private void startProfile() {
     if (followerCommand == null) {
@@ -252,7 +254,7 @@ public class RunMotionProfile extends CommandBase {
     input.replaceAll(point -> point.rotateBy(Rotation2d.fromDegrees(90)));
   }
 
-  private class MPGenerator extends Thread {
+  private static class MPGenerator extends Thread {
 
     private Pose2d initialPosition;
     private List<Translation2d> intermediatePoints;
