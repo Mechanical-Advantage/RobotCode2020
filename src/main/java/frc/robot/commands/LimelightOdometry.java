@@ -12,12 +12,13 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
+import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.util.UtilFunctions;
 
 public class LimelightOdometry extends CommandBase {
 
   private static final double targetHeight = 67.75; // in to center of target
-  private static final double cameraHeight = 25.75;
+  private static final double cameraHeight = 26.5;
   private static final double targetHorizLocation = 0; // in left of center line for close target
   // Can use the Limelight crosshair calibration instead of the next two options
   // (it's easier and compensates for the mount angle of the camera in the
@@ -26,7 +27,7 @@ public class LimelightOdometry extends CommandBase {
   // adjust the crosshair Y until the crosshair lines up with the object
   // For our Limelight, set crosshair Y to -0.13 to make 0 degrees be directly in
   // front of the camera
-  private static final double cameraVertAngle = 0; // 0 = straight forward, positive=up
+  private static final double cameraVertAngle = 23; // 0 = straight forward, positive=up
   private static final double cameraHorizAngle = 0; // positive = right
   private static final double cameraHorizOffset = 0; // positive = right
 
@@ -46,6 +47,7 @@ public class LimelightOdometry extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    limelight.setLEDMode(LimelightLEDMode.PIPELINE);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -79,18 +81,25 @@ public class LimelightOdometry extends CommandBase {
       double xDistance = Math.tan(Math.toRadians(angle)) * distance * -1;
       // Pass x/y to odometry as WPILib coordinate system
       odometry.setPosition(farTarget ? Constants.fieldLength - distance : distance,
-          (xDistance + targetHorizLocation) * (farTarget ? -1 : 1), Timer.getFPGATimestamp() - limelight.getLatency());
+          (xDistance + targetHorizLocation) * (farTarget ? -1 : 1),
+          Timer.getFPGATimestamp() - (limelight.getLatency() / 1000));
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    limelight.setLEDMode(LimelightLEDMode.OFF);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
   }
 }

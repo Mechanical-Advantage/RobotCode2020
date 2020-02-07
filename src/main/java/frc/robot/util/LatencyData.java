@@ -68,8 +68,8 @@ public class LatencyData implements DoubleSupplier {
     while (timestamps[indexBefore] > timestamp) {
       indexBefore--;
       indexBefore = Math.floorMod(indexBefore, data.length);
-      if (timestamps[indexBefore] == 0) {
-        // No valid data is there for the time
+      if (timestamps[indexBefore] == 0 || indexBefore == currentIndex) {
+        // No valid data is there for the time or the time is too far back
         return null;
       }
     }
