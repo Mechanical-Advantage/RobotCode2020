@@ -15,6 +15,7 @@ import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANPIDController;
+import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.revrobotics.CANEncoder;
 
 import frc.robot.Constants;
@@ -57,15 +58,15 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   @Override
   protected void driveOpenLoopLowLevel(double left, double right) {
     // TODO Auto-generated method stub
-    leftleader.set(ControlMode.PercentOutput, left);
-    rightleader.set(ControlMode.PercentOutput, right);
+    leftleader.set(left);
+    rightleader.set(right);
   }
 
   @Override
   protected void driveClosedLoopLowLevel(double left, double right) {
     // TODO Auto-generated method stub
-    leftleader.set(ControlMode.Velocity, left * ticksPerRotation / 10);
-    rightleader.set(ControlMode.Velocity, right * ticksPerRotation / 10);
+    leftleader.set(left * ticksPerRotation / 10);
+    rightleader.set(right * ticksPerRotation / 10);
   }
 
   @Override
@@ -85,33 +86,33 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   @Override
   public void resetPosition() {
     // TODO Auto-generated method stub
-    leftleader.setSelectedSensorPosition(0);
-    rightleader.setSelectedSensorPosition(0);
+    leftleader.setPosition(0);
+    rightleader.setPosition(0);
   }
 
   @Override
   public double getRotationsLeft() {
     // TODO Auto-generated method stub
-    return (double) leftleader.getSelectedSensorPosition() / ticksPerRotation;
+    return (double) leftleader.getPosition();
   }
 
   @Override
   public double getRotationsRight() {
     // TODO Auto-generated method stub
-    return (double) rightleader.getSelectedSensorPosition() / ticksPerRotation;
+    return (double) rightleader.getPosition();
   }
 
   @Override
   public double getVelocityRight() {
     // TODO Auto-generated method stub
-    return (double) rightleader.getSelectedSensorVelocity() / ticksPerRotation * 10;
+    return (double) rightleader.getVelocity() / ticksPerRotation * 10;
 
   }
 
   @Override
   public double getVelocityLeft() {
     // TODO Auto-generated method stub
-    return (double) leftleader.getSelectedSensorVelocity() / ticksPerRotation * 10;
+    return (double) leftleader.getVelocity() / ticksPerRotation * 10;
 
   }
 
