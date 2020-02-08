@@ -34,6 +34,7 @@ public class LimelightOdometry extends CommandBase {
   private static final double heightDifference = targetHeight - cameraHeight; // How far above the camera the target is
   private LimelightInterface limelight;
   private RobotOdometry odometry;
+  private boolean xCorrectionEnabled = true;
 
   /**
    * Creates a new LimelightOdometry.
@@ -55,15 +56,6 @@ public class LimelightOdometry extends CommandBase {
   @SuppressWarnings("all")
   public void execute() {
     if (limelight.hasValidTarget()) {
-      double distance = heightDifference
-          / Math.tan(Math.toRadians(Math.abs(limelight.getTargetVertAngle() + cameraVertAngle)));
-      double horizAngle = limelight.getTargetHorizAngle() - cameraHorizAngle;
-      if (cameraHorizOffset != 0) {
-        // This is NOT the X dimension
-        double horizDistance = Math.tan(Math.toRadians(horizAngle)) * distance;
-        horizDistance += cameraHorizOffset;
-        horizAngle = Math.toDegrees(Math.atan(horizDistance / distance));
-      }
       double poseAngle = odometry.getCurrentPose().getRotation().getDegrees() * -1;
       boolean farTarget = true;
       // Handle either target (always -90 to 90)
@@ -75,14 +67,36 @@ public class LimelightOdometry extends CommandBase {
         farTarget = false;
       }
       poseAngle = UtilFunctions.boundHalfDegrees(poseAngle);
+
+      double distance;
+      if (xCorrectionEnabled) {
+        distance = heightDifference
+            / Math.tan(Math.toRadians(Math.abs(limelight.getTargetVertAngle() + cameraVertAngle)));
+      } else {
+        distance = odometry.getCurrentPose().getTranslation().getX();
+        if (farTarget) {
+          distance = Constants.fieldLength - distance;
+        }
+      }
+      double horizAngle = limelight.getTargetHorizAngle() - cameraHorizAngle;
+      if (cameraHorizOffset != 0) {
+        // This is NOT the X dimension
+        double horizDistance = Math.tan(Math.toRadians(horizAngle)) * distance;
+        horizDistance += cameraHorizOffset;
+        horizAngle = Math.toDegrees(Math.atan(horizDistance / distance));
+      }
       // angle: In x y space, 0 = perpendicular to target
       double angle = poseAngle + horizAngle;
       // Sign of angle and xDist should be opposite
       double xDistance = Math.tan(Math.toRadians(angle)) * distance * -1;
       // Pass x/y to odometry as WPILib coordinate system
-      odometry.setPosition(farTarget ? Constants.fieldLength - distance : distance,
-          (xDistance + targetHorizLocation) * (farTarget ? -1 : 1),
-          Timer.getFPGATimestamp() - (limelight.getLatency() / 1000));
+      double y = (xDistance + targetHorizLocation) * (farTarget ? -1 : 1);
+      double timestamp = Timer.getFPGATimestamp() - (limelight.getLatency() / 1000);
+      if (xCorrectionEnabled) {
+        odometry.setPosition(farTarget ? Constants.fieldLength - distance : distance, y, timestamp);
+      } else {
+        odometry.setY(y, timestamp);
+      }
     }
   }
 
@@ -101,5 +115,16 @@ public class LimelightOdometry extends CommandBase {
   @Override
   public boolean runsWhenDisabled() {
     return true;
+  }
+
+  /**
+   * Set whether this command will change the x value in addition to the y value.
+   * This is useful if the robot is at a known x value already. This can be
+   * changed at any time.
+   * 
+   * @param enable Whether to enable x correction
+   */
+  public void enableXCorrection(boolean enable) {
+    xCorrectionEnabled = enable;
   }
 }

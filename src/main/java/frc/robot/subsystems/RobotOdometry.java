@@ -49,16 +49,21 @@ public class RobotOdometry extends SubsystemBase {
 
   @Override
   public void periodic() {
+    Pose2d pose = updateOdometry();
+    if (Constants.tuningMode) {
+      SmartDashboard.putNumber("Pose x", pose.getTranslation().getX());
+      SmartDashboard.putNumber("Pose y", pose.getTranslation().getY());
+      SmartDashboard.putNumber("Pose angle", pose.getRotation().getDegrees());
+    }
+  }
+
+  private Pose2d updateOdometry() {
     Pose2d pose = driveOdometry.update(getCurrentRotation(), driveTrain.getDistanceLeft() - baseLeftDistance,
         driveTrain.getDistanceRight() - baseRightDistance);
     Translation2d translation = pose.getTranslation();
     xData.addDataPoint(translation.getX());
     yData.addDataPoint(translation.getY());
-    if (Constants.tuningMode) {
-      SmartDashboard.putNumber("Pose x", translation.getX());
-      SmartDashboard.putNumber("Pose y", translation.getY());
-      SmartDashboard.putNumber("Pose angle", pose.getRotation().getDegrees());
-    }
+    return pose;
   }
 
   private Rotation2d getCurrentRotation() {
@@ -124,6 +129,10 @@ public class RobotOdometry extends SubsystemBase {
    * @param timestamp The timestamp the data is from (FPGA time)
    */
   public void setPosition(double x, double y, double timestamp) {
+    // Since this resets the odometry state make sure the numbers that are not being
+    // changed are up to date to avoid losing changes that happened in between the
+    // last update and this method call.
+    updateOdometry();
     // This uses xData and yData to perform latency correction on the x/y portion of
     // the provided position
     xData.addCorrectedData(x, timestamp);
@@ -135,12 +144,47 @@ public class RobotOdometry extends SubsystemBase {
   }
 
   /**
+   * Adjusts the robot's position using the provided x at the timestamp given. The
+   * data since then is kept and the y and rotation components of the pose is
+   * unchanged.
+   * 
+   * @param x         The x coordinate
+   * @param timestamp The timestamp the data is from (FPGA time)
+   */
+  public void setX(double x, double timestamp) {
+    updateOdometry();
+    xData.addCorrectedData(x, timestamp);
+    driveOdometry.resetPosition(
+        new Pose2d(xData.getCurrentPoint(), getCurrentPose().getTranslation().getY(), getCurrentPose().getRotation()),
+        getCurrentRotation());
+    resetBaseDistances();
+  }
+
+  /**
+   * Adjusts the robot's position using the provided y at the timestamp given. The
+   * data since then is kept and the x and rotation components of the pose is
+   * unchanged.
+   * 
+   * @param y         The y coordinate
+   * @param timestamp The timestamp the data is from (FPGA time)
+   */
+  public void setY(double y, double timestamp) {
+    updateOdometry();
+    yData.addCorrectedData(y, timestamp);
+    driveOdometry.resetPosition(
+        new Pose2d(getCurrentPose().getTranslation().getX(), yData.getCurrentPoint(), getCurrentPose().getRotation()),
+        getCurrentRotation());
+    resetBaseDistances();
+  }
+
+  /**
    * Sets the robot's current rotation without affecting the translation component
    * of the pose.
    * 
    * @param rotation The rotation component of the pose
    */
   public void setRotation(Rotation2d rotation) {
+    updateOdometry();
     Translation2d currentTranslation = getCurrentPose().getTranslation();
     driveOdometry.resetPosition(new Pose2d(currentTranslation, rotation), getCurrentRotation());
     resetBaseDistances();

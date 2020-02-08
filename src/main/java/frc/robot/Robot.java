@@ -81,6 +81,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     robotContainer.updateOIType();
+    robotContainer.setInitialPosition();
+    robotContainer.enableLimelightXCorrection(false);
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -106,6 +108,7 @@ public class Robot extends TimedRobot {
       autonomousCommand.cancel();
     }
     robotContainer.updateOIType();
+    robotContainer.enableLimelightXCorrection(true);
   }
 
   /**

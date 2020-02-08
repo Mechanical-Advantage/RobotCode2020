@@ -54,6 +54,8 @@ import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
  */
 public class RobotContainer {
   private static final double navXWaitTime = 5; // Maximum number of seconds to wait for the navX to initialize
+  private static final Pose2d initialAutoPosition = new Pose2d(Constants.initiationLine, 0,
+      Rotation2d.fromDegrees(180));
 
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
@@ -70,6 +72,8 @@ public class RobotContainer {
 
   private OI oi = new DummyOI();
   private String lastJoystickName;
+
+  private LimelightOdometry limelightOdometry;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -103,7 +107,8 @@ public class RobotContainer {
       DriverStation.reportError("Timeout while waiting for NavX init", false);
     }
     odometry = new RobotOdometry(driveSubsystem, ahrs);
-    odometry.setDefaultCommand(new LimelightOdometry(limelight, odometry));
+    limelightOdometry = new LimelightOdometry(limelight, odometry);
+    odometry.setDefaultCommand(limelightOdometry);
 
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     if (oi.hasDriveTriggers()) {
@@ -113,6 +118,7 @@ public class RobotContainer {
     joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
     SmartDashboard.putData("Joystick Mode", joystickModeChooser);
 
+    autoChooser.setDefaultOption("Do Nothing", null);
     autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
     autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
     autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
@@ -197,5 +203,13 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  public void setInitialPosition() {
+    odometry.setPosition(initialAutoPosition);
+  }
+
+  public void enableLimelightXCorrection(boolean enable) {
+    limelightOdometry.enableXCorrection(enable);
   }
 }
