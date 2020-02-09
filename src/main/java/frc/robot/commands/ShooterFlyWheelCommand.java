@@ -15,31 +15,36 @@ import frc.robot.util.TunableNumber;
 
 public class ShooterFlyWheelCommand extends CommandBase {
 
-  private TunableNumber setPoint = new TunableNumber("Shooter FlyWheel PID/setpoint");
-  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
+  private TunableNumber setPoint = new TunableNumber("Shooter FlyWheel/setpoint");
+  private final ShooterFlyWheel shooterFlyWheel;
 
   /**
    * Creates a new ShooterFlyWheel.
    * 
    * @param ShooterFlyWheel
    */
-  public ShooterFlyWheelCommand(Subsystem ShooterFlyWheel) {
+  public ShooterFlyWheelCommand(ShooterFlyWheel shooterFlyWheelSub) {
+    shooterFlyWheel = shooterFlyWheelSub;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(ShooterFlyWheel);
+    addRequirements(shooterFlyWheelSub);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     setPoint.setDefault(0);
-    shooterFlyWheel.setShooterRPM(setPoint.get());
+    shooterFlyWheel.run(setPoint.get());
+    // shooterFlyWheel.setShooterPercentOutput(setPoint.get());
+    // shooterFlyWheel.setShooterRPM(setPoint.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if (Constants.tuningMode) {
-      shooterFlyWheel.setShooterRPM(setPoint.get());
+      shooterFlyWheel.run(setPoint.get());
+      // shooterFlyWheel.setShooterPercentOutput(setPoint.get());
+      // shooterFlyWheel.setShooterRPM(setPoint.get());
     }
   }
 

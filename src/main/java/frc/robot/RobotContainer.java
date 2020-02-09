@@ -10,6 +10,8 @@ package frc.robot;
 import frc.robot.Constants.RobotType;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
+import frc.robot.commands.ShooterFlyWheelCommand;
+import frc.robot.commands.ShooterRollerCommand;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
@@ -145,10 +147,9 @@ public class RobotContainer {
 
     oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(
-        () -> shooterFlyWheel.runFlywheel(SmartDashboard.getNumber("ShooterFlyWheel/flywheel", 0)), shooterFlyWheel);
-    oi.getShooterPrototypeRollerButton().whileActiveContinuous(
-        () -> shooterRoller.runRollers(SmartDashboard.getNumber("ShooterRoller/rollers", 0)), shooterRoller);
+    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new ShooterFlyWheelCommand(shooterFlyWheel));
+    oi.getShooterPrototypeRollerButton().whileActiveContinuous(new ShooterRollerCommand(shooterRoller));
+
   }
 
   /**

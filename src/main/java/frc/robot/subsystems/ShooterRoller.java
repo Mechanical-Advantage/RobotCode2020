@@ -10,7 +10,6 @@ package frc.robot.subsystems;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -19,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.TunableNumber;
 import com.revrobotics.ControlType;
 
@@ -30,7 +30,6 @@ public class ShooterRoller extends SubsystemBase {
   CANSparkMax rollerMaster;
   CANSparkMax rollerFollower;
   CANPIDController roller_pidController;
-  CANEncoder flywheelEncoder;
   public double kP, kI, kD, kFF, kMaxOutput, kMinOutput, maxRPM;
 
   private Double lastRampRate = null; // Force this to be updated once
@@ -41,17 +40,24 @@ public class ShooterRoller extends SubsystemBase {
   private TunableNumber F = new TunableNumber("Shooter Roller PID/F");
   private double setpoint;
   private double multiplier;
+  public int currentLimit = 30;
+  private int rollerMasterDeviceID = 4;
+  private int rollerFollowerDeviceID = 11;
 
   /**
    * Creates a new ShooterRoller.
    */
   public ShooterRoller() {
     SmartDashboard.setDefaultNumber("Shooter Roller/ramp rate", defaultRampRate); // Seconds to full power
-    rollerMaster = new CANSparkMax(4, MotorType.kBrushless);
-    rollerFollower = new CANSparkMax(11, MotorType.kBrushless);
-    rollerFollower.follow(rollerMaster, true);
+    rollerMaster = new CANSparkMax(rollerMasterDeviceID, MotorType.kBrushless);
+    rollerFollower = new CANSparkMax(rollerFollowerDeviceID, MotorType.kBrushless);
     rollerMaster.restoreFactoryDefaults();
+    rollerFollower.restoreFactoryDefaults();
+    rollerFollower.follow(rollerMaster, true);
+
     roller_pidController = rollerMaster.getPIDController();
+
+    rollerMaster.setSmartCurrentLimit(currentLimit);
 
     P.setDefault(0);
     I.setDefault(0);
@@ -94,7 +100,7 @@ public class ShooterRoller extends SubsystemBase {
 
       @Override
       public void execute() {
-        subsystem.runRollers(0);
+        subsystem.run(0);
       }
     });
   }
@@ -139,23 +145,13 @@ public class ShooterRoller extends SubsystemBase {
       rollerMaster.setOpenLoopRampRate(currentRampRate);
       lastRampRate = currentRampRate;
     }
-    SmartDashboard.putNumber("Shooter Roller/speed", getSpeed());
 
     roller_pidController.setReference(setpoint, ControlType.kVelocity);
 
     SmartDashboard.putNumber("SetPoint", setpoint);
   }
 
-  public void setShooterRPM(double rpm) {
-    setpoint = rpm * multiplier;
-    // %
-  }
-
-  public void runRollers(double power) {
+  public void run(double power) {
     rollerMaster.set(power * (invertRollers ? -1 : 1));
-  }
-
-  public double getSpeed() {
-    return flywheelEncoder.getVelocity() * 1.5;
   }
 }

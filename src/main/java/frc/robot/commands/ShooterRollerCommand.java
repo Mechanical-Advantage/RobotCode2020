@@ -15,31 +15,32 @@ import frc.robot.util.TunableNumber;
 
 public class ShooterRollerCommand extends CommandBase {
 
-  private TunableNumber setPoint = new TunableNumber("Shooter Roller PID/setpoint");
-  private final ShooterRoller shooterRoller = new ShooterRoller();
+  private TunableNumber setPoint = new TunableNumber("Shooter Roller/setpoint");
+  private final ShooterRoller shooterRoller;
 
   /**
    * Creates a new ShooterRoller.
    * 
    * @param ShooterRoller
    */
-  public ShooterRollerCommand(Subsystem ShooterRoller) {
+  public ShooterRollerCommand(ShooterRoller shooterRollerSub) {
+    shooterRoller = shooterRollerSub;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(ShooterRoller);
+    addRequirements(shooterRollerSub);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     setPoint.setDefault(0);
-    shooterRoller.setShooterRPM(setPoint.get());
+    shooterRoller.run(setPoint.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if (Constants.tuningMode) {
-      shooterRoller.setShooterRPM(setPoint.get());
+      shooterRoller.run(setPoint.get());
     }
   }
 

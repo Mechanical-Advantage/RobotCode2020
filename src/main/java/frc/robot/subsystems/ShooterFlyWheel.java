@@ -40,18 +40,26 @@ public class ShooterFlyWheel extends SubsystemBase {
   private TunableNumber D = new TunableNumber("Shooter FlyWheel PID/D");
   private TunableNumber F = new TunableNumber("Shooter FlyWheel PID/F");
   private double setpoint;
+  public int currentLimit = 30;
+
+  private int flywheelMasterDeviceID = 3;
+  private int flyWheelFollowerDeviceID = 13;
 
   /**
    * Creates a new ShooterFlyWheel.
    */
   public ShooterFlyWheel() {
     SmartDashboard.setDefaultNumber("Shooter FlyWheel/ramp rate", defaultRampRate); // Seconds to full power
-    flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
-    flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-    flywheelFollower.follow(flywheelMaster, true);
+    flywheelMaster = new CANSparkMax(flywheelMasterDeviceID, MotorType.kBrushless);
+    flywheelFollower = new CANSparkMax(flyWheelFollowerDeviceID, MotorType.kBrushless);
     flywheelMaster.restoreFactoryDefaults();
+    flywheelFollower.restoreFactoryDefaults();
+    flywheelFollower.follow(flywheelMaster, true);
+
     flywheel_pidController = flywheelMaster.getPIDController();
     flywheelEncoder = flywheelMaster.getEncoder();
+
+    flywheelMaster.setSmartCurrentLimit(currentLimit);
 
     P.setDefault(0);
     I.setDefault(0);
@@ -94,7 +102,7 @@ public class ShooterFlyWheel extends SubsystemBase {
 
       @Override
       public void execute() {
-        subsystem.runFlywheel(0);
+        subsystem.run(0);
       }
     });
   }
@@ -151,8 +159,13 @@ public class ShooterFlyWheel extends SubsystemBase {
     setpoint = rpm;
   }
 
-  public void runFlywheel(double power) {
+  public void run(double power) {
     flywheelMaster.set(power * (invertFlywheel ? -1 : 1));
+  }
+
+  public void setShooterPercentOutput(double percentOutput) {
+    flywheelMaster.set(percentOutput);
+    // flywheel_pidController.setReference(percentOutput, ControlType.kDutyCycle);
   }
 
   public double getSpeed() {
