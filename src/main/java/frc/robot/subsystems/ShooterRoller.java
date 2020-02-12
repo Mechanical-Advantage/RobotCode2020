@@ -29,16 +29,16 @@ public class ShooterRoller extends SubsystemBase {
   private Double lastRampRate = null; // Force this to be updated once
   private double setpoint;
   public int currentLimit = 30;
-  private int rollerMasterDeviceID = 4;
-  private int rollerFollowerDeviceID = 11;
+  private int masterDeviceID = 4;
+  private int followerDeviceID = 11;
 
   /**
    * Creates a new ShooterRoller.
    */
   public ShooterRoller() {
     SmartDashboard.setDefaultNumber("Shooter Roller/ramp rate", defaultRampRate); // Seconds to full power
-    rollerMaster = new CANSparkMax(rollerMasterDeviceID, MotorType.kBrushless);
-    rollerFollower = new CANSparkMax(rollerFollowerDeviceID, MotorType.kBrushless);
+    rollerMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushless);
+    rollerFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushless);
     rollerMaster.restoreFactoryDefaults();
     rollerFollower.restoreFactoryDefaults();
     rollerFollower.follow(rollerMaster, true);

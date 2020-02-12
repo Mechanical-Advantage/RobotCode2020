@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import frc.robot.Constants.RobotType;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.ShooterFlyWheelCommand;

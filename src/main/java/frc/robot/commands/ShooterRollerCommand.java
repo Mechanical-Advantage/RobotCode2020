@@ -14,7 +14,7 @@ import frc.robot.util.TunableNumber;
 
 public class ShooterRollerCommand extends CommandBase {
 
-  private TunableNumber setPoint = new TunableNumber("Shooter Roller/setpoint");
+  private TunableNumber setpoint = new TunableNumber("Shooter Roller/setpoint");
   private final ShooterRoller shooterRoller;
 
   /**
@@ -24,22 +24,21 @@ public class ShooterRollerCommand extends CommandBase {
    */
   public ShooterRollerCommand(ShooterRoller shooterRollerSub) {
     shooterRoller = shooterRollerSub;
-    // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooterRollerSub);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setPoint.setDefault(0);
-    shooterRoller.run(setPoint.get());
+    setpoint.setDefault(0);
+    shooterRoller.run(setpoint.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if (Constants.tuningMode) {
-      shooterRoller.run(setPoint.get());
+      shooterRoller.run(setpoint.get());
     }
   }
 

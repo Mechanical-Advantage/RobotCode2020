@@ -42,16 +42,16 @@ public class ShooterFlyWheel extends SubsystemBase {
   private double setpoint;
   public int currentLimit = 30;
 
-  private int flywheelMasterDeviceID = 3;
-  private int flyWheelFollowerDeviceID = 13;
+  private int masterDeviceID = 3;
+  private int followerDeviceID = 13;
 
   /**
    * Creates a new ShooterFlyWheel.
    */
   public ShooterFlyWheel() {
     SmartDashboard.setDefaultNumber("Shooter FlyWheel/ramp rate", defaultRampRate); // Seconds to full power
-    flywheelMaster = new CANSparkMax(flywheelMasterDeviceID, MotorType.kBrushless);
-    flywheelFollower = new CANSparkMax(flyWheelFollowerDeviceID, MotorType.kBrushless);
+    flywheelMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushless);
+    flywheelFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushless);
     flywheelMaster.restoreFactoryDefaults();
     flywheelFollower.restoreFactoryDefaults();
     flywheelFollower.follow(flywheelMaster, true);
@@ -73,7 +73,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     kFF = F.get();
     kMaxOutput = 1;
     kMinOutput = -1;
-    maxRPM = 5700;
+    maxRPM = 6000;
 
     // set PID coefficients
     flywheel_pidController.setP(kP);
@@ -102,7 +102,7 @@ public class ShooterFlyWheel extends SubsystemBase {
 
       @Override
       public void execute() {
-        subsystem.run(0);
+        subsystem.stop();
       }
     });
   }
@@ -155,12 +155,18 @@ public class ShooterFlyWheel extends SubsystemBase {
     SmartDashboard.putNumber("ProcessVariable", flywheelEncoder.getVelocity());
   }
 
+  public void stop() {
+    flywheelMaster.disable();
+    flywheelFollower.disable();
+  }
+
   public void setShooterRPM(double rpm) {
     setpoint = rpm;
   }
 
   public void run(double power) {
-    flywheelMaster.set(power * (invertFlywheel ? -1 : 1));
+    // flywheelMaster.set(power * (invertFlywheel ? -1 : 1));
+    flywheel_pidController.setReference((power * (invertFlywheel ? -1 : 1)), ControlType.kDutyCycle);
   }
 
   public void setShooterPercentOutput(double percentOutput) {

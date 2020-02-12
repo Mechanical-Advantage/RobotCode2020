@@ -14,7 +14,7 @@ import frc.robot.util.TunableNumber;
 
 public class ShooterFlyWheelCommand extends CommandBase {
 
-  private TunableNumber setPoint = new TunableNumber("Shooter FlyWheel/setpoint");
+  private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/setpoint");
   private final ShooterFlyWheel shooterFlyWheel;
 
   /**
@@ -24,32 +24,33 @@ public class ShooterFlyWheelCommand extends CommandBase {
    */
   public ShooterFlyWheelCommand(ShooterFlyWheel shooterFlyWheelSub) {
     shooterFlyWheel = shooterFlyWheelSub;
-    // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(shooterFlyWheelSub);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setPoint.setDefault(0);
-    shooterFlyWheel.run(setPoint.get());
-    // shooterFlyWheel.setShooterPercentOutput(setPoint.get());
-    // shooterFlyWheel.setShooterRPM(setPoint.get());
+    setpoint.setDefault(0);
+    // shooterFlyWheel.run(setpoint.get());
+    // shooterFlyWheel.setShooterPercentOutput(setpoint.get());
+    shooterFlyWheel.setShooterRPM(setpoint.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if (Constants.tuningMode) {
-      shooterFlyWheel.run(setPoint.get());
-      // shooterFlyWheel.setShooterPercentOutput(setPoint.get());
-      // shooterFlyWheel.setShooterRPM(setPoint.get());
+      // shooterFlyWheel.run(setpoint.get());
+      // shooterFlyWheel.setShooterPercentOutput(setpoint.get());
+      shooterFlyWheel.setShooterRPM(setpoint.get());
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    shooterFlyWheel.stop();
+
   }
 
   // Returns true when the command should end.
