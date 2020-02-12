@@ -40,6 +40,7 @@ public class ShooterFlyWheelCommand extends CommandBase {
   @Override
   public void execute() {
     if (Constants.tuningMode) {
+      shooterFlyWheel.isEnabled = true;
       // shooterFlyWheel.run(setpoint.get());
       // shooterFlyWheel.setShooterPercentOutput(setpoint.get());
       shooterFlyWheel.setShooterRPM(setpoint.get());

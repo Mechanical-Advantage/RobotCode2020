@@ -45,6 +45,8 @@ public class ShooterFlyWheel extends SubsystemBase {
   private int masterDeviceID = 3;
   private int followerDeviceID = 13;
 
+  public boolean isEnabled = false;
+
   /**
    * Creates a new ShooterFlyWheel.
    */
@@ -102,6 +104,7 @@ public class ShooterFlyWheel extends SubsystemBase {
 
       @Override
       public void execute() {
+        System.out.println("executing default command");
         subsystem.stop();
       }
     });
@@ -115,6 +118,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     double i = I.get();
     double d = D.get();
     double ff = F.get();
+    System.out.println("calling periodic");
     double max = SmartDashboard.getNumber("Max Output", 0);
     double min = SmartDashboard.getNumber("Min Output", 0);
 
@@ -149,15 +153,20 @@ public class ShooterFlyWheel extends SubsystemBase {
     }
     SmartDashboard.putNumber("Shooter FlyWheel/speed", getSpeed());
 
-    flywheel_pidController.setReference(setpoint, ControlType.kVelocity);
+    if (isEnabled) {
+      flywheel_pidController.setReference(setpoint, ControlType.kVelocity);
+    }
 
     SmartDashboard.putNumber("SetPoint", setpoint);
     SmartDashboard.putNumber("ProcessVariable", flywheelEncoder.getVelocity());
+
   }
 
   public void stop() {
-    flywheelMaster.disable();
-    flywheelFollower.disable();
+    isEnabled = false;
+    System.out.println("executing stop");
+    flywheelMaster.stopMotor();
+    flywheelFollower.stopMotor();
   }
 
   public void setShooterRPM(double rpm) {
