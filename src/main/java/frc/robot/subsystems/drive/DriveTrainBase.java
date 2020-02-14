@@ -295,14 +295,32 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * 
    * @return current velocity in inches per second
    */
-  public abstract double getVelocityRight();
+  public double getVelocityRight() {
+    return wheelDiameter * Math.PI * getRPSRight();
+  }
+
+  /**
+   * Get the current velocity for the right side of the robot
+   * 
+   * @return current velocity in rotations per second
+   */
+  protected abstract double getRPSRight();
 
   /**
    * Get the current velocity for the left side of the robot
    * 
    * @return current velocity in inches per second
    */
-  public abstract double getVelocityLeft();
+  public double getVelocityLeft() {
+    return wheelDiameter * Math.PI * getRPSLeft();
+  }
+
+  /**
+   * Get the current velocity for the left side of the robot
+   * 
+   * @return current velocity in rotations per second
+   */
+  protected abstract double getRPSLeft();
 
   /**
    * Gets the average current for one motor.

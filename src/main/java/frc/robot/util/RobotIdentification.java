@@ -25,7 +25,7 @@ public class RobotIdentification {
             new MACAddress(new byte[] { 0, -128, 47, 37, 122, -105 }), RobotType.ROBOT_2019,
             new MACAddress(new byte[] { 0, -128, 47, 23, -47, 95 }), RobotType.ORIGINAL_ROBOT_2018,
             new MACAddress(new byte[] { 0, -128, 47, 36, 78, 94 }), RobotType.REBOT,
-            new MACAddress(new byte[] { 0, -128, 47, 35, -30, 92 }), RobotType.NOTBOT);
+            new MACAddress(new byte[] { 0, -128, 47, 35, -30, 92 }), RobotType.ROBOT_2020_DRIVE);
     public static RobotType robot;
 
     public static RobotType identifyRobot() {
