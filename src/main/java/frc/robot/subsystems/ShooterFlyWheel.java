@@ -39,13 +39,10 @@ public class ShooterFlyWheel extends SubsystemBase {
   private TunableNumber I = new TunableNumber("Shooter FlyWheel PID/I");
   private TunableNumber D = new TunableNumber("Shooter FlyWheel PID/D");
   private TunableNumber F = new TunableNumber("Shooter FlyWheel PID/F");
-  private double setpoint;
   public int currentLimit = 30;
-
   private int masterDeviceID = 3;
   private int followerDeviceID = 13;
-
-  public boolean isEnabled = false;
+  public double MULTIPLIER = 1.5;
 
   /**
    * Creates a new ShooterFlyWheel.
@@ -153,37 +150,28 @@ public class ShooterFlyWheel extends SubsystemBase {
     }
     SmartDashboard.putNumber("Shooter FlyWheel/speed", getSpeed());
 
-    if (isEnabled) {
-      flywheel_pidController.setReference(setpoint, ControlType.kVelocity);
-    }
+    SmartDashboard.putNumber("Shooter FlyWheel/ applied output", flywheelMaster.getAppliedOutput());
 
-    SmartDashboard.putNumber("SetPoint", setpoint);
     SmartDashboard.putNumber("ProcessVariable", flywheelEncoder.getVelocity());
 
   }
 
   public void stop() {
-    isEnabled = false;
     System.out.println("executing stop");
     flywheelMaster.stopMotor();
     flywheelFollower.stopMotor();
   }
 
   public void setShooterRPM(double rpm) {
-    setpoint = rpm;
+    double setpoint = rpm / MULTIPLIER;
+    flywheel_pidController.setReference(setpoint, ControlType.kVelocity);
   }
 
   public void run(double power) {
-    // flywheelMaster.set(power * (invertFlywheel ? -1 : 1));
-    flywheel_pidController.setReference((power * (invertFlywheel ? -1 : 1)), ControlType.kDutyCycle);
-  }
-
-  public void setShooterPercentOutput(double percentOutput) {
-    flywheelMaster.set(percentOutput);
-    // flywheel_pidController.setReference(percentOutput, ControlType.kDutyCycle);
+    flywheelMaster.set(power * (invertFlywheel ? -1 : 1));
   }
 
   public double getSpeed() {
-    return flywheelEncoder.getVelocity() * 1.5;
+    return flywheelEncoder.getVelocity() * MULTIPLIER;
   }
 }
