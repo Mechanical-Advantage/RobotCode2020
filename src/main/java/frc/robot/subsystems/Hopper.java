@@ -21,7 +21,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Hopper extends SubsystemBase {
 
   private static final double defaultRampRate = 10;
-  private static final boolean invertHopper = false;
+  private static final boolean invertHopperLeft = true;
+  private static final boolean invertHopperRight = false;
 
   CANSparkMax hopperLeft;
   CANSparkMax hopperRight;
@@ -79,7 +80,7 @@ public class Hopper extends SubsystemBase {
   }
 
   public void run(double powerLeft, double powerRight) {
-    hopperLeft.set(powerLeft * (invertHopper ? -1 : 1));
-    hopperRight.set(powerRight * (invertHopper ? -1 : 1));
+    hopperLeft.set(powerLeft * (invertHopperLeft ? -1 : 1));
+    hopperRight.set(powerRight * (invertHopperRight ? -1 : 1));
   }
 }

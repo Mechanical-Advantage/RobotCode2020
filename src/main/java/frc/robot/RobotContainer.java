@@ -150,7 +150,8 @@ public class RobotContainer {
     oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
     oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new ShooterFlyWheelCommand(shooterFlyWheel));
-    oi.getShooterPrototypeRollerButton().whileActiveContinuous(new ShooterRollerCommand(shooterRoller));
+    oi.getShooterPrototypeRollerButton()
+        .whileActiveContinuous(new ShooterRollerCommand(shooterRoller).alongWith(new HopperCommand(hopper)));
   }
 
   /**
