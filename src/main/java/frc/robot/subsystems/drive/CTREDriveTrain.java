@@ -111,7 +111,7 @@ public class CTREDriveTrain extends DriveTrainBase {
       ptoSolenoid2 = 2;
       ptoPCM = 1;
       maxVelocityLow = 170.566392;
-      minVelocityLow = 7.4622796;
+      minVelocityLow = 8.8836662;
       sixMotorDrive = true;
       encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
       ticksPerRotation = 4096;

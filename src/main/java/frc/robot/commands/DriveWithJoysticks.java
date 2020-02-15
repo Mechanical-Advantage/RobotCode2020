@@ -31,20 +31,24 @@ public class DriveWithJoysticks extends CommandBase {
   private DoubleSupplier oiRightDriveY;
   private DoubleSupplier oiRightDriveTrigger;
   private DoubleSupplier oiGetDeadband;
-  private boolean oiHasDriveTriggers;
   private BooleanSupplier oiSniperMode;
   private DoubleSupplier oiSniperLevel;
+  private DoubleSupplier oiSniperHighLevel;
+  private DoubleSupplier oiSniperLowLevel;
   private BooleanSupplier oiSniperLow;
   private BooleanSupplier oiSniperHigh;
   private boolean oiHasDualSniperMode;
   private DriveTrainBase driveSubsystem;
   private SendableChooser<JoystickMode> joystickChooser;
 
+  private boolean joysticksReversed = false;
+
   public DriveWithJoysticks(DoubleSupplier leftDriveX, DoubleSupplier leftDriveY, DoubleSupplier leftDriveTrigger,
       DoubleSupplier rightDriveX, DoubleSupplier rightDriveY, DoubleSupplier rightDriveTrigger,
-      DoubleSupplier getDeadband, boolean hasDriveTriggers, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
-      BooleanSupplier sniperLow, BooleanSupplier sniperHigh, boolean hasDualSniperMode,
-      SendableChooser<JoystickMode> joystickModeChooser, DriveTrainBase driveSubsystem) {
+      DoubleSupplier getDeadband, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
+      DoubleSupplier sniperHighLevel, DoubleSupplier sniperLowLevel, BooleanSupplier sniperLow,
+      BooleanSupplier sniperHigh, boolean hasDualSniperMode, SendableChooser<JoystickMode> joystickModeChooser,
+      DriveTrainBase driveSubsystem) {
     // Use requires() here to declare subsystem dependencies
     // eg. requires(chassis);
     super();
@@ -56,9 +60,10 @@ public class DriveWithJoysticks extends CommandBase {
     oiRightDriveY = rightDriveY;
     oiRightDriveTrigger = rightDriveTrigger;
     oiGetDeadband = getDeadband;
-    oiHasDriveTriggers = hasDriveTriggers;
     oiSniperMode = sniperMode;
     oiSniperLevel = sniperLevel;
+    oiSniperHighLevel = sniperHighLevel;
+    oiSniperLowLevel = sniperLowLevel;
     oiSniperLow = sniperLow;
     oiSniperHigh = sniperHigh;
     oiHasDualSniperMode = hasDualSniperMode;
@@ -86,47 +91,79 @@ public class DriveWithJoysticks extends CommandBase {
     double totalTurn;
     switch (joystickChooser.getSelected()) {
     case Tank:
-      joystickRight = processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getRightAxis() */);
-      joystickLeft = processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getLeftAxis() */);
+      joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+          : (processJoystickAxis(oiLeftDriveY.getAsDouble()));
+      joystickLeft = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+          : processJoystickAxis(oiRightDriveY.getAsDouble());
       break;
     case SplitArcade:
-      baseDrive = processJoystickAxis(oiLeftDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisLeft() */);
-      joystickRight = baseDrive
-          + processJoystickAxis(oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */);
+      baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+          : processJoystickAxis(oiLeftDriveY.getAsDouble());
+      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
+          : baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble());
+      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
+          : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble());
+
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive
-          - processJoystickAxis(oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */);
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case SplitArcadeRightDrive:
-      baseDrive = processJoystickAxis(oiRightDriveY.getAsDouble() /* Robot.oi.getSingleDriveAxisRight() */);
-      joystickRight = baseDrive
-          + processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
+      baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+          : processJoystickAxis(oiRightDriveY.getAsDouble());
+      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble()))
+          : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble());
+      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble()))
+          : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble());
+
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */);
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
     case Trigger:
-      baseDrive = (oiLeftDriveTrigger.getAsDouble()
-          /* Robot.oi.getLeftTrigger() */ - oiRightDriveTrigger.getAsDouble() /* Robot.oi.getRightTrigger() */ ) * -1;
-      totalTurn = oiLeftDriveX.getAsDouble() /* Robot.oi.getLeftHorizDriveAxis() */
-          + (oiRightDriveX.getAsDouble() /* Robot.oi.getRightHorizDriveAxis() */ * rightStickScale);
-      joystickRight = baseDrive + processJoystickAxis(totalTurn);
+      baseDrive = joysticksReversed ? ((oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1)
+          : (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble()) * -1;
+      totalTurn = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
+
+      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(totalTurn))
+          : baseDrive + processJoystickAxis(totalTurn);
+      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(totalTurn))
+          : baseDrive - processJoystickAxis(totalTurn);
+
       joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = baseDrive - processJoystickAxis(totalTurn);
       joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
       break;
-    case Sniper:
-
-      break;
     }
-    driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
 
+    if (oiSniperMode.getAsBoolean()) {
+      double multiplierLevel = getMultiplierForSniperMode();
+      joystickLeft *= multiplierLevel;
+      joystickRight *= multiplierLevel;
+    }
+
+    driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
+  }
+
+  public double getMultiplierForSniperMode() {
+    double sniperLevel;
+    if (oiHasDualSniperMode) {
+      if (oiSniperHigh.getAsBoolean()) {
+        sniperLevel = oiSniperHighLevel.getAsDouble();
+      } else {
+        sniperLevel = oiSniperLowLevel.getAsDouble();
+      }
+    } else {
+      sniperLevel = oiSniperLevel.getAsDouble();
+    }
+    return sniperLevel;
+  }
+
+  public void setReversed(boolean reverse) {
+    joysticksReversed = reverse;
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    SmartDashboard.putBoolean("Driver Control", false);
   }
 
   // Returns true when the command should end.
@@ -135,13 +172,7 @@ public class DriveWithJoysticks extends CommandBase {
     return false;
   }
 
-  // Called when another command which requires one or more of the same
-  // subsystems is scheduled to run
-  protected void interrupted() {
-    SmartDashboard.putBoolean("Driver Control", false);
-  }
-
   public static enum JoystickMode {
-    Tank, SplitArcade, SplitArcadeRightDrive, Trigger, Sniper;
+    Tank, SplitArcade, SplitArcadeRightDrive, Trigger;
   }
 }

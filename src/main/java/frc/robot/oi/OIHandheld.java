@@ -26,6 +26,9 @@ public class OIHandheld extends OI {
     private JoystickButton toggleDriveEnabled = new JoystickButton(driverController, 7); // back button
     private JoystickButton toggleOpenLoop = new JoystickButton(driverController, 8); // start button
 
+    private static final double sniperHighLevel = 0.3; // used for right trigger when using handheld control
+    private static final double sniperLowLevel = 0.15; // used for left trigger when using handheld control
+
     public OIHandheld() {
         resetRumble();
         // The toggle buttons are not exposed and this class fakes having a disable
@@ -109,8 +112,17 @@ public class OIHandheld extends OI {
 
     @Override
     public boolean getSniperMode() {
-        return driverController.getAButton() || driverController.getBButton() || driverController.getBumper(Hand.kLeft)
-                || driverController.getBumper(Hand.kRight);
+        return getSniperHigh() || getSniperLow();
+    }
+
+    @Override
+    public double getSniperHighLevel() {
+        return sniperHighLevel;
+    }
+
+    @Override
+    public double getSniperLowLevel() {
+        return sniperLowLevel;
     }
 
     @Override
