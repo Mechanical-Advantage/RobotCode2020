@@ -103,7 +103,7 @@ public class RobotContainer {
 
   public void updateOIType() {
     String joystickName = new Joystick(0).getName();
-    if (joystickName != lastJoystickName) {
+    if (!joystickName.equals(lastJoystickName)) {
       // Button mapping must be cleared before instantiating new OI because the new OI
       // might need to map buttons internally
       CommandScheduler.getInstance().clearButtons();
