@@ -26,6 +26,8 @@ public class VelocityPIDTuner extends CommandBase {
   private TunableNumber F = new TunableNumber("Drive PID/F");
   private TunableNumber setpoint = new TunableNumber("Drive PID/setpoint");
 
+  private double lastP, lastI, lastD, lastF = -1;
+
   public VelocityPIDTuner(DriveTrainBase drive) {
     addRequirements(drive);
     driveSubsystem = drive;
@@ -46,7 +48,17 @@ public class VelocityPIDTuner extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    driveSubsystem.setPID(P.get(), I.get(), D.get(), F.get(), 0);
+    double currentP = P.get();
+    double currentI = I.get();
+    double currentD = D.get();
+    double currentF = F.get();
+    if (currentP != lastP || currentI != lastI || currentD != lastD || currentF != lastF) {
+      driveSubsystem.setPID(currentP, currentI, currentD, currentF, 0);
+      lastP = currentP;
+      lastI = currentI;
+      lastD = currentD;
+      lastF = currentF;
+    }
     if (SmartDashboard.getBoolean("Drive PID/enabled", false)) {
       driveSubsystem.driveInchesPerSec(setpoint.get(), setpoint.get() * (spin ? -1 : 1));
       SmartDashboard.putNumber("Drive velocity",

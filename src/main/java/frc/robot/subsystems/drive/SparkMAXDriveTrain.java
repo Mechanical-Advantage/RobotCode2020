@@ -17,6 +17,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 public class SparkMAXDriveTrain extends DriveTrainBase {
@@ -56,11 +57,11 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
       leftEncoder = leftMaster.getEncoder();
       rightEncoder = rightMaster.getEncoder();
       minVelocityLow = 0;
-      maxVelocityLow = 1;
-      kPLow = 0;
+      maxVelocityLow = 150;
+      kPLow = 0.00015;
       kILow = 0;
-      kDLow = 0;
-      kFLow = 0;
+      kDLow = 0.0015;
+      kFLow = 0.0001821213133;
       kIZoneLow = 0;
       wheelDiameter = 6;
       smartCurrentLimit = 80;
@@ -95,6 +96,12 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if (Constants.tuningMode) {
+      SmartDashboard.putNumber("Drive L Velocity", getVelocityLeft());
+      SmartDashboard.putNumber("Drive R Velocity", getVelocityRight());
+      SmartDashboard.putNumber("Drive L Output", leftMaster.getAppliedOutput() * 100);
+      SmartDashboard.putNumber("Drive R Output", rightMaster.getAppliedOutput() * 100);
+    }
   }
 
   @Override
