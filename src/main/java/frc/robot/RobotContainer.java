@@ -11,11 +11,13 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.ShooterFlyWheelCommand;
 import frc.robot.commands.ShooterRollerCommand;
+import frc.robot.commands.HopperCommand;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
@@ -46,6 +48,7 @@ public class RobotContainer {
   // private final DriveTrainBase driveSubsystem;
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
   private final ShooterRoller shooterRoller = new ShooterRoller();
+  private final Hopper hopper = new Hopper();
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -148,7 +151,6 @@ public class RobotContainer {
 
     oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new ShooterFlyWheelCommand(shooterFlyWheel));
     oi.getShooterPrototypeRollerButton().whileActiveContinuous(new ShooterRollerCommand(shooterRoller));
-
   }
 
   /**

@@ -60,10 +60,10 @@ public class ShooterFlyWheel extends SubsystemBase {
 
     flywheelMaster.setSmartCurrentLimit(currentLimit);
 
-    P.setDefault(0);
+    P.setDefault(0.0024);
     I.setDefault(0);
-    D.setDefault(0);
-    F.setDefault(0);
+    D.setDefault(0.1);
+    F.setDefault(0.00019068);
 
     // PID coefficients
     kP = P.get();
@@ -101,7 +101,7 @@ public class ShooterFlyWheel extends SubsystemBase {
 
       @Override
       public void execute() {
-        System.out.println("executing default command");
+        // System.out.println("executing default command");
         subsystem.stop();
       }
     });
@@ -115,7 +115,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     double i = I.get();
     double d = D.get();
     double ff = F.get();
-    System.out.println("calling periodic");
+    // System.out.println("calling periodic");
     double max = SmartDashboard.getNumber("Max Output", 0);
     double min = SmartDashboard.getNumber("Min Output", 0);
 
@@ -157,7 +157,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   }
 
   public void stop() {
-    System.out.println("executing stop");
+    // System.out.println("executing stop");
     flywheelMaster.stopMotor();
     flywheelFollower.stopMotor();
   }
