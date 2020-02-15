@@ -24,7 +24,7 @@ public class TurnToAngle extends CommandBase {
   private double toleranceDegrees;
   // The average of this many of the most recent points must be within tolerance
   // to end
-  private int toleranceValuesToAverage;
+  private int toleranceValuesToAverage = 1; // 0 causes an exception so making the default 1 prevents crashes
   private DriveGear gear;
   private PIDController turnController;
   private LinearFilter movingAverageFilter;
