@@ -62,10 +62,11 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
       kDLow = 0;
       kFLow = 0;
       kIZoneLow = 0;
-      wheelDiameter = 0;
+      wheelDiameter = 6;
       smartCurrentLimit = 80;
-      reverseOutputLeft = false;
-      reverseOutputRight = true;
+      reverseOutputLeft = true;
+      reverseOutputRight = false;
+      afterEncoderReduction = 11.5;
     }
     setCANTimeout(configTimeoutInit);
     leftMaster.restoreFactoryDefaults();
@@ -111,7 +112,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   @Override
   protected void driveClosedLoopLowLevel(double left, double right) {
     leftPidController.setReference(left * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot);
-    rightPidController.setReference(left * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot);
+    rightPidController.setReference(right * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot);
   }
 
   @Override
