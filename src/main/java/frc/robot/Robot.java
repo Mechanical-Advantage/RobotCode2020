@@ -72,6 +72,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
+    robotContainer.coastIfNotMoving();
   }
 
   /**
@@ -81,6 +82,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     robotContainer.updateOIType();
+    robotContainer.brakeDuringNeutral();
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -119,6 +121,7 @@ public class Robot extends TimedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    robotContainer.brakeDuringNeutral();
   }
 
   /**

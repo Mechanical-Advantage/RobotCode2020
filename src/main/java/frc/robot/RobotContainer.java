@@ -176,4 +176,14 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
   }
+
+  public void coastIfNotMoving() {
+    if (driveSubsystem.getVelocityLeft() <= 1 && driveSubsystem.getVelocityRight() <= 1) {
+      driveSubsystem.enableBrakeMode(false);
+    }
+  }
+
+  public void brakeDuringNeutral() {
+    driveSubsystem.enableBrakeMode(true);
+  }
 }
