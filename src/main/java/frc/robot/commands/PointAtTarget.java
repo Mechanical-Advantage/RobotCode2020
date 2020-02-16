@@ -25,7 +25,6 @@ public class PointAtTarget extends CommandBase {
   private AHRS ahrs;
   private LimelightInterface limelight;
   private LatencyData angleData;
-  private PIDController spinController;
   private double kP;
   private double kI;
   private double kD;
