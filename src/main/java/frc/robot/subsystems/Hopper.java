@@ -17,29 +17,26 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Hopper extends SubsystemBase {
 
-  private static final double defaultRampRate = 10;
-  private static final boolean invertHopperLeft = true;
-  private static final boolean invertHopperRight = false;
+  private static final boolean invertLeft = true;
+  private static final boolean invertRight = false;
+  private static final int leftDeviceID = 5;
+  private static final int rightDeviceID = 8;
+  private static final int currentLimit = 30;
 
   CANSparkMax hopperLeft;
   CANSparkMax hopperRight;
 
-  private Double lastRampRate = null; // Force this to be updated once
-  public int currentLimit = 30;
   private double setpointLeft;
   private double setpointRight;
-  private int leftDeviceID = 5;
-  private int rightDeviceID = 8;
 
   /**
    * Creates a new Hopper.
    */
   public Hopper() {
-
-    SmartDashboard.setDefaultNumber("Shooter Roller/ramp rate", defaultRampRate); // Seconds to full power
     hopperLeft = new CANSparkMax(leftDeviceID, MotorType.kBrushless);
     hopperRight = new CANSparkMax(rightDeviceID, MotorType.kBrushless);
     hopperLeft.restoreFactoryDefaults();
@@ -62,25 +59,20 @@ public class Hopper extends SubsystemBase {
         subsystem.run(0, 0);
       }
     });
-
+    hopperLeft.burnFlash();
+    hopperRight.burnFlash();
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    double currentRampRate = SmartDashboard.getNumber("Hopper/ramp rate", defaultRampRate);
-    if (lastRampRate != null && currentRampRate != lastRampRate) {
-      hopperLeft.setOpenLoopRampRate(currentRampRate);
-      hopperRight.setOpenLoopRampRate(currentRampRate);
-      lastRampRate = currentRampRate;
+    if (Constants.tuningMode) {
+      SmartDashboard.putNumber("Hopper/Left SetPoint", setpointLeft);
+      SmartDashboard.putNumber("Hopper/Right SetPoint", setpointRight);
     }
-
-    SmartDashboard.putNumber("Left SetPoint", setpointLeft);
-    SmartDashboard.putNumber("Right SetPoint", setpointRight);
   }
 
   public void run(double powerLeft, double powerRight) {
-    hopperLeft.set(powerLeft * (invertHopperLeft ? -1 : 1));
-    hopperRight.set(powerRight * (invertHopperRight ? -1 : 1));
+    hopperLeft.set(powerLeft * (invertLeft ? -1 : 1));
+    hopperRight.set(powerRight * (invertRight ? -1 : 1));
   }
 }

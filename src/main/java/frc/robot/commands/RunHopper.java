@@ -12,7 +12,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.Hopper;
 import frc.robot.util.TunableNumber;
 
-public class HopperCommand extends CommandBase {
+public class RunHopper extends CommandBase {
 
   private TunableNumber setpointLeft = new TunableNumber("Hopper/setpointLeft");
   private TunableNumber setpointRight = new TunableNumber("Hopper/setpointRight");
@@ -23,7 +23,7 @@ public class HopperCommand extends CommandBase {
    * 
    * @param Hopper
    */
-  public HopperCommand(Hopper hopperSub) {
+  public RunHopper(Hopper hopperSub) {
     hopper = hopperSub;
     addRequirements(hopperSub);
   }

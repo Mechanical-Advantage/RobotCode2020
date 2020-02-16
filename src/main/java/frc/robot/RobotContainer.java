@@ -11,7 +11,7 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.ShooterFlyWheelCommand;
 import frc.robot.commands.ShooterRollerCommand;
-import frc.robot.commands.HopperCommand;
+import frc.robot.commands.RunHopper;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
@@ -151,7 +151,7 @@ public class RobotContainer {
 
     oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new ShooterFlyWheelCommand(shooterFlyWheel));
     oi.getShooterPrototypeRollerButton()
-        .whileActiveContinuous(new ShooterRollerCommand(shooterRoller).alongWith(new HopperCommand(hopper)));
+        .whileActiveContinuous(new ShooterRollerCommand(shooterRoller).alongWith(new RunHopper(hopper)));
   }
 
   /**
