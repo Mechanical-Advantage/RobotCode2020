@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -15,7 +16,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,8 +28,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
+import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.TurnToAngle;
@@ -38,12 +44,13 @@ import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
-import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 import frc.robot.subsystems.drive.SparkMAXDriveTrain;
+import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -53,6 +60,10 @@ import frc.robot.subsystems.drive.SparkMAXDriveTrain;
  * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  private static final double navXWaitTime = 5; // Maximum number of seconds to wait for the navX to initialize
+  private static final Pose2d initialAutoPosition = new Pose2d(Constants.initiationLine, 0,
+      Rotation2d.fromDegrees(180));
+
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
@@ -61,6 +72,7 @@ public class RobotContainer {
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
   private final ShooterRoller shooterRoller = new ShooterRoller();
   private final Hopper hopper = new Hopper();
+  private RobotOdometry odometry;
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -71,6 +83,8 @@ public class RobotContainer {
   private OI oi = new DummyOI();
   private String lastJoystickName;
   private boolean changedToCoast;
+
+  private LimelightOdometry limelightOdometry;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -93,6 +107,18 @@ public class RobotContainer {
       driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
       break;
     }
+    // Odometry must be instantiated after drive and AHRS and after the NavX
+    // initializes
+    Timer navXTimer = new Timer();
+    while (ahrs.getByteCount() == 0 && navXTimer.get() <= navXWaitTime) {
+      Timer.delay(0.01);
+    }
+    if (navXTimer.get() >= navXWaitTime) {
+      DriverStation.reportError("Timeout while waiting for NavX init", false);
+    }
+    odometry = new RobotOdometry(driveSubsystem, ahrs);
+    limelightOdometry = new LimelightOdometry(limelight, odometry);
+    odometry.setDefaultCommand(limelightOdometry);
 
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     if (oi.hasDriveTriggers()) {
@@ -102,11 +128,17 @@ public class RobotContainer {
     joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
     SmartDashboard.putData("Joystick Mode", joystickModeChooser);
 
+    autoChooser.setDefaultOption("Do Nothing", null);
     autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
     autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
     autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
     autoChooser.addOption("Drive velocity", new VelocityPIDTuner(driveSubsystem));
-
+    autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+        new Pose2d(0, 60, new Rotation2d(0)), 0, false, true));
+    autoChooser.addOption("Drive to 5 feet absolute (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+        new Pose2d(0, 60, new Rotation2d(0)), 0, false, false));
+    autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+        new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -201,5 +233,13 @@ public class RobotContainer {
   public void brakeDuringNeutral() {
     driveSubsystem.enableBrakeMode(true);
     changedToCoast = false;
+  }
+
+  public void setInitialPosition() {
+    odometry.setPosition(initialAutoPosition);
+  }
+
+  public void enableLimelightXCorrection(boolean enable) {
+    limelightOdometry.enableXCorrection(enable);
   }
 }

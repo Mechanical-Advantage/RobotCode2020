@@ -27,7 +27,8 @@ public class LimelightInterface extends SubsystemBase {
   private NetworkTableEntry longSideLength;
   private NetworkTableEntry horizSideLength;
   private NetworkTableEntry vertSideLength;
-  private NetworkTableEntry pipeline;
+  private NetworkTableEntry pipelineGet;
+  private NetworkTableEntry pipelineSet;
   private NetworkTableEntry camtran;
   private NetworkTableEntry ledMode;
   private NetworkTableEntry camMode;
@@ -67,7 +68,8 @@ public class LimelightInterface extends SubsystemBase {
     longSideLength = table.getEntry("longv");
     horizSideLength = table.getEntry("thor");
     vertSideLength = table.getEntry("tvert");
-    pipeline = table.getEntry("getpipe");
+    pipelineGet = table.getEntry("getpipe");
+    pipelineSet = table.getEntry("pipeline");
     camtran = table.getEntry("camtran");
     ledMode = table.getEntry("ledMode");
     camMode = table.getEntry("camMode");
@@ -117,7 +119,7 @@ public class LimelightInterface extends SubsystemBase {
    * @return the pipeline number, 0 to 9
    */
   public int getCurrentPipeline() {
-    return pipeline.getNumber(0).intValue();
+    return pipelineGet.getNumber(0).intValue();
   }
 
   /**
@@ -126,7 +128,7 @@ public class LimelightInterface extends SubsystemBase {
    * @param pipelineNumber the pipeline number, 0 to 9
    */
   public void setPipeline(int pipelineNumber) {
-    pipeline.forceSetNumber(pipelineNumber);
+    pipelineSet.forceSetNumber(pipelineNumber);
   }
 
   /**
