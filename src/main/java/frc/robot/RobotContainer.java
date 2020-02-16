@@ -191,7 +191,8 @@ public class RobotContainer {
   }
 
   public void coastIfNotMoving() {
-    if (!changedToCoast && driveSubsystem.getVelocityLeft() <= 1 && driveSubsystem.getVelocityRight() <= 1) {
+    if (!changedToCoast && Math.abs(driveSubsystem.getVelocityLeft()) <= 1
+        && Math.abs(driveSubsystem.getVelocityRight()) <= 1) {
       driveSubsystem.enableBrakeMode(false);
       changedToCoast = true;
     }
