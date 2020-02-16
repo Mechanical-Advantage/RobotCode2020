@@ -69,8 +69,9 @@ public class Hopper extends SubsystemBase {
 
   public void run(double powerLeft, double powerRight) {
     if (hopperLeft == null || hopperRight == null) {
-      hopperLeft.set(powerLeft * (invertLeft ? -1 : 1));
-      hopperRight.set(powerRight * (invertRight ? -1 : 1));
+      return;
     }
+    hopperLeft.set(powerLeft * (invertLeft ? -1 : 1));
+    hopperRight.set(powerRight * (invertRight ? -1 : 1));
   }
 }
