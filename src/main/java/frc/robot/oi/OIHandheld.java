@@ -2,6 +2,7 @@ package frc.robot.oi;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -32,8 +33,14 @@ public class OIHandheld extends OI {
         resetRumble();
         // The toggle buttons are not exposed and this class fakes having a disable
         // switch
-        toggleDriveEnabled.whenPressed(new InstantCommand(() -> driveEnabled = !driveEnabled));
-        toggleOpenLoop.whenPressed(new InstantCommand(() -> openLoop = !openLoop));
+        toggleDriveEnabled.whenPressed(new InstantCommand(() -> {
+            driveEnabled = !driveEnabled;
+            SmartDashboard.putBoolean("Drive Enabled", driveEnabled);
+        }));
+        toggleOpenLoop.whenPressed(new InstantCommand(() -> {
+            openLoop = !openLoop;
+            SmartDashboard.putBoolean("Open Loop", openLoop);
+        }));
     }
 
     @Override

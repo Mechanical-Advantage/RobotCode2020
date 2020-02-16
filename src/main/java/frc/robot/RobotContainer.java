@@ -37,6 +37,7 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 
 /**
@@ -61,6 +62,7 @@ public class RobotContainer {
 
   private OI oi = new DummyOI();
   private String lastJoystickName;
+  private boolean changedToCoast;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -74,8 +76,7 @@ public class RobotContainer {
     switch (Constants.getRobot()) {
     case ROBOT_2020:
     case ROBOT_2020_DRIVE:
-      // driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess,
-      // openLoopSwitchAccess);
+      driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
       break;
     case ROBOT_2019:
     case ORIGINAL_ROBOT_2018:
@@ -175,5 +176,17 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  public void coastIfNotMoving() {
+    if (!changedToCoast && driveSubsystem.getVelocityLeft() <= 1 && driveSubsystem.getVelocityRight() <= 1) {
+      driveSubsystem.enableBrakeMode(false);
+      changedToCoast = true;
+    }
+  }
+
+  public void brakeDuringNeutral() {
+    driveSubsystem.enableBrakeMode(true);
+    changedToCoast = false;
   }
 }

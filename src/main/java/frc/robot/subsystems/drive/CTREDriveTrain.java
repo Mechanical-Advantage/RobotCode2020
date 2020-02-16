@@ -229,12 +229,12 @@ public class CTREDriveTrain extends DriveTrainBase {
   }
 
   @Override
-  public double getVelocityRight() {
+  public double getRPSRight() {
     return (double) rightMaster.getSelectedSensorVelocity() / ticksPerRotation * 10;
   }
 
   @Override
-  public double getVelocityLeft() {
+  public double getRPSLeft() {
     return (double) leftMaster.getSelectedSensorVelocity() / ticksPerRotation * 10;
   }
 
