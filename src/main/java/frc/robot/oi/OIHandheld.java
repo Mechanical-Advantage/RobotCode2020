@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -28,6 +29,9 @@ public class OIHandheld extends OI {
 
     private static final double sniperHighLevel = 0.3; // used for right trigger when using handheld control
     private static final double sniperLowLevel = 0.15; // used for left trigger when using handheld control
+
+    private Button shooterPrototypeFlywheelButton = new Button(driverController::getYButton);
+    private Button shooterPrototypeRollerButton = new POVButton(driverController, 270);
 
     public OIHandheld() {
         resetRumble();
@@ -148,6 +152,16 @@ public class OIHandheld extends OI {
     @Override
     public Trigger getJoysticksReverseButton() {
         return joysticksReverse;
+    }
+
+    @Override
+    public Trigger getShooterPrototypeFlywheelButton() {
+        return shooterPrototypeFlywheelButton;
+    }
+
+    @Override
+    public Trigger getShooterPrototypeRollerButton() {
+        return shooterPrototypeRollerButton;
     }
 
     @Override

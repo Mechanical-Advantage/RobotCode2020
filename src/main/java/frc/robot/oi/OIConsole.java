@@ -68,6 +68,8 @@ public class OIConsole extends OI {
   private Button lowGear = new JoystickButton(leftController, 4);
 
   private Button visionTestButton = new JoystickButton(rightController, 8);
+  private Button shooterPrototypeFlywheelButton;
+  private Button shooterPrototypeRollerButton;
 
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
@@ -165,6 +167,16 @@ public class OIConsole extends OI {
   @Override
   public Trigger getVisionTestButton() {
     return visionTestButton;
+  }
+
+  @Override
+  public Trigger getShooterPrototypeFlywheelButton() {
+    return shooterPrototypeFlywheelButton;
+  }
+
+  @Override
+  public Trigger getShooterPrototypeRollerButton() {
+    return shooterPrototypeRollerButton;
   }
 
   @Override

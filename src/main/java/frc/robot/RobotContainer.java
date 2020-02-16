@@ -24,8 +24,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
-import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
+import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunShooterFlyWheel;
+import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
@@ -34,11 +36,14 @@ import frc.robot.oi.OIConsole;
 import frc.robot.oi.OIHandheld;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.ShooterFlyWheel;
+import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
-import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
+import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -53,6 +58,9 @@ public class RobotContainer {
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
+  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
+  private final ShooterRoller shooterRoller = new ShooterRoller();
+  private final Hopper hopper = new Hopper();
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -167,6 +175,10 @@ public class RobotContainer {
     oi.getSecondCameraButton().whenActive(new InstantCommand(cameraSubsystem::useSecondCamera, cameraSubsystem));
 
     oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
+
+    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
+    oi.getShooterPrototypeRollerButton()
+        .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
   }
 
   /**
