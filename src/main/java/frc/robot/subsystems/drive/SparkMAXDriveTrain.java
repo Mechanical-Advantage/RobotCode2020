@@ -56,7 +56,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
       rightFollower = new CANSparkMax(15, MotorType.kBrushless);
       leftEncoder = leftMaster.getEncoder();
       rightEncoder = rightMaster.getEncoder();
-      minVelocityLow = 0;
+      minVelocityLow = 3;
       maxVelocityLow = 150;
       kPLow = 0.00015;
       kILow = 0;

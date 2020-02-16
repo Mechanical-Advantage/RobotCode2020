@@ -178,6 +178,16 @@ public class DriveDistanceOnHeading extends CommandBase {
       kDAngle = 0;
       toleranceDegrees = 1;
       break;
+    case ROBOT_2020:
+    case ROBOT_2020_DRIVE:
+      kPDistance = 0.015;
+      kIDistance = 0;
+      kDDistance = 0;
+      toleranceInches = 0.5;
+      kPAngle = 0.05;
+      kIAngle = 0;
+      kDAngle = 0;
+      toleranceDegrees = 1;
     default:
       break;
     }
