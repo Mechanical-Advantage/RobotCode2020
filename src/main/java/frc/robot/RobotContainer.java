@@ -62,6 +62,7 @@ public class RobotContainer {
 
   private OI oi = new DummyOI();
   private String lastJoystickName;
+  private boolean changedToCoast;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -178,12 +179,14 @@ public class RobotContainer {
   }
 
   public void coastIfNotMoving() {
-    if (driveSubsystem.getVelocityLeft() <= 1 && driveSubsystem.getVelocityRight() <= 1) {
+    if (!changedToCoast && driveSubsystem.getVelocityLeft() <= 1 && driveSubsystem.getVelocityRight() <= 1) {
       driveSubsystem.enableBrakeMode(false);
+      changedToCoast = true;
     }
   }
 
   public void brakeDuringNeutral() {
     driveSubsystem.enableBrakeMode(true);
+    changedToCoast = false;
   }
 }

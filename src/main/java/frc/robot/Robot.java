@@ -107,6 +107,7 @@ public class Robot extends TimedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    robotContainer.brakeDuringNeutral();
     robotContainer.updateOIType();
   }
 
@@ -121,7 +122,6 @@ public class Robot extends TimedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-    robotContainer.brakeDuringNeutral();
   }
 
   /**
