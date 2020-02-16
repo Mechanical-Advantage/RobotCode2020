@@ -9,8 +9,8 @@ package frc.robot;
 
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.LimelightTest;
-import frc.robot.commands.ShooterFlyWheelCommand;
-import frc.robot.commands.ShooterRollerCommand;
+import frc.robot.commands.RunShooterFlyWheel;
+import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.RunHopper;
 import frc.robot.oi.OI;
 import frc.robot.oi.OIConsole;
@@ -149,9 +149,9 @@ public class RobotContainer {
 
     oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new ShooterFlyWheelCommand(shooterFlyWheel));
+    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
     oi.getShooterPrototypeRollerButton()
-        .whileActiveContinuous(new ShooterRollerCommand(shooterRoller).alongWith(new RunHopper(hopper)));
+        .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
   }
 
   /**

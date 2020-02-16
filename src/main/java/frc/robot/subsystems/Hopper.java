@@ -13,11 +13,11 @@ import java.util.Set;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 
 public class Hopper extends SubsystemBase {
 
@@ -30,13 +30,13 @@ public class Hopper extends SubsystemBase {
   CANSparkMax hopperLeft;
   CANSparkMax hopperRight;
 
-  private double setpointLeft;
-  private double setpointRight;
-
   /**
    * Creates a new Hopper.
    */
   public Hopper() {
+    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
+      return;
+    }
     hopperLeft = new CANSparkMax(leftDeviceID, MotorType.kBrushless);
     hopperRight = new CANSparkMax(rightDeviceID, MotorType.kBrushless);
     hopperLeft.restoreFactoryDefaults();
@@ -65,14 +65,12 @@ public class Hopper extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (Constants.tuningMode) {
-      SmartDashboard.putNumber("Hopper/Left SetPoint", setpointLeft);
-      SmartDashboard.putNumber("Hopper/Right SetPoint", setpointRight);
-    }
   }
 
   public void run(double powerLeft, double powerRight) {
-    hopperLeft.set(powerLeft * (invertLeft ? -1 : 1));
-    hopperRight.set(powerRight * (invertRight ? -1 : 1));
+    if (hopperLeft == null || hopperRight == null) {
+      hopperLeft.set(powerLeft * (invertLeft ? -1 : 1));
+      hopperRight.set(powerRight * (invertRight ? -1 : 1));
+    }
   }
 }

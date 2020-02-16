@@ -13,36 +13,36 @@ import java.util.Set;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 
 public class ShooterRoller extends SubsystemBase {
 
-  private static final double defaultRampRate = 10;
   private static final boolean invertRollers = false;
+  private static final int currentLimit = 30;
+  private static final int masterDeviceID = 4;
+  private static final int followerDeviceID = 11;
 
   CANSparkMax rollerMaster;
   CANSparkMax rollerFollower;
-
-  private Double lastRampRate = null; // Force this to be updated once
-  private double setpoint;
-  public int currentLimit = 30;
-  private int masterDeviceID = 4;
-  private int followerDeviceID = 11;
 
   /**
    * Creates a new ShooterRoller.
    */
   public ShooterRoller() {
-    SmartDashboard.setDefaultNumber("Shooter Roller/ramp rate", defaultRampRate); // Seconds to full power
+    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
+      return;
+    }
     rollerMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushless);
     rollerFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushless);
     rollerMaster.restoreFactoryDefaults();
     rollerFollower.restoreFactoryDefaults();
     rollerFollower.follow(rollerMaster, true);
     rollerMaster.setSmartCurrentLimit(currentLimit);
+    rollerFollower.setSmartCurrentLimit(currentLimit);
 
     // Stop by default
     final ShooterRoller subsystem = this;
@@ -59,21 +59,19 @@ public class ShooterRoller extends SubsystemBase {
         subsystem.run(0);
       }
     });
+    rollerMaster.burnFlash();
+    rollerFollower.burnFlash();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double currentRampRate = SmartDashboard.getNumber("Shooter Roller/ramp rate", defaultRampRate);
-    if (lastRampRate != null && currentRampRate != lastRampRate) {
-      rollerMaster.setOpenLoopRampRate(currentRampRate);
-      lastRampRate = currentRampRate;
-    }
-
-    SmartDashboard.putNumber("SetPoint", setpoint);
   }
 
   public void run(double power) {
+    if (rollerMaster == null) {
+      return;
+    }
     rollerMaster.set(power * (invertRollers ? -1 : 1));
   }
 }

@@ -12,7 +12,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.util.TunableNumber;
 
-public class ShooterFlyWheelCommand extends CommandBase {
+public class RunShooterFlyWheel extends CommandBase {
 
   private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/setpoint");
   private final ShooterFlyWheel shooterFlyWheel;
@@ -22,7 +22,7 @@ public class ShooterFlyWheelCommand extends CommandBase {
    * 
    * @param ShooterFlyWheel
    */
-  public ShooterFlyWheelCommand(ShooterFlyWheel shooterFlyWheelSub) {
+  public RunShooterFlyWheel(ShooterFlyWheel shooterFlyWheelSub) {
     shooterFlyWheel = shooterFlyWheelSub;
     addRequirements(shooterFlyWheelSub);
   }
