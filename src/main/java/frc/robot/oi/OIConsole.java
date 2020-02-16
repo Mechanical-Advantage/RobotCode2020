@@ -97,7 +97,7 @@ public class OIConsole extends OI {
 
   @Override
   public double getRightDriveX() {
-    return leftController.getRawAxis(0);
+    return rightController.getRawAxis(0);
   }
 
   @Override

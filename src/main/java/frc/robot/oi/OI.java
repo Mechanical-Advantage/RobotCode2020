@@ -48,11 +48,23 @@ public abstract class OI {
 
     public abstract Trigger getDriveDisableSwitch();
 
+    public Trigger getShiftLockSwitch() {
+        return dummyTrigger;
+    }
+
     public boolean getSniperMode() {
         return false;
     }
 
     public double getSniperLevel() {
+        return 0;
+    }
+
+    public double getSniperHighLevel() {
+        return 0;
+    }
+
+    public double getSniperLowLevel() {
         return 0;
     }
 

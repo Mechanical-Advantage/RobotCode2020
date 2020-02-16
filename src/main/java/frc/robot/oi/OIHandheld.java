@@ -1,9 +1,8 @@
 package frc.robot.oi;
 
-import java.util.concurrent.Callable;
-
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -14,8 +13,8 @@ public class OIHandheld extends OI {
     private boolean driveEnabled = true;
     private boolean openLoop = true;
 
-    private Trigger openLoopSwitch = new FakeSwitch(false, () -> openLoop);
-    private Trigger driveDisableSwitch = new FakeSwitch(true, () -> driveEnabled);
+    private Trigger openLoopSwitch = new Trigger(() -> openLoop);
+    private Trigger driveDisableSwitch = new Trigger(() -> driveEnabled).negate();
 
     // map driver controller to ID 0 and operator controller to ID 1 in driver
     // station
@@ -27,12 +26,21 @@ public class OIHandheld extends OI {
     private JoystickButton toggleDriveEnabled = new JoystickButton(driverController, 7); // back button
     private JoystickButton toggleOpenLoop = new JoystickButton(driverController, 8); // start button
 
+    private static final double sniperHighLevel = 0.3; // used for right trigger when using handheld control
+    private static final double sniperLowLevel = 0.15; // used for left trigger when using handheld control
+
     public OIHandheld() {
         resetRumble();
         // The toggle buttons are not exposed and this class fakes having a disable
         // switch
-        toggleDriveEnabled.whenPressed(new InstantCommand(this::toggleDriveEnabled));
-        toggleOpenLoop.whenPressed(new InstantCommand(this::toggleOpenLoop));
+        toggleDriveEnabled.whenPressed(new InstantCommand(() -> {
+            driveEnabled = !driveEnabled;
+            SmartDashboard.putBoolean("Drive Enabled", driveEnabled);
+        }));
+        toggleOpenLoop.whenPressed(new InstantCommand(() -> {
+            openLoop = !openLoop;
+            SmartDashboard.putBoolean("Open Loop", openLoop);
+        }));
     }
 
     @Override
@@ -97,23 +105,24 @@ public class OIHandheld extends OI {
         return openLoopSwitch;
     }
 
-    private void toggleOpenLoop() {
-        openLoop = !openLoop;
-    }
-
     @Override
     public Trigger getDriveDisableSwitch() {
         return driveDisableSwitch;
     }
 
-    private void toggleDriveEnabled() {
-        driveEnabled = !driveEnabled;
+    @Override
+    public boolean getSniperMode() {
+        return getSniperHigh() || getSniperLow();
     }
 
     @Override
-    public boolean getSniperMode() {
-        return driverController.getAButton() || driverController.getBButton() || driverController.getBumper(Hand.kLeft)
-                || driverController.getBumper(Hand.kRight);
+    public double getSniperHighLevel() {
+        return sniperHighLevel;
+    }
+
+    @Override
+    public double getSniperLowLevel() {
+        return sniperLowLevel;
     }
 
     @Override
@@ -144,39 +153,5 @@ public class OIHandheld extends OI {
     @Override
     public double getDeadband() {
         return 0.09;
-    }
-
-    /**
-     * A trigger that gets its input from a Callable.
-     */
-    private static class FakeSwitch extends Trigger {
-
-        private boolean invert;
-        private Callable<Boolean> input;
-
-        /**
-         * Creates a new FakeSwitch
-         * 
-         * @param invert Whether to invert the input
-         * @param input  The Callable used to get the current value
-         */
-        public FakeSwitch(boolean invert, Callable<Boolean> input) {
-            this.invert = invert;
-            this.input = input;
-        }
-
-        @Override
-        public boolean get() {
-            try {
-                Boolean state = input.call();
-                return invert ? !state : state;
-            } catch (Exception e) {
-                // Since this is just used to retrieve the value of a primitive this block
-                // should never run.
-                e.printStackTrace();
-                // Assume the switch is set
-                return true;
-            }
-        }
     }
 }
