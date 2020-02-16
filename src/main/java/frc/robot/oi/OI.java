@@ -124,6 +124,14 @@ public abstract class OI {
         return dummyTrigger;
     }
 
+    public Trigger getAutoAimButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getAutoDriveButton() {
+        return dummyTrigger;
+    }
+
     public void setRumble(OIRumbleType type, double value) {
     }
 

@@ -30,6 +30,7 @@ import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
+import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
@@ -118,7 +119,7 @@ public class RobotContainer {
     }
     odometry = new RobotOdometry(driveSubsystem, ahrs);
     limelightOdometry = new LimelightOdometry(limelight, odometry);
-    odometry.setDefaultCommand(limelightOdometry);
+    // odometry.setDefaultCommand(limelightOdometry);
 
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     if (oi.hasDriveTriggers()) {
@@ -211,6 +212,14 @@ public class RobotContainer {
     oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
     oi.getShooterPrototypeRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
+
+    PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
+    oi.getAutoAimButton().whenActive(autoAimCommand);
+    oi.getAutoAimButton().whenInactive(autoAimCommand::cancel);
+    RunMotionProfile autoDriveCommand = new RunMotionProfile(driveSubsystem, odometry, List.of(),
+        new Pose2d(0, 120, Rotation2d.fromDegrees(0)), 0, false, false);
+    oi.getAutoDriveButton().whileActiveContinuous(autoDriveCommand);
+    oi.getAutoDriveButton().whenInactive(autoDriveCommand::cancel);
   }
 
   /**

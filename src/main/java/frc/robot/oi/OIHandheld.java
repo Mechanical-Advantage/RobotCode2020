@@ -33,6 +33,9 @@ public class OIHandheld extends OI {
     private Button shooterPrototypeFlywheelButton = new Button(driverController::getYButton);
     private Button shooterPrototypeRollerButton = new POVButton(driverController, 270);
 
+    private Button autoAimButton = new Button(driverController::getXButton);
+    private Button autoDriveButton = new POVButton(driverController, 90);
+
     public OIHandheld() {
         resetRumble();
         // The toggle buttons are not exposed and this class fakes having a disable
@@ -162,6 +165,16 @@ public class OIHandheld extends OI {
     @Override
     public Trigger getShooterPrototypeRollerButton() {
         return shooterPrototypeRollerButton;
+    }
+
+    @Override
+    public Trigger getAutoAimButton() {
+        return autoAimButton;
+    }
+
+    @Override
+    public Trigger getAutoDriveButton() {
+        return autoDriveButton;
     }
 
     @Override

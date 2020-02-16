@@ -21,6 +21,8 @@ import frc.robot.util.LatencyData;
 
 public class PointAtTarget extends CommandBase {
 
+  private static final int historyPoints = 20;
+
   private DriveTrainBase driveTrain;
   private AHRS ahrs;
   private LimelightInterface limelight;
@@ -33,10 +35,12 @@ public class PointAtTarget extends CommandBase {
   // to end
   private int toleranceValuesToAverage = 1;
   private DriveGear gear;
+  private double minOutput;
   private PIDController turnController;
   private LinearFilter movingAverageFilter;
   private double lastAngle;
   private double targetAngle;
+  private boolean dataRecieved;
 
   /**
    * Creates a new PointAtTarget.
@@ -80,6 +84,14 @@ public class PointAtTarget extends CommandBase {
       toleranceDegrees = 1;
       toleranceValuesToAverage = 3;
       break;
+    case ROBOT_2020:
+    case ROBOT_2020_DRIVE:
+      kP = 0.012;
+      kI = 0;
+      kD = 0.00030;
+      toleranceDegrees = 1;
+      toleranceValuesToAverage = 10;
+      minOutput = 0.03;
     default:
       break;
     }
@@ -87,7 +99,7 @@ public class PointAtTarget extends CommandBase {
     turnController.setTolerance(toleranceDegrees);
     turnController.enableContinuousInput(-180, 180);
     movingAverageFilter = LinearFilter.movingAverage(toleranceValuesToAverage);
-
+    angleData = new LatencyData(historyPoints);
   }
 
   // Called when the command is initially scheduled.
@@ -101,19 +113,28 @@ public class PointAtTarget extends CommandBase {
     movingAverageFilter.reset();
     angleData.clear();
     lastAngle = ahrs.getAngle();
+    dataRecieved = false;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double angleChange = ahrs.getAngle() - lastAngle;
+    double currentAngle = ahrs.getAngle();
+    double angleChange = currentAngle - lastAngle;
     angleData.addDataPoint(angleData.getCurrentPoint() + angleChange);
+    lastAngle = currentAngle;
     if (limelight.hasValidTarget()) {
-      angleData.addCorrectedData(limelight.getTargetHorizAngle(),
-          Timer.getFPGATimestamp() - (limelight.getLatency() / 1000));
+      // Don't set dataRecieved if a correction wasn't applied
+      if (angleData.addCorrectedData(limelight.getTargetHorizAngle(),
+          Timer.getFPGATimestamp() - (limelight.getLatency() / 1000))) {
+        dataRecieved = true;
+      }
     }
     double outputVelocity = turnController.calculate(angleData.getCurrentPoint());
-    driveTrain.drive(outputVelocity, outputVelocity * -1);
+    if (Math.abs(outputVelocity) < minOutput) {
+      outputVelocity = Math.copySign(minOutput, outputVelocity);
+    }
+    driveTrain.drive(outputVelocity * -1, outputVelocity);
   }
 
   // Called once the command ends or is interrupted.
@@ -126,7 +147,9 @@ public class PointAtTarget extends CommandBase {
   @Override
   public boolean isFinished() {
     // The moving average and current value must both be within tolerance
-    return turnController.atSetpoint()
-        && Math.abs(movingAverageFilter.calculate(angleData.getCurrentPoint()) - targetAngle) <= toleranceDegrees;
+    // The moving average uses absolute error to make centering the data around the
+    // target still be out of tolerance
+    double averageError = movingAverageFilter.calculate(Math.abs(angleData.getCurrentPoint() - targetAngle));
+    return dataRecieved && turnController.atSetpoint() && averageError <= toleranceDegrees;
   }
 }
