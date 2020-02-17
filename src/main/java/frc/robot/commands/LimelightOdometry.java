@@ -19,7 +19,7 @@ public class LimelightOdometry extends CommandBase {
 
   private static final double targetHeight = 89.75; // in to center of target
   private static final double cameraHeight = 20;
-  private static final double targetHorizLocation = 0; // in left of center line for close target
+  private static final double targetHorizLocation = 43.75 + 24; // in left of center line for close target
   // Can use the Limelight crosshair calibration instead of the next two options
   // (it's easier and compensates for the mount angle of the camera in the
   // Limelight)

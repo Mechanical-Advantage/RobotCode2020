@@ -116,6 +116,16 @@ public class RunMotionProfile extends CommandBase {
       trackWidth = 27.5932064868814;
       maxVelocity = 150;
       maxAcceleration = 50;
+      break;
+    case ROBOT_2020:
+    case ROBOT_2020_DRIVE:
+      kS = 0.14;
+      kV = 0.0758;
+      kA = 0.0128;
+      trackWidth = 24.890470780033485;
+      maxVelocity = 120;
+      maxAcceleration = 50;
+      break;
     }
     driveKinematics = new DifferentialDriveKinematics(trackWidth);
     DifferentialDriveVoltageConstraint voltageConstraint = new DifferentialDriveVoltageConstraint(

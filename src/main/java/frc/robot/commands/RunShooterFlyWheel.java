@@ -30,7 +30,7 @@ public class RunShooterFlyWheel extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(0);
+    setpoint.setDefault(6000);
     // shooterFlyWheel.run(setpoint.get());
     shooterFlyWheel.setShooterRPM(setpoint.get());
   }
