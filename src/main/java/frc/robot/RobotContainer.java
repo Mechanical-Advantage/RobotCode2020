@@ -31,6 +31,7 @@ import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
+import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
@@ -140,6 +141,8 @@ public class RobotContainer {
         new Pose2d(0, 60, new Rotation2d(0)), 0, false, false));
     autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
         new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
+    autoChooser.addOption("Aim and fire loaded balls",
+        new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
