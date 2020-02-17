@@ -17,8 +17,8 @@ import frc.robot.util.UtilFunctions;
 
 public class LimelightOdometry extends CommandBase {
 
-  private static final double targetHeight = 67.75; // in to center of target
-  private static final double cameraHeight = 26.5;
+  private static final double targetHeight = 89.75; // in to center of target
+  private static final double cameraHeight = 20;
   private static final double targetHorizLocation = 0; // in left of center line for close target
   // Can use the Limelight crosshair calibration instead of the next two options
   // (it's easier and compensates for the mount angle of the camera in the
@@ -27,7 +27,7 @@ public class LimelightOdometry extends CommandBase {
   // adjust the crosshair Y until the crosshair lines up with the object
   // For our Limelight, set crosshair Y to -0.13 to make 0 degrees be directly in
   // front of the camera
-  private static final double cameraVertAngle = 23; // 0 = straight forward, positive=up
+  private static final double cameraVertAngle = 28; // 0 = straight forward, positive=up
   private static final double cameraHorizAngle = 0; // positive = right
   private static final double cameraHorizOffset = 0; // positive = right
 
