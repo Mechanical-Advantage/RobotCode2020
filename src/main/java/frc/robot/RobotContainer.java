@@ -63,8 +63,8 @@ import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
  */
 public class RobotContainer {
   private static final double navXWaitTime = 5; // Maximum number of seconds to wait for the navX to initialize
-  private static final Pose2d initialAutoPosition = new Pose2d(Constants.initiationLine, 0,
-      Rotation2d.fromDegrees(180));
+  private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine, 0,
+      Rotation2d.fromDegrees(0));
 
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
@@ -120,7 +120,7 @@ public class RobotContainer {
     }
     odometry = new RobotOdometry(driveSubsystem, ahrs);
     limelightOdometry = new LimelightOdometry(limelight, odometry);
-    // odometry.setDefaultCommand(limelightOdometry);
+    odometry.setDefaultCommand(limelightOdometry);
 
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     if (oi.hasDriveTriggers()) {
@@ -220,7 +220,9 @@ public class RobotContainer {
     oi.getAutoAimButton().whenActive(autoAimCommand);
     oi.getAutoAimButton().whenInactive(autoAimCommand::cancel);
     RunMotionProfile autoDriveCommand = new RunMotionProfile(driveSubsystem, odometry, List.of(),
-        new Pose2d(0, 120, Rotation2d.fromDegrees(0)), 0, false, false);
+        new Pose2d(Constants.visionTargetHorizDist, Constants.fieldLength - Constants.initiationLine,
+            Rotation2d.fromDegrees(0)),
+        0, false, false);
     oi.getAutoDriveButton().whileActiveContinuous(autoDriveCommand);
     oi.getAutoDriveButton().whenInactive(autoDriveCommand::cancel);
   }

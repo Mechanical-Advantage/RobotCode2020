@@ -19,7 +19,8 @@ public class LimelightOdometry extends CommandBase {
 
   private static final double targetHeight = 89.75; // in to center of target
   private static final double cameraHeight = 20;
-  private static final double targetHorizLocation = 43.75 + 24; // in left of center line for close target
+  private static final double targetHorizLocation = Constants.visionTargetHorizDist; // in left of center line for close
+                                                                                     // target
   // Can use the Limelight crosshair calibration instead of the next two options
   // (it's easier and compensates for the mount angle of the camera in the
   // Limelight)
@@ -27,9 +28,10 @@ public class LimelightOdometry extends CommandBase {
   // adjust the crosshair Y until the crosshair lines up with the object
   // For our Limelight, set crosshair Y to -0.13 to make 0 degrees be directly in
   // front of the camera
-  private static final double cameraVertAngle = 28; // 0 = straight forward, positive=up
+  private static final double cameraVertAngle = 29; // 0 = straight forward, positive=up
   private static final double cameraHorizAngle = 0; // positive = right
   private static final double cameraHorizOffset = 0; // positive = right
+  private static final int odometryPipeline = 1; // Data will be ignored for other pipelines
 
   private static final double heightDifference = targetHeight - cameraHeight; // How far above the camera the target is
   private LimelightInterface limelight;
@@ -37,10 +39,12 @@ public class LimelightOdometry extends CommandBase {
   private boolean xCorrectionEnabled = true;
 
   /**
-   * Creates a new LimelightOdometry.
+   * Creates a new LimelightOdometry. Note that this command does not require the
+   * limelight but does not expect exclusive access. It will not call any set
+   * methods and will only use data when the limelight is in a state it can use.
    */
   public LimelightOdometry(LimelightInterface limelight, RobotOdometry odometry) {
-    addRequirements(limelight, odometry);
+    addRequirements(odometry);
     this.limelight = limelight;
     this.odometry = odometry;
   }
@@ -55,7 +59,7 @@ public class LimelightOdometry extends CommandBase {
   @Override
   @SuppressWarnings("all")
   public void execute() {
-    if (limelight.hasValidTarget()) {
+    if (hasUseableTarget()) {
       double poseAngle = odometry.getCurrentPose().getRotation().getDegrees() * -1;
       boolean farTarget = true;
       // Handle either target (always -90 to 90)
@@ -126,5 +130,16 @@ public class LimelightOdometry extends CommandBase {
    */
   public void enableXCorrection(boolean enable) {
     xCorrectionEnabled = enable;
+  }
+
+  /**
+   * Returns whether the limelight is currently in a state where is is producing
+   * targeting data that can be used for odometry.
+   * 
+   * @return Whether there is a useable target
+   */
+  private boolean hasUseableTarget() {
+    return limelight.hasValidTarget() && limelight.getLEDMode() != LimelightLEDMode.OFF && !limelight.isDriverCam()
+        && limelight.getCurrentPipeline() == odometryPipeline;
   }
 }
