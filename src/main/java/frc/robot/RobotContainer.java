@@ -32,6 +32,7 @@ import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
+import frc.robot.subsystems.Intake;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -48,6 +49,7 @@ public class RobotContainer {
   // private final DriveTrainBase driveSubsystem;
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
   private final ShooterRoller shooterRoller = new ShooterRoller();
+  private final Intake intake = new Intake();
   private final Hopper hopper = new Hopper();
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
@@ -150,6 +152,9 @@ public class RobotContainer {
     oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
     oi.getShooterPrototypeRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
+
+    oi.getIntakeExtendButton().whenActive(new InstantCommand(intake::extend, intake));
+    oi.getIntakeRetractButton().whenActive(new InstantCommand(intake::retract, intake));
   }
 
   /**

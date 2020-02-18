@@ -112,6 +112,14 @@ public abstract class OI {
         return dummyTrigger;
     }
 
+    public Trigger getIntakeExtendButton() {
+        return dummyTrigger;
+    }
+
+    public Trigger getIntakeRetractButton() {
+        return dummyTrigger;
+    }
+
     public void setRumble(OIRumbleType type, double value) {
     }
 
