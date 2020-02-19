@@ -1,11 +1,18 @@
+/*----------------------------------------------------------------------------*/
+/* Copyright (c) 2018-2019 FIRST. All Rights Reserved.                        */
+/* Open Source Software - may be modified and shared by FRC teams. The code   */
+/* must be accompanied by the FIRST BSD license file in the root directory of */
+/* the project.                                                               */
+/*----------------------------------------------------------------------------*/
+
 package frc.robot.oi;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
- * Acts as an interface to multiple OI configurations
+ * OI interface for driver controls.
  */
-public interface OI {
+public interface IDriverOI {
     public static final double minAcceleration = 0.2; // Minimum total horizontal acceleration before rumbling
                                                       // controller
     public static final double fullAcceleration = 0.8; // Total horizontal acceleration (g) for full high frequency
@@ -14,21 +21,13 @@ public interface OI {
                                                        // frequency rumble power
     static final Trigger dummyTrigger = new Trigger();
 
-    public default double getLeftDriveY() {
-        return 0;
-    }
+    public double getLeftDriveY();
 
-    public default double getLeftDriveX() {
-        return 0;
-    }
+    public double getLeftDriveX();
 
-    public default double getRightDriveY() {
-        return 0;
-    }
+    public double getRightDriveY();
 
-    public default double getRightDriveX() {
-        return 0;
-    }
+    public double getRightDriveX();
 
     public default double getLeftDriveTrigger() {
         return 0;
@@ -40,16 +39,6 @@ public interface OI {
 
     public default boolean hasDriveTriggers() {
         return false;
-    }
-
-    // All OIs are required to implement an open loop switch and drive disable.
-
-    public Trigger getOpenLoopSwitch();
-
-    public Trigger getDriveDisableSwitch();
-
-    public default Trigger getShiftLockSwitch() {
-        return dummyTrigger;
     }
 
     public default boolean getSniperMode() {
@@ -80,10 +69,6 @@ public interface OI {
         return false;
     }
 
-    public default Trigger getShiftDisableSwitch() {
-        return dummyTrigger;
-    }
-
     public default Trigger getHighGearButton() {
         return dummyTrigger;
     }
@@ -112,18 +97,6 @@ public interface OI {
         return dummyTrigger;
     }
 
-    public default Trigger getVisionTestButton() {
-        return dummyTrigger;
-    }
-
-    public default Trigger getShooterPrototypeFlywheelButton() {
-        return dummyTrigger;
-    }
-
-    public default Trigger getShooterPrototypeRollerButton() {
-        return dummyTrigger;
-    }
-
     public default Trigger getAutoAimButton() {
         return dummyTrigger;
     }
@@ -132,7 +105,11 @@ public interface OI {
         return dummyTrigger;
     }
 
-    public default void setRumble(OIRumbleType type, double value) {
+    public default Trigger getVisionTestButton() {
+        return dummyTrigger;
+    }
+
+    public default void setDriverRumble(DriverOIRumbleType type, double value) {
     }
 
     public default void resetRumble() {
@@ -142,15 +119,7 @@ public interface OI {
         return 0;
     }
 
-    public default void updateLED(OILED led, boolean state) {
-    }
-
-    public static enum OILED {
-        MISC_1, MISC_2, MISC_3, INTAKE_RETRACT, INTAKE_ON_OFF, VAC_PICKUP, VAC_TAIL, TOGGLE_LOW, TOGGLE_HIGH,
-        JOYSTICK_YELLOW, ARM_ALT, ARM_FLOOR, ARM_CARGO_SHIP, ARM_ROCKET_LOW, ARM_ROCKET_MID, ARM_ROCKET_HIGH, ARM_HOME
-    }
-
-    public static enum OIRumbleType {
-        DRIVER_LEFT, DRIVER_RIGHT, OPERATOR_LEFT, OPERATOR_RIGHT
+    public static enum DriverOIRumbleType {
+        LEFT, RIGHT
     }
 }
