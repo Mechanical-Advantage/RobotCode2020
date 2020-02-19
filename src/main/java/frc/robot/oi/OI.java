@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 /**
  * Acts as an interface to multiple OI configurations
  */
-public abstract class OI {
+public interface OI {
     public static final double minAcceleration = 0.2; // Minimum total horizontal acceleration before rumbling
                                                       // controller
     public static final double fullAcceleration = 0.8; // Total horizontal acceleration (g) for full high frequency
@@ -14,135 +14,135 @@ public abstract class OI {
                                                        // frequency rumble power
     static final Trigger dummyTrigger = new Trigger();
 
-    public double getLeftDriveY() {
+    public default double getLeftDriveY() {
         return 0;
     }
 
-    public double getLeftDriveX() {
+    public default double getLeftDriveX() {
         return 0;
     }
 
-    public double getRightDriveY() {
+    public default double getRightDriveY() {
         return 0;
     }
 
-    public double getRightDriveX() {
+    public default double getRightDriveX() {
         return 0;
     }
 
-    public double getLeftDriveTrigger() {
+    public default double getLeftDriveTrigger() {
         return 0;
     }
 
-    public double getRightDriveTrigger() {
+    public default double getRightDriveTrigger() {
         return 0;
     }
 
-    public boolean hasDriveTriggers() {
+    public default boolean hasDriveTriggers() {
         return false;
     }
 
     // All OIs are required to implement an open loop switch and drive disable.
 
-    public abstract Trigger getOpenLoopSwitch();
+    public Trigger getOpenLoopSwitch();
 
-    public abstract Trigger getDriveDisableSwitch();
+    public Trigger getDriveDisableSwitch();
 
-    public Trigger getShiftLockSwitch() {
+    public default Trigger getShiftLockSwitch() {
         return dummyTrigger;
     }
 
-    public boolean getSniperMode() {
+    public default boolean getSniperMode() {
         return false;
     }
 
-    public double getSniperLevel() {
+    public default double getSniperLevel() {
         return 0;
     }
 
-    public double getSniperHighLevel() {
+    public default double getSniperHighLevel() {
         return 0;
     }
 
-    public double getSniperLowLevel() {
+    public default double getSniperLowLevel() {
         return 0;
     }
 
-    public boolean getSniperHigh() {
+    public default boolean getSniperHigh() {
         return false;
     }
 
-    public boolean getSniperLow() {
+    public default boolean getSniperLow() {
         return false;
     }
 
-    public boolean hasDualSniperMode() {
+    public default boolean hasDualSniperMode() {
         return false;
     }
 
-    public Trigger getShiftDisableSwitch() {
+    public default Trigger getShiftDisableSwitch() {
         return dummyTrigger;
     }
 
-    public Trigger getHighGearButton() {
+    public default Trigger getHighGearButton() {
         return dummyTrigger;
     }
 
-    public Trigger getLowGearButton() {
+    public default Trigger getLowGearButton() {
         return dummyTrigger;
     }
 
-    public Trigger getToggleGearButton() {
+    public default Trigger getToggleGearButton() {
         return dummyTrigger;
     }
 
-    public Trigger getJoysticksForwardButton() {
+    public default Trigger getJoysticksForwardButton() {
         return dummyTrigger;
     }
 
-    public Trigger getJoysticksReverseButton() {
+    public default Trigger getJoysticksReverseButton() {
         return dummyTrigger;
     }
 
-    public Trigger getFrontCameraButton() {
+    public default Trigger getFrontCameraButton() {
         return dummyTrigger;
     }
 
-    public Trigger getSecondCameraButton() {
+    public default Trigger getSecondCameraButton() {
         return dummyTrigger;
     }
 
-    public Trigger getVisionTestButton() {
+    public default Trigger getVisionTestButton() {
         return dummyTrigger;
     }
 
-    public Trigger getShooterPrototypeFlywheelButton() {
+    public default Trigger getShooterPrototypeFlywheelButton() {
         return dummyTrigger;
     }
 
-    public Trigger getShooterPrototypeRollerButton() {
+    public default Trigger getShooterPrototypeRollerButton() {
         return dummyTrigger;
     }
 
-    public Trigger getAutoAimButton() {
+    public default Trigger getAutoAimButton() {
         return dummyTrigger;
     }
 
-    public Trigger getAutoDriveButton() {
+    public default Trigger getAutoDriveButton() {
         return dummyTrigger;
     }
 
-    public void setRumble(OIRumbleType type, double value) {
+    public default void setRumble(OIRumbleType type, double value) {
     }
 
-    public void resetRumble() {
+    public default void resetRumble() {
     }
 
-    public double getDeadband() {
+    public default double getDeadband() {
         return 0;
     }
 
-    public void updateLED(OILED led, boolean state) {
+    public default void updateLED(OILED led, boolean state) {
     }
 
     public static enum OILED {

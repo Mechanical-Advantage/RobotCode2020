@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * An OI class that can be instantiated when the real OI is unknown to provide
  * real Triggers
  */
-public class DummyOI extends OI {
+public class DummyOI implements OI {
 
     @Override
     public Trigger getOpenLoopSwitch() {

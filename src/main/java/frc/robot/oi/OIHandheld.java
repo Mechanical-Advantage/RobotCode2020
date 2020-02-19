@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class OIHandheld extends OI {
+public class OIHandheld implements OI {
     private boolean driveEnabled = true;
     private boolean openLoop = true;
 
