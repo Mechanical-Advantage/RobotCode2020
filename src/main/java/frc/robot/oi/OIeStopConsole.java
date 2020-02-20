@@ -26,8 +26,8 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button openLoopDrive = new JoystickButton(oiController2, 10);
   private Button driveDisableSwitch = new JoystickButton(oiController2, 9);
   private Button shiftDisableSwitch = new JoystickButton(oiController2, 8);
-  private Button shooterPrototypeFlywheelButton;
-  private Button shooterPrototypeRollerButton;
+  private Button shooterPrototypeFlywheelButton = new JoystickButton(oiController2, 4);
+  private Button shooterPrototypeRollerButton = new JoystickButton(oiController2, 5);
 
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
