@@ -30,7 +30,7 @@ public class RunShooterRoller extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(0);
+    setpoint.setDefault(1);
     shooterRoller.run(setpoint.get());
   }
 

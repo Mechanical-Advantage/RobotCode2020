@@ -68,9 +68,11 @@ public class ShooterFlyWheel extends SubsystemBase {
     flywheelMaster.setSmartCurrentLimit(currentLimit);
     flywheelFollower.setSmartCurrentLimit(currentLimit);
 
-    P.setDefault(0.0024);
+    flywheelMaster.setInverted(invertFlywheel);
+
+    P.setDefault(0.0012);
     I.setDefault(0);
-    D.setDefault(0.1);
+    D.setDefault(0);
     F.setDefault(0.00019068);
     rampRate.setDefault(defaultRampRate); // Seconds to full power
     maxOutput.setDefault(1);
@@ -181,7 +183,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     if (flywheelMaster == null) {
       return;
     }
-    flywheelMaster.set(power * (invertFlywheel ? -1 : 1));
+    flywheelMaster.set(power);
   }
 
   public double getSpeed() {

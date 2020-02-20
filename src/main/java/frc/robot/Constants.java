@@ -22,6 +22,11 @@ public final class Constants {
     public static final RobotType defaultRobot = RobotType.NOTBOT;
     private static RobotType robot;
 
+    public static final double fieldLength = 52 * 12 + 5.25;
+    public static final double fieldWidth = 26 * 12 + 11.25;
+    public static final double initiationLine = 120; // From player station 2
+    public static final double visionTargetHorizDist = 43.75 + 24; // From center of field
+
     public static RobotType getRobot() {
         return robot;
     }

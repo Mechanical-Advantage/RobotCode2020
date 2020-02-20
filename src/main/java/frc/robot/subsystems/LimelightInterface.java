@@ -27,7 +27,8 @@ public class LimelightInterface extends SubsystemBase {
   private NetworkTableEntry longSideLength;
   private NetworkTableEntry horizSideLength;
   private NetworkTableEntry vertSideLength;
-  private NetworkTableEntry pipeline;
+  private NetworkTableEntry pipelineGet;
+  private NetworkTableEntry pipelineSet;
   private NetworkTableEntry camtran;
   private NetworkTableEntry ledMode;
   private NetworkTableEntry camMode;
@@ -67,7 +68,8 @@ public class LimelightInterface extends SubsystemBase {
     longSideLength = table.getEntry("longv");
     horizSideLength = table.getEntry("thor");
     vertSideLength = table.getEntry("tvert");
-    pipeline = table.getEntry("getpipe");
+    pipelineGet = table.getEntry("getpipe");
+    pipelineSet = table.getEntry("pipeline");
     camtran = table.getEntry("camtran");
     ledMode = table.getEntry("ledMode");
     camMode = table.getEntry("camMode");
@@ -107,8 +109,21 @@ public class LimelightInterface extends SubsystemBase {
     ledMode.forceSetNumber(mode.modeID);
   }
 
+  /**
+   * Gets the LED mode of the limelight.
+   * 
+   * @return The LED mode
+   */
+  public LimelightLEDMode getLEDMode() {
+    return LimelightLEDMode.fromModeID(ledMode.getNumber(1).intValue());
+  }
+
   public void useAsDriverCam(boolean driverCam) {
     camMode.setDouble(driverCam ? 1.0 : 0.0);
+  }
+
+  public boolean isDriverCam() {
+    return camMode.getNumber(0).intValue() == 1;
   }
 
   /**
@@ -117,7 +132,7 @@ public class LimelightInterface extends SubsystemBase {
    * @return the pipeline number, 0 to 9
    */
   public int getCurrentPipeline() {
-    return pipeline.getNumber(0).intValue();
+    return pipelineGet.getNumber(0).intValue();
   }
 
   /**
@@ -126,7 +141,7 @@ public class LimelightInterface extends SubsystemBase {
    * @param pipelineNumber the pipeline number, 0 to 9
    */
   public void setPipeline(int pipelineNumber) {
-    pipeline.forceSetNumber(pipelineNumber);
+    pipelineSet.forceSetNumber(pipelineNumber);
   }
 
   /**
@@ -157,6 +172,15 @@ public class LimelightInterface extends SubsystemBase {
   }
 
   /**
+   * Gets the streaming mode of the limelight.
+   * 
+   * @return The streaming mode
+   */
+  public LimelightStreamingMode getStreamingMode() {
+    return LimelightStreamingMode.fromModeID(streamingMode.getNumber(0).intValue());
+  }
+
+  /**
    * Enables or disables snapshots. If enabled, two snapshots are captured per
    * second.
    * 
@@ -164,6 +188,15 @@ public class LimelightInterface extends SubsystemBase {
    */
   public void enableSnapshots(boolean enable) {
     snapshot.setDouble(enable ? 1.0 : 0.0);
+  }
+
+  /**
+   * Returns whether snapshots are enabled.
+   * 
+   * @return Whether snapshots are enabled
+   */
+  public boolean areSnapshotsEnabled() {
+    return snapshot.getNumber(0).intValue() == 1;
   }
 
   /**
@@ -405,9 +438,19 @@ public class LimelightInterface extends SubsystemBase {
     PIPELINE(0), OFF(1), BLINK(2), ON(3);
 
     public final int modeID;
+    private static final LimelightLEDMode[] values = values();
 
     private LimelightLEDMode(int modeID) {
       this.modeID = modeID;
+    }
+
+    public static LimelightLEDMode fromModeID(int modeID) {
+      for (LimelightLEDMode mode : values) {
+        if (mode.modeID == modeID) {
+          return mode;
+        }
+      }
+      return null;
     }
   }
 
@@ -426,9 +469,19 @@ public class LimelightInterface extends SubsystemBase {
     PIP_SECONDARY(2);
 
     public final int modeID;
+    private static final LimelightStreamingMode[] values = values();
 
     private LimelightStreamingMode(int modeID) {
       this.modeID = modeID;
+    }
+
+    public static LimelightStreamingMode fromModeID(int modeID) {
+      for (LimelightStreamingMode mode : values) {
+        if (mode.modeID == modeID) {
+          return mode;
+        }
+      }
+      return null;
     }
   }
 

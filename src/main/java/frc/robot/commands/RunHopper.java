@@ -31,8 +31,8 @@ public class RunHopper extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpointLeft.setDefault(0);
-    setpointRight.setDefault(0);
+    setpointLeft.setDefault(0.8);
+    setpointRight.setDefault(0.7);
     hopper.run(setpointLeft.get(), setpointRight.get());
   }
 

@@ -14,4 +14,20 @@ public class UtilFunctions {
     public static double map(double x, double in_min, double in_max, double out_min, double out_max) {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
+
+    /**
+     * Converts the input to -179 to 180
+     * 
+     * @param input The input angle
+     * @return The resulting angle
+     */
+    public static double boundHalfDegrees(double input) {
+        while (input > 180) {
+            input -= 360;
+        }
+        while (input <= -180) {
+            input += 360;
+        }
+        return input;
+    }
 }
