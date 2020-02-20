@@ -20,6 +20,14 @@ public interface IOperatorOI {
 
     public Trigger getShooterRollerButton();
 
+    public Trigger getIntakeExtendButton();
+
+    public Trigger getIntakeRetractButton();
+
+    public Trigger getRunIntakeForwardsButton();
+
+    public Trigger getRunIntakeBackwardsButton();
+
     public default void updateLED(OILED led, boolean state) {
     }
 

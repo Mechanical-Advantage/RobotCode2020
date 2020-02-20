@@ -26,8 +26,12 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button openLoopDrive = new JoystickButton(oiController2, 10);
   private Button driveDisableSwitch = new JoystickButton(oiController2, 9);
   private Button shiftDisableSwitch = new JoystickButton(oiController2, 8);
-  private Button shooterPrototypeFlywheelButton;
-  private Button shooterPrototypeRollerButton;
+  private Button shooterFlywheelButton;
+  private Button shooterRollerButton;
+  private Button intakeExtendButton;
+  private Button intakeRetractButton;
+  private Button intakeForwardsButton;
+  private Button intakeBackwardsButton;
 
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
@@ -57,12 +61,32 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
 
   @Override
   public Trigger getShooterFlywheelButton() {
-    return shooterPrototypeFlywheelButton;
+    return shooterFlywheelButton;
   }
 
   @Override
   public Trigger getShooterRollerButton() {
-    return shooterPrototypeRollerButton;
+    return shooterRollerButton;
+  }
+
+  @Override
+  public Trigger getIntakeExtendButton() {
+    return intakeExtendButton;
+  }
+
+  @Override
+  public Trigger getIntakeRetractButton() {
+    return intakeRetractButton;
+  }
+
+  @Override
+  public Trigger getRunIntakeForwardsButton() {
+    return intakeForwardsButton;
+  }
+
+  @Override
+  public Trigger getRunIntakeBackwardsButton() {
+    return intakeBackwardsButton;
   }
 
   @Override

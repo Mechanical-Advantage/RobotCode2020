@@ -33,6 +33,8 @@ import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunIntakeBackwards;
+import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
@@ -46,7 +48,6 @@ import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIeStopConsole;
 import frc.robot.subsystems.CameraSystem;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
@@ -71,7 +72,6 @@ public class RobotContainer {
       Rotation2d.fromDegrees(0));
 
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
@@ -231,10 +231,12 @@ public class RobotContainer {
     operatorOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
 
-    // operatorOI.getIntakeExtendButton().whenActive(new
-    // InstantCommand(intake::extend, intake));
-    // operatorOI.getIntakeRetractButton().whenActive(new
-    // InstantCommand(intake::retract, intake));
+    operatorOI.getIntakeExtendButton().whenActive(new InstantCommand(intake::extend, intake));
+    operatorOI.getIntakeRetractButton().whenActive(new InstantCommand(intake::retract, intake));
+
+    operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(new RunIntakeForwards(intake));
+    operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(new RunIntakeBackwards(intake));
+
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
     driverOI.getAutoAimButton().whenInactive(autoAimCommand::cancel);

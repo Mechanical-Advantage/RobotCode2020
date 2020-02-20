@@ -36,6 +36,26 @@ public class DummyOI implements IDriverOI, IDriverOverrideOI, IOperatorOI {
     }
 
     @Override
+    public Trigger getIntakeExtendButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getIntakeRetractButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getRunIntakeForwardsButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getRunIntakeBackwardsButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
     public double getLeftDriveY() {
         return 0;
     }
