@@ -112,6 +112,7 @@ public class RobotContainer {
     // Odometry must be instantiated after drive and AHRS and after the NavX
     // initializes
     Timer navXTimer = new Timer();
+    navXTimer.start();
     while (ahrs.getByteCount() == 0 && navXTimer.get() <= navXWaitTime) {
       Timer.delay(0.01);
     }
