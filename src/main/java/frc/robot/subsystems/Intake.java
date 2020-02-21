@@ -39,11 +39,12 @@ public class Intake extends SubsystemBase {
    */
   public Intake() {
 
-    intakeSolenoid = new Solenoid(channel, PCM);
-
-    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
+    if (Constants.getRobot() != RobotType.ROBOT_2020) {
       return;
     }
+
+    intakeSolenoid = new Solenoid(channel, PCM);
+
     intake = new CANSparkMax(deviceID, MotorType.kBrushless);
     intake.restoreFactoryDefaults();
     intake.setSmartCurrentLimit(currentLimit);
@@ -78,10 +79,16 @@ public class Intake extends SubsystemBase {
   }
 
   public void extend() {
+    if (intakeSolenoid == null) {
+      return;
+    }
     intakeSolenoid.set(true);
   }
 
   public void retract() {
+    if (intakeSolenoid == null) {
+      return;
+    }
     intakeSolenoid.set(false);
   }
 

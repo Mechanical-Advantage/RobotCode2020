@@ -237,6 +237,15 @@ public class RobotContainer {
     operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(new RunIntakeForwards(intake));
     operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(new RunIntakeBackwards(intake));
 
+    // HandHeldAllInOne
+    ShooterFlyWheel shooterFlyWheelCopy = new ShooterFlyWheel();
+    operatorOI.getShooterFlywheelButton().whenActive(new RunShooterFlyWheel(shooterFlyWheelCopy));
+    operatorOI.getShooterFlywheelButton().cancelWhenActive(new RunShooterFlyWheel(shooterFlyWheelCopy));
+
+    ShooterRoller shooterRollerCopy = new ShooterRoller();
+    operatorOI.getShooterRollerButton().whenActive(new RunShooterRoller(shooterRollerCopy));
+    operatorOI.getShooterRollerButton().cancelWhenActive(new RunShooterRoller(shooterRollerCopy));
+
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
     driverOI.getAutoAimButton().whenInactive(autoAimCommand::cancel);
