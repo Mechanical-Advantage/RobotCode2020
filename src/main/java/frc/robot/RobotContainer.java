@@ -227,24 +227,21 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    operatorOI.getShooterFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
     operatorOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
 
     operatorOI.getIntakeExtendButton().whenActive(new InstantCommand(intake::extend, intake));
     operatorOI.getIntakeRetractButton().whenActive(new InstantCommand(intake::retract, intake));
 
-    operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(new RunIntakeForwards(intake));
-    operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(new RunIntakeBackwards(intake));
+    RunIntakeForwards runIntake = new RunIntakeForwards(intake);
+    operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntake);
+    operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntake);
 
-    // HandHeldAllInOne
-    ShooterFlyWheel shooterFlyWheelCopy = new ShooterFlyWheel();
-    operatorOI.getShooterFlywheelButton().whenActive(new RunShooterFlyWheel(shooterFlyWheelCopy));
-    operatorOI.getShooterFlywheelButton().cancelWhenActive(new RunShooterFlyWheel(shooterFlyWheelCopy));
+    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
+    operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
+    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
 
-    ShooterRoller shooterRollerCopy = new ShooterRoller();
-    operatorOI.getShooterRollerButton().whenActive(new RunShooterRoller(shooterRollerCopy));
-    operatorOI.getShooterRollerButton().cancelWhenActive(new RunShooterRoller(shooterRollerCopy));
+    operatorOI.getShooterRollerButton().whileActiveContinuous(new RunShooterRoller(shooterRoller));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);

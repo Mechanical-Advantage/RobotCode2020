@@ -16,7 +16,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * (driver and operator).
  */
 public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOperatorOI {
-    private Button shooterFlywheelButton = new Button(driverController::getAButton);
+    private Button shooterFlywheelRunButton = new Button(driverController::getAButton);
+    private Button shooterFlywheelStopButton = new Button(driverController::getBButton);
     private Button shooterRollerButton = new Button(driverController::getXButton);
 
     private Button intakeExtendButton = new POVButton(driverController, 90);
@@ -25,8 +26,13 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     private Button intakeBackwardsButton = new POVButton(driverController, 180);
 
     @Override
-    public Trigger getShooterFlywheelButton() {
-        return shooterFlywheelButton;
+    public Trigger getShooterFlywheelRunButton() {
+        return shooterFlywheelRunButton;
+    }
+
+    @Override
+    public Trigger getShooterFlywheelStopButton() {
+        return shooterFlywheelStopButton;
     }
 
     @Override

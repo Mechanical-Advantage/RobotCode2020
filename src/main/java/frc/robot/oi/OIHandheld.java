@@ -19,7 +19,7 @@ public class OIHandheld implements IDriverOI {
     private static final double sniperHighLevel = 0.3; // used for right trigger when using handheld control
     private static final double sniperLowLevel = 0.15; // used for left trigger when using handheld control
 
-    private Button autoAimButton = new Button(driverController::getXButton);
+    private Button autoAimButton = new Button(() -> driverController.getBumper(Hand.kLeft)); // create a lamda
     private Button autoDriveButton = new POVButton(driverController, 90);
 
     public OIHandheld() {
@@ -98,12 +98,7 @@ public class OIHandheld implements IDriverOI {
 
     @Override
     public boolean getSniperHigh() {
-        return driverController.getBButton() || driverController.getBumper(Hand.kRight);
-    }
-
-    @Override
-    public boolean getSniperLow() {
-        return driverController.getAButton() || driverController.getBumper(Hand.kLeft);
+        return driverController.getBumper(Hand.kRight);
     }
 
     @Override

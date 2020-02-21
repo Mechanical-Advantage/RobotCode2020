@@ -26,7 +26,12 @@ public class DummyOI implements IDriverOI, IDriverOverrideOI, IOperatorOI {
     }
 
     @Override
-    public Trigger getShooterFlywheelButton() {
+    public Trigger getShooterFlywheelRunButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getShooterFlywheelStopButton() {
         return IOperatorOI.dummyTrigger;
     }
 
