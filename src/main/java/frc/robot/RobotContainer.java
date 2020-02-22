@@ -250,8 +250,6 @@ public class RobotContainer {
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
 
-    operatorOI.getShooterRollerButton().whileActiveContinuous(new RunShooterRoller(shooterRoller));
-
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
     driverOI.getAutoAimButton().whenInactive(autoAimCommand::cancel);

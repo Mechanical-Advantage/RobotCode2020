@@ -91,5 +91,4 @@ public class Intake extends SubsystemBase {
     }
     intakeSolenoid.set(false);
   }
-
 }

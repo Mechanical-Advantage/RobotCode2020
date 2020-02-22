@@ -30,7 +30,7 @@ public class RunIntakeBackwards extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(0);
+    setpoint.setDefault(1);
     intake.run(setpoint.get());
   }
 
@@ -45,6 +45,7 @@ public class RunIntakeBackwards extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    intake.run(0);
   }
 
   // Returns true when the command should end.

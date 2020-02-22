@@ -42,15 +42,7 @@ public class OIArduinoConsole implements IOperatorOI {
     private Button hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
     private Button hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
-    NetworkTable ledTable;
-    NetworkTableEntry ledEntry;
-
     public OIArduinoConsole() {
-        ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
-        ledEntry = ledTable.getEntry("OI LEDs");
-
-        ledEntry.setBooleanArray(new boolean[] { false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false });
     }
 
     @Override
