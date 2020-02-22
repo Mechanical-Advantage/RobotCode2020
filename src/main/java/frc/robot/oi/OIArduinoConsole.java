@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
 
-    private Joystick arduinoController1 = new Joystick(1);
-    private Joystick arduinoController2 = new Joystick(2);
+    private Joystick arduinoController1;
+    private Joystick arduinoController2;
 
     private Button openLoopDriveButton = new JoystickButton(arduinoController1, 1);
     private Button driveDisableSwitchButton = new JoystickButton(arduinoController1, 2);
@@ -39,7 +39,9 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Button hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
     private Button hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
-    public OIArduinoConsole() {
+    public OIArduinoConsole(int firstID, int secondID) {
+        arduinoController1 = new Joystick(firstID);
+        arduinoController2 = new Joystick(secondID);
     }
 
     @Override

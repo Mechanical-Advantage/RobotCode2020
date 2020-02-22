@@ -20,8 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * robotics boards.
  */
 public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
-  private Joystick oiController1 = new Joystick(2);
-  private Joystick oiController2 = new Joystick(3);
+  private Joystick oiController1;
+  private Joystick oiController2;
 
   private Button openLoopDrive = new JoystickButton(oiController2, 10);
   private Button driveDisableSwitch = new JoystickButton(oiController2, 9);
@@ -39,7 +39,10 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
 
-  public OIeStopConsole() {
+  public OIeStopConsole(int firstID, int secondID) {
+    oiController1 = new Joystick(firstID);
+    oiController2 = new Joystick(secondID);
+
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
 

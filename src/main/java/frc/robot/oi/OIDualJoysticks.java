@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class OIDualJoysticks implements IDriverOI {
     // map left stick to ID 0 and right to ID 1 in driver station
-    private Joystick leftController = new Joystick(0);
-    private Joystick rightController = new Joystick(1);
+    private Joystick leftController;
+    private Joystick rightController;
 
     private Button frontCameraButton = new JoystickButton(rightController, 3);
     private Button secondCameraButton = new JoystickButton(rightController, 2);
@@ -31,6 +31,11 @@ public class OIDualJoysticks implements IDriverOI {
     private Button lowGear = new JoystickButton(leftController, 4);
 
     private Button visionTestButton = new JoystickButton(rightController, 8);
+
+    public OIDualJoysticks(int leftID, int rightID) {
+        leftController = new Joystick(leftID);
+        rightController = new Joystick(rightID);
+    }
 
     @Override
     public double getLeftDriveY() {

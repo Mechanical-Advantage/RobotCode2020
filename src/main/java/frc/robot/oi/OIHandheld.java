@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * Driver OI class for an XBox style controller.
  */
 public class OIHandheld implements IDriverOI {
-    XboxController driverController = new XboxController(0);
+    XboxController driverController;
 
     private POVButton joysticksForward = new POVButton(driverController, 0);
     private POVButton joysticksReverse = new POVButton(driverController, 180);
@@ -22,7 +22,9 @@ public class OIHandheld implements IDriverOI {
     private Button autoAimButton = new Button(() -> driverController.getBumper(Hand.kLeft)); // create a lamda
     private Button autoDriveButton = new POVButton(driverController, 90);
 
-    public OIHandheld() {
+    public OIHandheld(int ID) {
+        driverController = new XboxController(ID);
+
         resetRumble();
     }
 

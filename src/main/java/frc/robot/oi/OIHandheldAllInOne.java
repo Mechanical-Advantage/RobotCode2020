@@ -25,6 +25,10 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     private Button intakeForwardsButton = new POVButton(driverController, 0);
     private Button intakeBackwardsButton = new POVButton(driverController, 180);
 
+    public OIHandheldAllInOne(int ID) {
+        super(ID);
+    }
+
     @Override
     public Trigger getShooterFlywheelRunButton() {
         return shooterFlywheelRunButton;
