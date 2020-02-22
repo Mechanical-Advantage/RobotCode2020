@@ -44,6 +44,7 @@ import frc.robot.oi.DummyOI;
 import frc.robot.oi.IDriverOI;
 import frc.robot.oi.IDriverOverrideOI;
 import frc.robot.oi.IOperatorOI;
+import frc.robot.oi.OIArduinoConsole;
 import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIeStopConsole;
@@ -174,6 +175,13 @@ public class RobotContainer {
         operatorOI = gamepadOI;
         driverOverrideOI = gamepadOI;
         break;
+      // case "Arduino Leonardo":
+      // System.out.println("Robot controller: Arduino");
+      // OIArduinoConsole arduinoOI = new OIArduinoConsole();
+      // // driverOI = ;
+      // operatorOI = arduinoOI;
+      // // driverOverrideOI = ;
+      // break;
       default:
         DriverStation.reportError("Controller not recognized", false);
         DummyOI dummyOI = new DummyOI();
