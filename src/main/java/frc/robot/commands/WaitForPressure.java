@@ -12,7 +12,7 @@ import frc.robot.util.PressureSensor;
 
 public class WaitForPressure extends CommandBase {
 
-  private final double requiredPressure = 1.0;
+  private final double requiredPressure = 40.0;
   private final PressureSensor pressureSensor;
 
   /**

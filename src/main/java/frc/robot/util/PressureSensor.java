@@ -8,14 +8,15 @@
 package frc.robot.util;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Add your docs here.
  */
-public class PressureSensor {
+public class PressureSensor extends SubsystemBase {
 
-    private static final double minVoltage = 0.0; // voltage when no pressure
-    private static final double voltageMultiplier = 1.0; // multiplier to convert voltage to pressure
+    private static final double supplyNormalized = 4.9705882353;
     private AnalogInput sensor;
 
     public PressureSensor(int channel) {
@@ -24,10 +25,15 @@ public class PressureSensor {
     }
 
     public double getPressure() {
-        return (sensor.getAverageVoltage() - minVoltage) * voltageMultiplier;
+        return ((sensor.getAverageVoltage() / supplyNormalized) * 250) - 25;
     }
 
     public double getVoltage() {
         return sensor.getAverageVoltage();
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Pressure Sensor", getPressure());
     }
 }
