@@ -20,11 +20,11 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Joystick arduinoController1;
     private Joystick arduinoController2;
 
-    private Button openLoopDriveButton = new JoystickButton(arduinoController1, 1);
-    private Button driveDisableSwitchButton = new JoystickButton(arduinoController1, 2);
-    private Button manualHoodButton = new JoystickButton(arduinoController1, 4);
-    private Button buddyClimbButton = new JoystickButton(arduinoController1, 5);
-    private Button climbEnableButton = new JoystickButton(arduinoController1, 6);
+    private Button openLoopSwitch = new JoystickButton(arduinoController1, 1);
+    private Button driveDisableSwitch = new JoystickButton(arduinoController1, 2);
+    private Button manualHoodSwitch = new JoystickButton(arduinoController1, 4);
+    private Button buddyClimbSwitch = new JoystickButton(arduinoController1, 5);
+    private Button climbEnableSwitch = new JoystickButton(arduinoController1, 6);
 
     private Button intakeExtendButton = new JoystickButton(arduinoController1, 7);
     private Button intakeRetractButton = new JoystickButton(arduinoController1, 8);
@@ -81,12 +81,12 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
 
     @Override
     public Trigger getOpenLoopSwitch() {
-        return openLoopDriveButton;
+        return openLoopSwitch;
     }
 
     @Override
     public Trigger getDriveDisableSwitch() {
-        return driveDisableSwitchButton;
+        return driveDisableSwitch;
     }
 
 }
