@@ -19,7 +19,7 @@ package frc.robot;
  */
 public final class Constants {
     public static final boolean tuningMode = true;
-    public static final RobotType defaultRobot = RobotType.NOTBOT;
+    public static final RobotType defaultRobot = RobotType.ROBOT_2020;
     private static RobotType robot;
 
     public static final double fieldLength = 52 * 12 + 5.25;
