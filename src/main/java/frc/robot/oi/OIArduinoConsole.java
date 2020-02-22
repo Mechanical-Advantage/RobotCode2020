@@ -7,6 +7,8 @@
 
 package frc.robot.oi;
 
+import org.graalvm.compiler.lir.aarch64.AArch64ControlFlow.StrategySwitchOp.SwitchClosure;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -18,12 +20,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 /**
  * OI class for the Arduino Leonardo based box/panel.
  */
-public class OIArduinoConsole implements IOperatorOI {
+public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
 
     private Joystick arduinoController1 = new Joystick(1);
     private Joystick arduinoController2 = new Joystick(2);
 
-    private Button openLoopDriveButton = new JoystickButton(arduinoController1, 1);
+    private  openLoopDriveButton = new JoystickButton(arduinoController1, 1);
     private Button driveDisableSwitchButton = new JoystickButton(arduinoController1, 2);
     private Button manualHoodButton = new JoystickButton(arduinoController1, 4);
     private Button buddyClimbButton = new JoystickButton(arduinoController1, 5);
@@ -86,6 +88,16 @@ public class OIArduinoConsole implements IOperatorOI {
                 false, false, false, false, false, false, false, false, false, false, false, false, false });
         array[led.ordinal()] = state;
         ledEntry.setBooleanArray(array);
+    }
+
+    @Override
+    public Trigger getOpenLoopSwitch() {
+        return openLoopDriveButton;
+    }
+
+    @Override
+    public Trigger getDriveDisableSwitch() {
+        return driveDisableSwitchButton;
     }
 
 }

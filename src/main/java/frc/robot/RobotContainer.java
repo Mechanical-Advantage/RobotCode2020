@@ -242,9 +242,10 @@ public class RobotContainer {
     operatorOI.getIntakeExtendButton().whenActive(new InstantCommand(intake::extend, intake));
     operatorOI.getIntakeRetractButton().whenActive(new InstantCommand(intake::retract, intake));
 
-    RunIntakeForwards runIntake = new RunIntakeForwards(intake);
-    operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntake);
-    operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntake);
+    RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
+    RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
+    operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntakeForwards);
+    operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntakeBackwards);
 
     RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);

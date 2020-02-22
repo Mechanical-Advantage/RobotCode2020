@@ -64,6 +64,7 @@ public class Intake extends SubsystemBase {
         subsystem.run(0);
       }
     });
+    intake.burnFlash();
   }
 
   @Override
