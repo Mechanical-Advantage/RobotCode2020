@@ -26,13 +26,14 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button openLoopDrive = new JoystickButton(oiController2, 10);
   private Button driveDisableSwitch = new JoystickButton(oiController2, 9);
   private Button shiftDisableSwitch = new JoystickButton(oiController2, 8);
-  private Button shooterFlywheelRunButton;
-  private Button shooterFlywheelStopButton;
-  private Button shooterRollerButton;
-  private Button intakeExtendButton;
-  private Button intakeRetractButton;
-  private Button intakeForwardsButton;
-  private Button intakeBackwardsButton;
+  private Button shooterFlywheelRunButton = new JoystickButton(oiController2, 4);
+  private Button shooterFlywheelStopButton = new JoystickButton(oiController2, 3);
+  private Button shooterRollerButton = new JoystickButton(oiController2, 5);
+
+  private Button intakeExtendButton = new JoystickButton(oiController1, 9);
+  private Button intakeRetractButton = new JoystickButton(oiController1, 10);
+  private Button intakeForwardsButton = new JoystickButton(oiController2, 2);
+  private Button intakeBackwardsButton = new JoystickButton(oiController2, 1);
 
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
