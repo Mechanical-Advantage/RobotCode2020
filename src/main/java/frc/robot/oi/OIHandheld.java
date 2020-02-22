@@ -103,7 +103,7 @@ public class OIHandheld implements IDriverOI {
 
     @Override
     public boolean hasDualSniperMode() {
-        return true;
+        return false;
     }
 
     // @Override
