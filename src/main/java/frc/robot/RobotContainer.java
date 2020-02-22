@@ -168,7 +168,7 @@ public class RobotContainer {
 
       // The first name that is seen will be used and any other
       // controller names will be ignored (will only complete a pair)
-      int firstController; // Used to store first ID for controller pairs
+      int firstController = 0; // Used to store first ID for controller pairs
       String firstControllerName = null;
       String joystickName;
       boolean operatorOIFound = false;
@@ -241,7 +241,7 @@ public class RobotContainer {
         }
       }
 
-      DummyOI dummyOI;
+      DummyOI dummyOI = null;
       if (!operatorOIFound) {
         DriverStation.reportWarning("No operator controller found", false);
         dummyOI = new DummyOI();
