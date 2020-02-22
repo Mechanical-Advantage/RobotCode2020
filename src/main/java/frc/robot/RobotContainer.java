@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
@@ -39,9 +38,12 @@ import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
-import frc.robot.oi.OI;
-import frc.robot.oi.OIConsole;
-import frc.robot.oi.OIHandheld;
+import frc.robot.oi.IDriverOI;
+import frc.robot.oi.IDriverOverrideOI;
+import frc.robot.oi.IOperatorOI;
+import frc.robot.oi.OIDualJoysticks;
+import frc.robot.oi.OIHandheldAllInOne;
+import frc.robot.oi.OIeStopConsole;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Hopper;
@@ -51,8 +53,8 @@ import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
-import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
+import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -78,11 +80,13 @@ public class RobotContainer {
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
-  private final SendableChooser<JoystickMode> joystickModeChooser = new SendableChooser<JoystickMode>();
+  private SendableChooser<JoystickMode> joystickModeChooser;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
-  private OI oi = new DummyOI();
+  private IDriverOI driverOI;
+  private IDriverOverrideOI driverOverrideOI;
+  private IOperatorOI operatorOI;
   private String lastJoystickName;
   private boolean changedToCoast;
 
@@ -92,11 +96,16 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    // Use a dummy OI initially
+    DummyOI dummyOI = new DummyOI();
+    driverOI = dummyOI;
+    driverOverrideOI = dummyOI;
+    operatorOI = dummyOI;
     // The subsystems can't be recreated when OI changes so provide them with a
     // BooleanSupplier to access the current value from whatever OI is current
-    BooleanSupplier openLoopSwitchAccess = () -> oi.getOpenLoopSwitch().get();
-    BooleanSupplier driveDisableSwitchAccess = () -> oi.getDriveDisableSwitch().get();
-    BooleanSupplier shiftLockSwitchAccess = () -> oi.getShiftLockSwitch().get();
+    BooleanSupplier openLoopSwitchAccess = () -> driverOverrideOI.getOpenLoopSwitch().get();
+    BooleanSupplier driveDisableSwitchAccess = () -> driverOverrideOI.getDriveDisableSwitch().get();
+    BooleanSupplier shiftLockSwitchAccess = () -> driverOverrideOI.getShiftLockSwitch().get();
     switch (Constants.getRobot()) {
     case ROBOT_2020:
     case ROBOT_2020_DRIVE:
@@ -123,13 +132,7 @@ public class RobotContainer {
     limelightOdometry = new LimelightOdometry(limelight, odometry);
     odometry.setDefaultCommand(limelightOdometry);
 
-    joystickModeChooser.addOption("Tank", JoystickMode.Tank);
-    if (oi.hasDriveTriggers()) {
-      joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
-    }
-    joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
-    joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
-    SmartDashboard.putData("Joystick Mode", joystickModeChooser);
+    setupJoystickModeChooser();
 
     autoChooser.setDefaultOption("Do Nothing", null);
     autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
@@ -156,17 +159,25 @@ public class RobotContainer {
       switch (joystickName) {
       case "Logitech Attack 3":
         System.out.println("Robot controller: Logitech Attack 3");
-        oi = new OIConsole();
+        driverOI = new OIDualJoysticks();
+        OIeStopConsole eStopOI = new OIeStopConsole();
+        operatorOI = eStopOI;
+        driverOverrideOI = eStopOI;
         break;
       case "Controller (XBOX 360 For Windows)":
       case "Controller (Gamepad F310)":
         System.out.println("Robot controller: XBOX 360 or Gamepad F310");
-        oi = new OIHandheld();
+        OIHandheldAllInOne gamepadOI = new OIHandheldAllInOne();
+        driverOI = gamepadOI;
+        operatorOI = gamepadOI;
+        driverOverrideOI = gamepadOI;
         break;
       default:
-        DriverStation.reportWarning("Controller not recognized", false);
-
-        oi = new DummyOI();
+        DriverStation.reportError("Controller not recognized", false);
+        DummyOI dummyOI = new DummyOI();
+        driverOI = dummyOI;
+        operatorOI = dummyOI;
+        driverOverrideOI = dummyOI;
         break;
       }
       lastJoystickName = joystickName;
@@ -181,51 +192,63 @@ public class RobotContainer {
    * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureInputs() {
-    DriveWithJoysticks driveCommand = new DriveWithJoysticks(oi::getLeftDriveX, oi::getLeftDriveY,
-        oi::getLeftDriveTrigger, oi::getRightDriveX, oi::getRightDriveY, oi::getRightDriveTrigger, oi::getDeadband,
-        oi::getSniperMode, oi::getSniperLevel, oi::getSniperHighLevel, oi::getSniperLowLevel, oi::getSniperLow,
-        oi::getSniperHigh, oi.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+    setupJoystickModeChooser();
+
+    DriveWithJoysticks driveCommand = new DriveWithJoysticks(driverOI::getLeftDriveX, driverOI::getLeftDriveY,
+        driverOI::getLeftDriveTrigger, driverOI::getRightDriveX, driverOI::getRightDriveY,
+        driverOI::getRightDriveTrigger, driverOI::getDeadband, driverOI::getSniperMode, driverOI::getSniperLevel,
+        driverOI::getSniperHighLevel, driverOI::getSniperLowLevel, driverOI::getSniperLow, driverOI::getSniperHigh,
+        driverOI.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
-    oi.getJoysticksForwardButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(false)));
-    oi.getJoysticksReverseButton().whenActive(new InstantCommand(() -> driveCommand.setReversed(true)));
+    driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
+    driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
-    oi.getDriveDisableSwitch().whenActive(new InstantCommand(driveSubsystem::neutralOutput, driveSubsystem));
+    driverOverrideOI.getDriveDisableSwitch().whenActive(driveSubsystem::neutralOutput, driveSubsystem);
     // This prevents the drive train from running in the old mode and since behavior
     // changes anyway stopping if the current command isn't calling drive is
     // reasonable. A brief neutralOutput while driving won't cause a noticable
     // change anyway
-    oi.getOpenLoopSwitch().whenActive(new InstantCommand(driveSubsystem::neutralOutput));
-    oi.getOpenLoopSwitch().whenInactive(new InstantCommand(driveSubsystem::neutralOutput));
+    driverOverrideOI.getOpenLoopSwitch().whenActive(driveSubsystem::neutralOutput);
+    driverOverrideOI.getOpenLoopSwitch().whenInactive(driveSubsystem::neutralOutput);
 
-    oi.getHighGearButton()
-        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem));
-    oi.getLowGearButton()
-        .whenActive(new InstantCommand(() -> driveSubsystem.switchGear(DriveGear.LOW), driveSubsystem));
-    oi.getToggleGearButton().whenActive(
-        new InstantCommand(() -> driveSubsystem.switchGear(driveSubsystem.getCurrentGear().invert()), driveSubsystem));
+    driverOI.getHighGearButton().whenActive(() -> driveSubsystem.switchGear(DriveGear.HIGH), driveSubsystem);
+    driverOI.getLowGearButton().whenActive(() -> driveSubsystem.switchGear(DriveGear.LOW), driveSubsystem);
+    driverOI.getToggleGearButton().whenActive(() -> driveSubsystem.switchGear(driveSubsystem.getCurrentGear().invert()),
+        driveSubsystem);
 
     // Since useFrontCamera/useSecondCamera don't need arguments they can be passed
-    // directly to InstantCommand
-    oi.getFrontCameraButton().whenActive(new InstantCommand(cameraSubsystem::useFrontCamera, cameraSubsystem));
-    oi.getSecondCameraButton().whenActive(new InstantCommand(cameraSubsystem::useSecondCamera, cameraSubsystem));
+    // directly to whenActive
+    driverOI.getFrontCameraButton().whenActive(cameraSubsystem::useFrontCamera, cameraSubsystem);
+    driverOI.getSecondCameraButton().whenActive(cameraSubsystem::useSecondCamera, cameraSubsystem);
 
-    oi.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
+    driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    oi.getShooterPrototypeFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
-    oi.getShooterPrototypeRollerButton()
+    operatorOI.getShooterFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
+    operatorOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
-    oi.getAutoAimButton().whenActive(autoAimCommand);
-    oi.getAutoAimButton().whenInactive(autoAimCommand::cancel);
+    driverOI.getAutoAimButton().whenActive(autoAimCommand);
+    driverOI.getAutoAimButton().whenInactive(autoAimCommand::cancel);
     RunMotionProfile autoDriveCommand = new RunMotionProfile(driveSubsystem, odometry, List.of(),
         new Pose2d(Constants.visionTargetHorizDist, Constants.fieldLength - Constants.initiationLine,
             Rotation2d.fromDegrees(0)),
         0, false, false);
-    oi.getAutoDriveButton().whileActiveContinuous(autoDriveCommand);
-    oi.getAutoDriveButton().whenInactive(autoDriveCommand::cancel);
+    driverOI.getAutoDriveButton().whileActiveContinuous(autoDriveCommand);
+    driverOI.getAutoDriveButton().whenInactive(autoDriveCommand::cancel);
+  }
+
+  private void setupJoystickModeChooser() {
+    joystickModeChooser = new SendableChooser<JoystickMode>();
+    joystickModeChooser.addOption("Tank", JoystickMode.Tank);
+    if (driverOI.hasDriveTriggers()) {
+      joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
+    }
+    joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
+    joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
+    SmartDashboard.putData("Joystick Mode", joystickModeChooser);
   }
 
   /**

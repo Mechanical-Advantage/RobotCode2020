@@ -2,52 +2,28 @@ package frc.robot.oi;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class OIHandheld extends OI {
-    private boolean driveEnabled = true;
-    private boolean openLoop = true;
-
-    private Trigger openLoopSwitch = new Trigger(() -> openLoop);
-    private Trigger driveDisableSwitch = new Trigger(() -> driveEnabled).negate();
-
-    // map driver controller to ID 0 and operator controller to ID 1 in driver
-    // station
-    private XboxController driverController = new XboxController(0);
-    private XboxController operatorController = new XboxController(1);
+/**
+ * Driver OI class for an XBox style controller.
+ */
+public class OIHandheld implements IDriverOI {
+    XboxController driverController = new XboxController(0);
 
     private POVButton joysticksForward = new POVButton(driverController, 0);
     private POVButton joysticksReverse = new POVButton(driverController, 180);
-    private JoystickButton toggleDriveEnabled = new JoystickButton(driverController, 7); // back button
-    private JoystickButton toggleOpenLoop = new JoystickButton(driverController, 8); // start button
 
     private static final double sniperHighLevel = 0.3; // used for right trigger when using handheld control
     private static final double sniperLowLevel = 0.15; // used for left trigger when using handheld control
-
-    private Button shooterPrototypeFlywheelButton = new Button(driverController::getYButton);
-    private Button shooterPrototypeRollerButton = new POVButton(driverController, 270);
 
     private Button autoAimButton = new Button(driverController::getXButton);
     private Button autoDriveButton = new POVButton(driverController, 90);
 
     public OIHandheld() {
         resetRumble();
-        // The toggle buttons are not exposed and this class fakes having a disable
-        // switch
-        toggleDriveEnabled.whenPressed(new InstantCommand(() -> {
-            driveEnabled = !driveEnabled;
-            SmartDashboard.putBoolean("Drive Enabled", driveEnabled);
-        }));
-        toggleOpenLoop.whenPressed(new InstantCommand(() -> {
-            openLoop = !openLoop;
-            SmartDashboard.putBoolean("Open Loop", openLoop);
-        }));
     }
 
     @Override
@@ -86,35 +62,23 @@ public class OIHandheld extends OI {
     }
 
     @Override
-    public void setRumble(OIRumbleType type, double value) {
+    public void setDriverRumble(DriverOIRumbleType type, double value) {
         value = value > 1 ? 1 : value;
         switch (type) {
-        case DRIVER_LEFT:
+        case LEFT:
             driverController.setRumble(RumbleType.kLeftRumble, value);
-        case DRIVER_RIGHT:
+            break;
+        case RIGHT:
             driverController.setRumble(RumbleType.kRightRumble, value);
-        case OPERATOR_LEFT:
-            operatorController.setRumble(RumbleType.kLeftRumble, value);
-        case OPERATOR_RIGHT:
-            operatorController.setRumble(RumbleType.kRightRumble, value);
+            break;
         }
     }
 
     @Override
     public void resetRumble() {
-        for (OIRumbleType type : OIRumbleType.values()) {
-            setRumble(type, 0);
+        for (DriverOIRumbleType type : DriverOIRumbleType.values()) {
+            setDriverRumble(type, 0);
         }
-    }
-
-    @Override
-    public Trigger getOpenLoopSwitch() {
-        return openLoopSwitch;
-    }
-
-    @Override
-    public Trigger getDriveDisableSwitch() {
-        return driveDisableSwitch;
     }
 
     @Override
@@ -155,16 +119,6 @@ public class OIHandheld extends OI {
     @Override
     public Trigger getJoysticksReverseButton() {
         return joysticksReverse;
-    }
-
-    @Override
-    public Trigger getShooterPrototypeFlywheelButton() {
-        return shooterPrototypeFlywheelButton;
-    }
-
-    @Override
-    public Trigger getShooterPrototypeRollerButton() {
-        return shooterPrototypeRollerButton;
     }
 
     @Override
