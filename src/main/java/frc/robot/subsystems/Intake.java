@@ -25,7 +25,7 @@ public class Intake extends SubsystemBase {
 
   private static final boolean invertIntake = false;
   private static final int deviceID = 7;
-  private static final int channel = 0;
+  private static final int solenoidChannel = 0;
   private static final int PCM = 0;
 
   private static final int currentLimit = 30;
@@ -43,7 +43,7 @@ public class Intake extends SubsystemBase {
       return;
     }
 
-    intakeSolenoid = new Solenoid(channel, PCM);
+    intakeSolenoid = new Solenoid(solenoidChannel, PCM);
 
     intake = new CANSparkMax(deviceID, MotorType.kBrushless);
     intake.restoreFactoryDefaults();

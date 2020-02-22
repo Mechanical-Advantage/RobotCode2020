@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
- * Add your docs here.
+ * OI class for the Arduino Leonardo based box/panel.
  */
 public class OIArduinoConsole implements IOperatorOI {
 
