@@ -58,7 +58,9 @@ public class ShooterHood extends SubsystemBase {
    */
   public void setStopPosition(boolean stopped) {
     if (available()) {
-      stopSolenoid.set(stopped);
+      if (!(liftSolenoid.get() && stopped)) { // do not lock if lift raised
+        stopSolenoid.set(stopped);
+      }
     }
   }
 }
