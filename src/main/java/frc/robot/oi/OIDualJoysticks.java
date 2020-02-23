@@ -42,12 +42,12 @@ public class OIDualJoysticks implements IDriverOI {
         joysticksForward = new JoystickButton(leftController, 3);
         joysticksReverse = new JoystickButton(leftController, 2);
         sniperMode = new JoystickButton(rightController, 1);
-        toggleGear = new JoystickButton(leftController, 1);
+        toggleGear = new JoystickButton(leftController, 9);
         highGear = new JoystickButton(leftController, 5);
         lowGear = new JoystickButton(leftController, 4);
 
         visionTestButton = new JoystickButton(rightController, 8);
-        autoAimButton = new JoystickButton(leftController, 0);
+        autoAimButton = new JoystickButton(leftController, 1);
     }
 
     @Override
