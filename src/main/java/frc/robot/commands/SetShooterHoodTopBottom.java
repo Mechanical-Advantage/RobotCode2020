@@ -8,26 +8,23 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.ShooterHood;
-import frc.robot.util.PressureSensor;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
-public class SetShooterHoodEdge extends SequentialCommandGroup {
+public class SetShooterHoodTopBottom extends ParallelCommandGroup {
   /**
    * Creates a new SetShooterHoodEdge.
    * 
-   * @param shooterHood    Shooter hood subsystem
-   * @param pressureSensor Pressure sensor
-   * @param position       Top or bottom? (true=top, false=bottom)
+   * @param shooterHood Shooter hood subsystem
+   * @param top         Position to move to
    */
-  public SetShooterHoodEdge(ShooterHood shooterHood, PressureSensor pressureSensor, boolean position) {
+  public SetShooterHoodTopBottom(ShooterHood shooterHood, boolean top) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
-    super(new WaitForPressure(pressureSensor),
-        new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
-        new InstantCommand(() -> shooterHood.setLiftPosition(position), shooterHood));
+    super(new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
+        new InstantCommand(() -> shooterHood.setLiftPosition(top), shooterHood));
   }
 }

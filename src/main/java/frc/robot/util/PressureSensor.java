@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * Add your docs here.
+ * Class for the REV analog pressure sensor.
  */
 public class PressureSensor extends SubsystemBase {
 
