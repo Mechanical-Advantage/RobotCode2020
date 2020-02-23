@@ -24,11 +24,15 @@ public class ShooterHood extends SubsystemBase {
    * Creates a new ShooterHood.
    */
   public ShooterHood() {
-    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
+    if (!available()) {
       return;
     }
     liftSolenoid = new Solenoid(liftSolenoidChannel);
     stopSolenoid = new Solenoid(stopSolenoidChannel);
+  }
+
+  private boolean available() {
+    return Constants.getRobot() == RobotType.ROBOT_2020;
   }
 
   @Override
@@ -42,7 +46,9 @@ public class ShooterHood extends SubsystemBase {
    * @param raised
    */
   public void setLiftPosition(boolean raised) {
-    liftSolenoid.set(raised);
+    if (available()) {
+      liftSolenoid.set(raised);
+    }
   }
 
   /**
@@ -51,6 +57,8 @@ public class ShooterHood extends SubsystemBase {
    * @param stopped
    */
   public void setStopPosition(boolean stopped) {
-    stopSolenoid.set(stopped);
+    if (available()) {
+      stopSolenoid.set(stopped);
+    }
   }
 }
