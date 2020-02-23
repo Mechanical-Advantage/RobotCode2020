@@ -22,6 +22,8 @@ public interface IOperatorOI {
 
     public Trigger getShooterRollerButton();
 
+    public Trigger getShooterUnstickButton();
+
     public Trigger getIntakeExtendButton();
 
     public Trigger getIntakeRetractButton();

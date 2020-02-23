@@ -33,6 +33,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button shooterFlywheelRunButton;
   private Button shooterFlywheelStopButton;
   private Button shooterRollerButton;
+  private Button shooterUnstickButton;
 
   private Button intakeExtendButton;
   private Button intakeRetractButton;
@@ -55,6 +56,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     shooterFlywheelRunButton = new JoystickButton(oiController2, 4);
     shooterFlywheelStopButton = new JoystickButton(oiController2, 3);
     shooterRollerButton = new JoystickButton(oiController2, 5);
+    shooterUnstickButton = new JoystickButton(oiController1, 11);
 
     intakeExtendButton = new JoystickButton(oiController1, 9);
     intakeRetractButton = new JoystickButton(oiController1, 10);
@@ -101,6 +103,11 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   @Override
   public Trigger getShooterRollerButton() {
     return shooterRollerButton;
+  }
+
+  @Override
+  public Trigger getShooterUnstickButton() {
+    return shooterUnstickButton;
   }
 
   @Override

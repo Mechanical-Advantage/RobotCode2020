@@ -40,6 +40,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Button shooterFlywheelRunButton;
     private Button shooterFlywheelStopButton;
     private Button shooterRollerButton;
+    private Button shooterUnstickButton;
 
     private Button hoodWallButton;
     private Button hoodLineButton;
@@ -68,6 +69,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         shooterFlywheelRunButton = new JoystickButton(arduinoController2, 2); // 14
         shooterFlywheelStopButton = new JoystickButton(arduinoController2, 1); // 13
         shooterRollerButton = new JoystickButton(arduinoController2, 5); // 17
+        shooterUnstickButton = new JoystickButton(arduinoController2, 3); // 15
 
         hoodWallButton = new JoystickButton(arduinoController2, 6); // 18
         hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
@@ -98,6 +100,11 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     @Override
     public Trigger getShooterRollerButton() {
         return shooterRollerButton;
+    }
+
+    @Override
+    public Trigger getShooterUnstickButton() {
+        return shooterUnstickButton;
     }
 
     @Override
