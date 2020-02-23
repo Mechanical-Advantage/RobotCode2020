@@ -23,18 +23,18 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Joystick oiController1;
   private Joystick oiController2;
 
-  private Button openLoopDrive = new JoystickButton(oiController2, 10);
-  private Button driveDisableSwitch = new JoystickButton(oiController2, 9);
-  private Button shiftDisableSwitch = new JoystickButton(oiController2, 8);
+  private Button openLoopDrive;
+  private Button driveDisableSwitch;
+  private Button shiftDisableSwitch;
 
-  private Button shooterFlywheelRunButton = new JoystickButton(oiController2, 4);
-  private Button shooterFlywheelStopButton = new JoystickButton(oiController2, 3);
-  private Button shooterRollerButton = new JoystickButton(oiController2, 5);
+  private Button shooterFlywheelRunButton;
+  private Button shooterFlywheelStopButton;
+  private Button shooterRollerButton;
 
-  private Button intakeExtendButton = new JoystickButton(oiController1, 9);
-  private Button intakeRetractButton = new JoystickButton(oiController1, 10);
-  private Button intakeForwardsButton = new JoystickButton(oiController2, 2);
-  private Button intakeBackwardsButton = new JoystickButton(oiController2, 1);
+  private Button intakeExtendButton;
+  private Button intakeRetractButton;
+  private Button intakeForwardsButton;
+  private Button intakeBackwardsButton;
 
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
@@ -42,6 +42,19 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   public OIeStopConsole(int firstID, int secondID) {
     oiController1 = new Joystick(firstID);
     oiController2 = new Joystick(secondID);
+
+    openLoopDrive = new JoystickButton(oiController2, 10);
+    driveDisableSwitch = new JoystickButton(oiController2, 9);
+    shiftDisableSwitch = new JoystickButton(oiController2, 8);
+
+    shooterFlywheelRunButton = new JoystickButton(oiController2, 4);
+    shooterFlywheelStopButton = new JoystickButton(oiController2, 3);
+    shooterRollerButton = new JoystickButton(oiController2, 5);
+
+    intakeExtendButton = new JoystickButton(oiController1, 9);
+    intakeRetractButton = new JoystickButton(oiController1, 10);
+    intakeForwardsButton = new JoystickButton(oiController2, 2);
+    intakeBackwardsButton = new JoystickButton(oiController2, 1);
 
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");

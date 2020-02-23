@@ -20,28 +20,47 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Joystick arduinoController1;
     private Joystick arduinoController2;
 
-    private Button openLoopSwitch = new JoystickButton(arduinoController1, 1);
-    private Button driveDisableSwitch = new JoystickButton(arduinoController1, 2);
-    private Button manualHoodSwitch = new JoystickButton(arduinoController1, 4);
-    private Button buddyClimbSwitch = new JoystickButton(arduinoController1, 5);
-    private Button climbEnableSwitch = new JoystickButton(arduinoController1, 6);
+    private Button openLoopSwitch;
+    private Button driveDisableSwitch;
+    private Button manualHoodSwitch;
+    private Button buddyClimbSwitch;
+    private Button climbEnableSwitch;
 
-    private Button intakeExtendButton = new JoystickButton(arduinoController1, 7);
-    private Button intakeRetractButton = new JoystickButton(arduinoController1, 8);
-    private Button intakeForwardsButton = new JoystickButton(arduinoController1, 9);
-    private Button intakeBackwardsButton = new JoystickButton(arduinoController1, 10);
+    private Button intakeExtendButton;
+    private Button intakeRetractButton;
+    private Button intakeForwardsButton;
+    private Button intakeBackwardsButton;
 
-    private Button shooterFlywheelRunButton = new JoystickButton(arduinoController2, 2); // 14
-    private Button shooterFlywheelStopButton = new JoystickButton(arduinoController2, 1); // 13
-    private Button shooterRollerButton = new JoystickButton(arduinoController2, 5); // 17
+    private Button shooterFlywheelRunButton;
+    private Button shooterFlywheelStopButton;
+    private Button shooterRollerButton;
 
-    private Button hoodWallButton = new JoystickButton(arduinoController2, 6); // 18
-    private Button hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
-    private Button hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
+    private Button hoodWallButton;
+    private Button hoodLineButton;
+    private Button hoodTrenchButton;
 
     public OIArduinoConsole(int firstID, int secondID) {
         arduinoController1 = new Joystick(firstID);
         arduinoController2 = new Joystick(secondID);
+
+        openLoopSwitch = new JoystickButton(arduinoController1, 1);
+        driveDisableSwitch = new JoystickButton(arduinoController1, 2);
+        manualHoodSwitch = new JoystickButton(arduinoController1, 4);
+        buddyClimbSwitch = new JoystickButton(arduinoController1, 5);
+        climbEnableSwitch = new JoystickButton(arduinoController1, 6);
+
+        intakeExtendButton = new JoystickButton(arduinoController1, 7);
+        intakeRetractButton = new JoystickButton(arduinoController1, 8);
+        intakeForwardsButton = new JoystickButton(arduinoController1, 9);
+        intakeBackwardsButton = new JoystickButton(arduinoController1, 10);
+
+        shooterFlywheelRunButton = new JoystickButton(arduinoController2, 2); // 14
+        shooterFlywheelStopButton = new JoystickButton(arduinoController2, 1); // 13
+        shooterRollerButton = new JoystickButton(arduinoController2, 5); // 17
+
+        hoodWallButton = new JoystickButton(arduinoController2, 6); // 18
+        hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
+        hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
     }
 
     @Override
