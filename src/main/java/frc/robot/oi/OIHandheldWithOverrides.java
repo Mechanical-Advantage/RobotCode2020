@@ -23,10 +23,15 @@ public class OIHandheldWithOverrides extends OIHandheld implements IDriverOverri
     private Trigger openLoopSwitch = new Trigger(() -> openLoop);
     private Trigger driveDisableSwitch = new Trigger(() -> driveEnabled).negate();
 
-    private JoystickButton toggleDriveEnabled = new JoystickButton(driverController, 7); // back button
-    private JoystickButton toggleOpenLoop = new JoystickButton(driverController, 8); // start button
+    private JoystickButton toggleDriveEnabled;
+    private JoystickButton toggleOpenLoop;
 
-    public OIHandheldWithOverrides() {
+    public OIHandheldWithOverrides(int ID) {
+        super(ID);
+
+        toggleDriveEnabled = new JoystickButton(driverController, 7); // back button
+        toggleOpenLoop = new JoystickButton(driverController, 8); // start button
+
         // The toggle buttons are not exposed and this class fakes having a disable
         // switch
         toggleDriveEnabled.whenPressed(new InstantCommand(() -> {

@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
@@ -32,6 +34,8 @@ import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunIntakeBackwards;
+import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
@@ -41,16 +45,18 @@ import frc.robot.oi.DummyOI;
 import frc.robot.oi.IDriverOI;
 import frc.robot.oi.IDriverOverrideOI;
 import frc.robot.oi.IOperatorOI;
+import frc.robot.oi.OIArduinoConsole;
 import frc.robot.oi.OIDualJoysticks;
+import frc.robot.oi.OIHandheld;
 import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIeStopConsole;
 import frc.robot.subsystems.CameraSystem;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
@@ -69,12 +75,12 @@ public class RobotContainer {
       Rotation2d.fromDegrees(0));
 
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
   private final ShooterRoller shooterRoller = new ShooterRoller();
+  private final Intake intake = new Intake();
   private final Hopper hopper = new Hopper();
   private RobotOdometry odometry;
 
@@ -87,7 +93,7 @@ public class RobotContainer {
   private IDriverOI driverOI;
   private IDriverOverrideOI driverOverrideOI;
   private IOperatorOI operatorOI;
-  private String lastJoystickName;
+  private String[] lastJoystickNames;
   private boolean changedToCoast;
 
   private LimelightOdometry limelightOdometry;
@@ -107,16 +113,16 @@ public class RobotContainer {
     BooleanSupplier driveDisableSwitchAccess = () -> driverOverrideOI.getDriveDisableSwitch().get();
     BooleanSupplier shiftLockSwitchAccess = () -> driverOverrideOI.getShiftLockSwitch().get();
     switch (Constants.getRobot()) {
-    case ROBOT_2020:
-    case ROBOT_2020_DRIVE:
-      driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
-      break;
-    case ROBOT_2019:
-    case ORIGINAL_ROBOT_2018:
-    case REBOT:
-    case NOTBOT:
-      driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
-      break;
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
+        break;
+      case ROBOT_2019:
+      case ORIGINAL_ROBOT_2018:
+      case REBOT:
+      case NOTBOT:
+        driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
+        break;
     }
     // Odometry must be instantiated after drive and AHRS and after the NavX
     // initializes
@@ -151,36 +157,108 @@ public class RobotContainer {
   }
 
   public void updateOIType() {
-    String joystickName = new Joystick(0).getName();
-    if (!joystickName.equals(lastJoystickName)) {
+    String[] joystickNames = { null, null, null, null, null, null };
+    int joystickNum;
+    for (joystickNum = 0; joystickNum < 6; joystickNum++) {
+      joystickNames[joystickNum] = new Joystick(joystickNum).getName();
+    }
+    if (!Arrays.equals(joystickNames, lastJoystickNames)) {
       // Button mapping must be cleared before instantiating new OI because the new OI
       // might need to map buttons internally
       CommandScheduler.getInstance().clearButtons();
-      switch (joystickName) {
-      case "Logitech Attack 3":
-        System.out.println("Robot controller: Logitech Attack 3");
-        driverOI = new OIDualJoysticks();
-        OIeStopConsole eStopOI = new OIeStopConsole();
-        operatorOI = eStopOI;
-        driverOverrideOI = eStopOI;
-        break;
-      case "Controller (XBOX 360 For Windows)":
-      case "Controller (Gamepad F310)":
-        System.out.println("Robot controller: XBOX 360 or Gamepad F310");
-        OIHandheldAllInOne gamepadOI = new OIHandheldAllInOne();
-        driverOI = gamepadOI;
-        operatorOI = gamepadOI;
-        driverOverrideOI = gamepadOI;
-        break;
-      default:
-        DriverStation.reportError("Controller not recognized", false);
-        DummyOI dummyOI = new DummyOI();
-        driverOI = dummyOI;
-        operatorOI = dummyOI;
-        driverOverrideOI = dummyOI;
-        break;
+
+      // The first name that is seen will be used and any other
+      // controller names will be ignored (will only complete a pair)
+      int firstController = 0; // Used to store first ID for controller pairs
+      String firstControllerName = null;
+      String joystickName;
+      boolean operatorOIFound = false;
+      boolean driverOIFound = false;
+
+      // Look for operator controller
+      for (joystickNum = 0; joystickNum < 6; joystickNum++) {
+        joystickName = joystickNames[joystickNum];
+        switch (joystickName) {
+          case "Arduino Leonardo":
+            if (firstControllerName == null) {
+              firstController = joystickNum;
+              firstControllerName = joystickName;
+            } else if (firstControllerName.equals(joystickName)) {
+              OIArduinoConsole arduinoConsole = new OIArduinoConsole(firstController, joystickNum);
+              operatorOI = arduinoConsole;
+              driverOverrideOI = arduinoConsole;
+              operatorOIFound = true;
+              System.out.println("Operator: Arduino console");
+            }
+            break;
+          case "eStop Robotics HID":
+            if (firstControllerName == null) {
+              firstController = joystickNum;
+              firstControllerName = joystickName;
+            } else if (firstControllerName.equals(joystickName)) {
+              OIeStopConsole eStopConsole = new OIeStopConsole(firstController, joystickNum);
+              operatorOI = eStopConsole;
+              driverOverrideOI = eStopConsole;
+              operatorOIFound = true;
+              System.out.println("Operator: eStop console");
+            }
+            break;
+        }
       }
-      lastJoystickName = joystickName;
+
+      // Look for driver controller
+      firstControllerName = null;
+      for (joystickNum = 0; joystickNum < 6; joystickNum++) {
+        joystickName = joystickNames[joystickNum];
+        switch (joystickNames[joystickNum]) {
+          case "Controller (XBOX 360 For Windows)":
+          case "Controller (Gamepad F310)":
+            if (firstControllerName == null) {
+              firstControllerName = joystickName;
+              if (operatorOIFound) {
+                driverOI = new OIHandheld(joystickNum);
+                System.out.println("Driver: XBox/F310 controller");
+              } else {
+                OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(joystickNum);
+                driverOI = handheldAllInOne;
+                operatorOI = handheldAllInOne;
+                driverOverrideOI = handheldAllInOne;
+                operatorOIFound = true;
+                System.out.println("Driver/operator: XBox/F310 controller");
+              }
+              driverOIFound = true;
+            }
+            break;
+          case "Logitech Attack 3":
+            if (firstControllerName == null) {
+              firstController = joystickNum;
+              firstControllerName = joystickName;
+            } else if (firstControllerName.equals(joystickName)) {
+              driverOI = new OIDualJoysticks(firstController, joystickNum);
+              driverOIFound = true;
+              System.out.println("Driver: Dual Attack 3");
+            }
+            break;
+        }
+      }
+
+      DummyOI dummyOI = null;
+      if (!operatorOIFound) {
+        DriverStation.reportWarning("No operator controller found", false);
+        dummyOI = new DummyOI();
+        operatorOI = dummyOI;
+        // At the moment all the operator OIs also implement IDriverOverrideOI
+        driverOverrideOI = dummyOI;
+      }
+      if (!driverOIFound) {
+        DriverStation.reportWarning("No driver controller found", false);
+        if (dummyOI == null) {
+          dummyOI = new DummyOI();
+        }
+        driverOI = dummyOI;
+      }
+
+      lastJoystickNames = joystickNames;
       configureInputs();
     }
   }
@@ -225,9 +303,20 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    operatorOI.getShooterFlywheelButton().whileActiveContinuous(new RunShooterFlyWheel(shooterFlyWheel));
     operatorOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
+
+    operatorOI.getIntakeExtendButton().whenActive(new InstantCommand(intake::extend, intake));
+    operatorOI.getIntakeRetractButton().whenActive(new InstantCommand(intake::retract, intake));
+
+    RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
+    RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
+    operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntakeForwards);
+    operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntakeBackwards);
+
+    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
+    operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
+    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);

@@ -16,16 +16,61 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * (driver and operator).
  */
 public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOperatorOI {
-    private Button shooterFlywheelButton = new Button(driverController::getYButton);
-    private Button shooterRollerButton = new POVButton(driverController, 270);
+    private Button shooterFlywheelRunButton;
+    private Button shooterFlywheelStopButton;
+    private Button shooterRollerButton;
+
+    private Button intakeExtendButton;
+    private Button intakeRetractButton;
+    private Button intakeForwardsButton;
+    private Button intakeBackwardsButton;
+
+    public OIHandheldAllInOne(int ID) {
+        super(ID);
+
+        shooterFlywheelRunButton = new Button(driverController::getAButton);
+        shooterFlywheelStopButton = new Button(driverController::getBButton);
+        shooterRollerButton = new Button(driverController::getXButton);
+
+        intakeExtendButton = new POVButton(driverController, 90);
+        intakeRetractButton = new POVButton(driverController, 270);
+        intakeForwardsButton = new POVButton(driverController, 0);
+        intakeBackwardsButton = new POVButton(driverController, 180);
+
+    }
 
     @Override
-    public Trigger getShooterFlywheelButton() {
-        return shooterFlywheelButton;
+    public Trigger getShooterFlywheelRunButton() {
+        return shooterFlywheelRunButton;
+    }
+
+    @Override
+    public Trigger getShooterFlywheelStopButton() {
+        return shooterFlywheelStopButton;
     }
 
     @Override
     public Trigger getShooterRollerButton() {
         return shooterRollerButton;
+    }
+
+    @Override
+    public Trigger getIntakeExtendButton() {
+        return intakeExtendButton;
+    }
+
+    @Override
+    public Trigger getIntakeRetractButton() {
+        return intakeRetractButton;
+    }
+
+    @Override
+    public Trigger getRunIntakeForwardsButton() {
+        return intakeForwardsButton;
+    }
+
+    @Override
+    public Trigger getRunIntakeBackwardsButton() {
+        return intakeBackwardsButton;
     }
 }

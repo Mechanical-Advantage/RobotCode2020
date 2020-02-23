@@ -26,12 +26,37 @@ public class DummyOI implements IDriverOI, IDriverOverrideOI, IOperatorOI {
     }
 
     @Override
-    public Trigger getShooterFlywheelButton() {
+    public Trigger getShooterFlywheelRunButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getShooterFlywheelStopButton() {
         return IOperatorOI.dummyTrigger;
     }
 
     @Override
     public Trigger getShooterRollerButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getIntakeExtendButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getIntakeRetractButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getRunIntakeForwardsButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getRunIntakeBackwardsButton() {
         return IOperatorOI.dummyTrigger;
     }
 
