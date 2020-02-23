@@ -17,10 +17,12 @@ public interface IOperatorOI {
     static final Trigger dummyTrigger = new Trigger();
 
     public Trigger getShooterFlywheelRunButton();
-    
+
     public Trigger getShooterFlywheelStopButton();
 
     public Trigger getShooterRollerButton();
+
+    public Trigger getShooterUnstickButton();
 
     public Trigger getIntakeExtendButton();
 
