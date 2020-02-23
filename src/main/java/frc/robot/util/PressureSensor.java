@@ -10,6 +10,8 @@ package frc.robot.util;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 
 /**
  * Class for the REV analog pressure sensor.
@@ -20,20 +22,36 @@ public class PressureSensor extends SubsystemBase {
     private AnalogInput sensor;
 
     public PressureSensor(int channel) {
-        sensor = new AnalogInput(channel);
-        sensor.setAverageBits(4);
+        if (available()) {
+            sensor = new AnalogInput(channel);
+            sensor.setAverageBits(4);
+        }
+    }
+
+    public boolean available() {
+        return Constants.getRobot() == RobotType.ROBOT_2020;
     }
 
     public double getPressure() {
-        return ((sensor.getAverageVoltage() / supplyNormalized) * 250) - 25;
+        if (available()) {
+            return ((sensor.getAverageVoltage() / supplyNormalized) * 250) - 25;
+        } else {
+            return 0;
+        }
     }
 
     public double getVoltage() {
-        return sensor.getAverageVoltage();
+        if (available()) {
+            return sensor.getAverageVoltage();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Pressure Sensor", getPressure());
+        if (available()) {
+            SmartDashboard.putNumber("Pressure Sensor", getPressure());
+        }
     }
 }
