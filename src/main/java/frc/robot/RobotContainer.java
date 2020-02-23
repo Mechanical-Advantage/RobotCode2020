@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.FeedUnstick;
+import frc.robot.commands.IntakeExtendRetract;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
@@ -51,6 +52,8 @@ import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheld;
 import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIeStopConsole;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
@@ -152,8 +155,8 @@ public class RobotContainer {
         new Pose2d(0, 60, new Rotation2d(0)), 0, false, false));
     autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
         new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
-    autoChooser.addOption("Aim and fire loaded balls",
-        new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel));
+    autoChooser.addOption("Aim and fire loaded balls", new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs,
+        hopper, shooterRoller, shooterFlyWheel, operatorOI::updateLED));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -308,17 +311,21 @@ public class RobotContainer {
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
     operatorOI.getShooterUnstickButton().whileActiveContinuous(new FeedUnstick(shooterRoller, hopper));
 
-    operatorOI.getIntakeExtendButton().whenActive(new InstantCommand(intake::extend, intake));
-    operatorOI.getIntakeRetractButton().whenActive(new InstantCommand(intake::retract, intake));
+    IntakeExtendRetract intakeExtend = new IntakeExtendRetract(true, intake, operatorOI::updateLED);
+    IntakeExtendRetract intakeRetract = new IntakeExtendRetract(false, intake, operatorOI::updateLED);
+    operatorOI.getIntakeExtendButton().whenActive(intakeExtend);
+    operatorOI.getIntakeRetractButton().whenActive(intakeRetract);
+    operatorOI.updateLED(OILED.INTAKE_RETRACT, OILEDState.ON);
 
-    RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
-    RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
+    RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake, operatorOI::updateLED);
+    RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake, operatorOI::updateLED);
     operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntakeForwards);
     operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntakeBackwards);
 
-    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
+    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel, operatorOI::updateLED);
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
+    operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);

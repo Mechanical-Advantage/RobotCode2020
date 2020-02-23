@@ -16,6 +16,7 @@ import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.util.UpdateLEDInterface;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -25,13 +26,13 @@ public class PointAtTargetAndShoot extends ParallelDeadlineGroup {
    * Creates a new PointAtTargetAndShoot.
    */
   public PointAtTargetAndShoot(DriveTrainBase driveTrain, LimelightInterface limelight, AHRS ahrs, Hopper hopper,
-      ShooterRoller roller, ShooterFlyWheel flywheel) {
+      ShooterRoller roller, ShooterFlyWheel flywheel, UpdateLEDInterface updateLED) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(
         new PointAtTarget(driveTrain, limelight, ahrs)
             .alongWith(new WaitCommand(7).withInterrupt(() -> flywheel.getSpeed() > 6000))
             .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(5)),
-        new RunShooterFlyWheel(flywheel));
+        new RunShooterFlyWheel(flywheel, updateLED));
   }
 }

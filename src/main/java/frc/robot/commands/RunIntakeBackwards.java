@@ -9,22 +9,27 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.Intake;
 import frc.robot.util.TunableNumber;
+import frc.robot.util.UpdateLEDInterface;
 
 public class RunIntakeBackwards extends CommandBase {
 
   private TunableNumber setpoint = new TunableNumber("Intake Backwards/setpoint");
   private final Intake intake;
+  private final UpdateLEDInterface updateLED;
 
   /**
    * Creates a new RunIntakeBackwards.
    * 
    * @param Intake
    */
-  public RunIntakeBackwards(Intake intakeSub) {
+  public RunIntakeBackwards(Intake intakeSub, UpdateLEDInterface updateLED) {
     intake = intakeSub;
     addRequirements(intakeSub);
+    this.updateLED = updateLED;
   }
 
   // Called when the command is initially scheduled.
@@ -32,6 +37,7 @@ public class RunIntakeBackwards extends CommandBase {
   public void initialize() {
     setpoint.setDefault(-1);
     intake.run(setpoint.get());
+    updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.ON);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -46,6 +52,7 @@ public class RunIntakeBackwards extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     intake.run(0);
+    updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.ON);
   }
 
   // Returns true when the command should end.

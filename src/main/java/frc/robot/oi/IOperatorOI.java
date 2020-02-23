@@ -36,7 +36,8 @@ public interface IOperatorOI {
     }
 
     public static enum OILED {
-        MISC_1, MISC_2, MISC_3,
+        INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD, INTAKE_BACKWARD, SHOOTER_RUN, SHOOTER_STOP, SHOOTER_SHOOT,
+        SHOOTER_UNSTICK
     }
 
     public static enum OILEDState {

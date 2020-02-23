@@ -79,12 +79,15 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         ledEntry = ledTable.getEntry("LEDs");
 
         // Define LED mapping
-        ledMap.put(OILED.MISC_1, 0);
-        ledMap.put(OILED.MISC_2, 1);
-        ledMap.put(OILED.MISC_3, 2);
+        ledMap.put(OILED.INTAKE_EXTEND, 10);
+        ledMap.put(OILED.INTAKE_RETRACT, 11);
+        ledMap.put(OILED.INTAKE_FORWARD, 12);
+        ledMap.put(OILED.INTAKE_BACKWARD, 13);
+        ledMap.put(OILED.SHOOTER_STOP, 16);
+        ledMap.put(OILED.SHOOTER_RUN, 17);
 
-        ledEntry.setNumberArray(
-                new Number[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+        ledEntry.setNumberArray(new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
     }
 
     @Override
@@ -140,10 +143,12 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     @Override
     public void updateLED(OILED led, OILEDState state) {
         if (ledMap.containsKey(led)) {
-            Number[] array = ledTable.getEntry("LEDs").getNumberArray(
-                    new Number[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-            array[ledMap.get(led)] = state.ordinal();
+            System.out.println("Trying to update an LED...");
+            Double[] array = (Double[]) ledTable.getEntry("LEDs").getNumberArray(
+                    new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            array[ledMap.get(led)] = (double) state.ordinal();
             ledEntry.setNumberArray(array);
+            System.out.println("Successfully updated the LED!");
         }
     }
 }

@@ -67,9 +67,10 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     ledEntry = ledTable.getEntry("OI LEDs");
 
     // Define LED mapping
-    ledMap.put(OILED.MISC_1, 0);
-    ledMap.put(OILED.MISC_2, 1);
-    ledMap.put(OILED.MISC_3, 2);
+    // ledMap.put(OILED.INTAKE_EXTEND, 0);
+    // ledMap.put(OILED.INTAKE_RETRACT, 1);
+    // ledMap.put(OILED.INTAKE_FORWARD, 2);
+    // ledMap.put(OILED.INTAKE_BACKWARD, 3);
 
     ledEntry.setBooleanArray(new boolean[] { false, false, false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false });
