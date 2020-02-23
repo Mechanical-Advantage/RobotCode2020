@@ -29,8 +29,6 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final double defaultRampRate = 2;
   private static final boolean invertFlywheel = true;
   private static final int currentLimit = 30;
-  private static final int masterDeviceID = 3;
-  private static final int followerDeviceID = 13;
   private static final double MULTIPLIER = 1.5;
 
   CANSparkMax flywheelMaster;
@@ -53,11 +51,19 @@ public class ShooterFlyWheel extends SubsystemBase {
    * Creates a new ShooterFlyWheel.
    */
   public ShooterFlyWheel() {
-    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
+    switch (Constants.getRobot()) {
+    case ROBOT_2020:
+      flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      break;
+    case ROBOT_2020_DRIVE:
+      flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      break;
+    default:
       return;
     }
-    flywheelMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushless);
-    flywheelFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushless);
+
     flywheelMaster.restoreFactoryDefaults();
     flywheelFollower.restoreFactoryDefaults();
     flywheelFollower.follow(flywheelMaster, true);
