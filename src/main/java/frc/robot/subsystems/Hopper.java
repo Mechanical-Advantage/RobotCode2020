@@ -23,8 +23,6 @@ public class Hopper extends SubsystemBase {
 
   private static final boolean invertLeft = true;
   private static final boolean invertRight = false;
-  private static final int leftDeviceID = 5;
-  private static final int rightDeviceID = 8;
   private static final int currentLimit = 30;
 
   CANSparkMax hopperLeft;
@@ -34,11 +32,19 @@ public class Hopper extends SubsystemBase {
    * Creates a new Hopper.
    */
   public Hopper() {
-    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
+    switch (Constants.getRobot()) {
+    case ROBOT_2020:
+      hopperLeft = new CANSparkMax(7, MotorType.kBrushless);
+      hopperRight = new CANSparkMax(4, MotorType.kBrushless);
+      break;
+    case ROBOT_2020_DRIVE:
+      hopperLeft = new CANSparkMax(5, MotorType.kBrushless);
+      hopperRight = new CANSparkMax(8, MotorType.kBrushless);
+      break;
+    default:
       return;
     }
-    hopperLeft = new CANSparkMax(leftDeviceID, MotorType.kBrushless);
-    hopperRight = new CANSparkMax(rightDeviceID, MotorType.kBrushless);
+
     hopperLeft.restoreFactoryDefaults();
     hopperRight.restoreFactoryDefaults();
     hopperLeft.setSmartCurrentLimit(currentLimit);
