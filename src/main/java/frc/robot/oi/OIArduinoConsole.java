@@ -85,6 +85,8 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         ledMap.put(OILED.INTAKE_BACKWARD, 13);
         ledMap.put(OILED.SHOOTER_STOP, 16);
         ledMap.put(OILED.SHOOTER_RUN, 17);
+        ledMap.put(OILED.SHOOTER_UNSTICK, 18);
+        ledMap.put(OILED.SHOOTER_SHOOT, 19);
 
         ledEntry.setNumberArray(new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });

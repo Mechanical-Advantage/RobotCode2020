@@ -309,7 +309,8 @@ public class RobotContainer {
 
     operatorOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
-    operatorOI.getShooterUnstickButton().whileActiveContinuous(new FeedUnstick(shooterRoller, hopper));
+    operatorOI.getShooterUnstickButton()
+        .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
     IntakeExtendRetract intakeExtend = new IntakeExtendRetract(true, intake, operatorOI::updateLED);
     IntakeExtendRetract intakeRetract = new IntakeExtendRetract(false, intake, operatorOI::updateLED);

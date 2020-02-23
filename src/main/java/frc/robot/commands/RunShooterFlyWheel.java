@@ -17,9 +17,12 @@ import frc.robot.util.UpdateLEDInterface;
 
 public class RunShooterFlyWheel extends CommandBase {
 
+  private static final double rpmThreshold = 5500; // rpm at which LED turns solid
+
   private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/setpoint");
   private final ShooterFlyWheel shooterFlyWheel;
   private final UpdateLEDInterface updateLED;
+  private boolean lastUpToSpeed = false;
 
   /**
    * Creates a new ShooterFlyWheel.
@@ -38,7 +41,7 @@ public class RunShooterFlyWheel extends CommandBase {
     setpoint.setDefault(6000);
     // shooterFlyWheel.run(setpoint.get());
     shooterFlyWheel.setShooterRPM(setpoint.get());
-    setLEDS(true);
+    setRunningLEDs(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -48,13 +51,19 @@ public class RunShooterFlyWheel extends CommandBase {
       // shooterFlyWheel.run(setpoint.get());
       shooterFlyWheel.setShooterRPM(setpoint.get());
     }
+    boolean upToSpeed = shooterFlyWheel.getSpeed() > rpmThreshold;
+    if (upToSpeed != lastUpToSpeed) {
+      upToSpeed = lastUpToSpeed;
+      updateLED.update(OILED.SHOOTER_SHOOT, upToSpeed ? OILEDState.ON : OILEDState.BLINK_FAST);
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     shooterFlyWheel.stop();
-    setLEDS(false);
+    setRunningLEDs(false);
+    updateLED.update(OILED.SHOOTER_SHOOT, OILEDState.OFF);
   }
 
   // Returns true when the command should end.
@@ -63,7 +72,7 @@ public class RunShooterFlyWheel extends CommandBase {
     return false;
   }
 
-  private void setLEDS(boolean running) {
+  private void setRunningLEDs(boolean running) {
     updateLED.update(OILED.SHOOTER_RUN, running ? OILEDState.ON : OILEDState.OFF);
     updateLED.update(OILED.SHOOTER_SHOOT, running ? OILEDState.OFF : OILEDState.ON);
   }
