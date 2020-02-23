@@ -17,7 +17,7 @@ public interface IOperatorOI {
     static final Trigger dummyTrigger = new Trigger();
 
     public Trigger getShooterFlywheelRunButton();
-    
+
     public Trigger getShooterFlywheelStopButton();
 
     public Trigger getShooterRollerButton();
@@ -30,11 +30,14 @@ public interface IOperatorOI {
 
     public Trigger getRunIntakeBackwardsButton();
 
-    public default void updateLED(OILED led, boolean state) {
+    public default void updateLED(OILED led, OILEDState state) {
     }
 
     public static enum OILED {
-        MISC_1, MISC_2, MISC_3, INTAKE_RETRACT, INTAKE_ON_OFF, VAC_PICKUP, VAC_TAIL, TOGGLE_LOW, TOGGLE_HIGH,
-        JOYSTICK_YELLOW, ARM_ALT, ARM_FLOOR, ARM_CARGO_SHIP, ARM_ROCKET_LOW, ARM_ROCKET_MID, ARM_ROCKET_HIGH, ARM_HOME
+        MISC_1, MISC_2, MISC_3,
+    }
+
+    public static enum OILEDState {
+        OFF, BLINK_SLOW, BLINK_FAST, PULSE_SLOW, PULSE_FAST, DIM, MED, ON
     }
 }

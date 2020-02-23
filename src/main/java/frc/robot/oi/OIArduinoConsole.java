@@ -7,6 +7,12 @@
 
 package frc.robot.oi;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -39,6 +45,11 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Button hoodLineButton;
     private Button hoodTrenchButton;
 
+    NetworkTable ledTable;
+    NetworkTableEntry ledEntry;
+
+    private static final Map<OILED, Integer> ledMap = new HashMap<OILED, Integer>();
+
     public OIArduinoConsole(int firstID, int secondID) {
         arduinoController1 = new Joystick(firstID);
         arduinoController2 = new Joystick(secondID);
@@ -61,6 +72,17 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         hoodWallButton = new JoystickButton(arduinoController2, 6); // 18
         hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
         hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
+
+        ledTable = NetworkTableInstance.getDefault().getTable("OperatorInterface");
+        ledEntry = ledTable.getEntry("LEDs");
+
+        // Define LED mapping
+        ledMap.put(OILED.MISC_1, 0);
+        ledMap.put(OILED.MISC_2, 1);
+        ledMap.put(OILED.MISC_3, 2);
+
+        ledEntry.setNumberArray(
+                new Number[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
     }
 
     @Override
@@ -108,4 +130,13 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         return driveDisableSwitch;
     }
 
+    @Override
+    public void updateLED(OILED led, OILEDState state) {
+        if (ledMap.containsKey(led)) {
+            Number[] array = ledTable.getEntry("LEDs").getNumberArray(
+                    new Number[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+            array[ledMap.get(led)] = state.ordinal();
+            ledEntry.setNumberArray(array);
+        }
+    }
 }

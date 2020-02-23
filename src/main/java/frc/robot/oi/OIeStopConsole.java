@@ -7,6 +7,9 @@
 
 package frc.robot.oi;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -39,6 +42,8 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
 
+  private static final Map<OILED, Integer> ledMap = new HashMap<OILED, Integer>();
+
   public OIeStopConsole(int firstID, int secondID) {
     oiController1 = new Joystick(firstID);
     oiController2 = new Joystick(secondID);
@@ -58,6 +63,11 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
 
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
+
+    // Define LED mapping
+    ledMap.put(OILED.MISC_1, 0);
+    ledMap.put(OILED.MISC_2, 1);
+    ledMap.put(OILED.MISC_3, 2);
 
     ledEntry.setBooleanArray(new boolean[] { false, false, false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false });
@@ -114,10 +124,12 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   }
 
   @Override
-  public void updateLED(OILED led, boolean state) {
-    boolean[] array = ledTable.getEntry("OI LEDs").getBooleanArray(new boolean[] { false, false, false, false, false,
-        false, false, false, false, false, false, false, false, false, false, false, false });
-    array[led.ordinal()] = state;
-    ledEntry.setBooleanArray(array);
+  public void updateLED(OILED led, OILEDState state) {
+    if (ledMap.containsKey(led)) {
+      boolean[] array = ledTable.getEntry("OI LEDs").getBooleanArray(new boolean[] { false, false, false, false, false,
+          false, false, false, false, false, false, false, false, false, false, false, false });
+      array[ledMap.get(led)] = state != OILEDState.OFF;
+      ledEntry.setBooleanArray(array);
+    }
   }
 }
