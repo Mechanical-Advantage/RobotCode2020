@@ -345,11 +345,11 @@ public class RobotContainer {
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodTopBottom(shooterHood, false));
+        .whenActive(new SetShooterHoodTopBottom(shooterHood, false, operatorOI::updateLED));
     operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddle(shooterHood, pressureSensor));
+        .whenActive(new SetShooterHoodMiddle(shooterHood, pressureSensor, operatorOI::updateLED));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodTopBottom(shooterHood, true));
+        .whenActive(new SetShooterHoodTopBottom(shooterHood, true, operatorOI::updateLED));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
