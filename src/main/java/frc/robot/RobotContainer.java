@@ -93,7 +93,7 @@ public class RobotContainer {
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
-  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel(operatorOI::setFlyWheelSpeed);
+  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((rpm) -> operatorOI.setFlyWheelSpeed(rpm));
   private final ShooterRoller shooterRoller = new ShooterRoller();
   private final ShooterHood shooterHood = new ShooterHood();
   private final Intake intake = new Intake();
@@ -107,7 +107,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
   private LimelightOdometry limelightOdometry;
-  private final PressureSensor pressureSensor = new PressureSensor(0, operatorOI::setPressure);
+  private final PressureSensor pressureSensor = new PressureSensor(0, (pressure) -> operatorOI.setPressure(pressure));
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -345,11 +345,11 @@ public class RobotContainer {
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodTopBottom(shooterHood, false, operatorOI::updateLED));
+        .whenActive(new SetShooterHoodTopBottom(shooterHood, false));
     operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddle(shooterHood, pressureSensor, operatorOI::updateLED));
+        .whenActive(new SetShooterHoodMiddle(shooterHood, pressureSensor));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodTopBottom(shooterHood, true, operatorOI::updateLED));
+        .whenActive(new SetShooterHoodTopBottom(shooterHood, true));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
@@ -363,10 +363,12 @@ public class RobotContainer {
   }
 
   public void updateOITimer() {
-    int currentMatchTime = (int) DriverStation.getInstance().getMatchTime();
-    if (currentMatchTime != lastMatchTime) {
-      lastMatchTime = currentMatchTime;
-      operatorOI.setTimer(currentMatchTime);
+    if (operatorOI != null) {
+      int currentMatchTime = (int) DriverStation.getInstance().getMatchTime();
+      if (currentMatchTime != lastMatchTime) {
+        lastMatchTime = currentMatchTime;
+        operatorOI.setTimer(currentMatchTime);
+      }
     }
   }
 

@@ -31,6 +31,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final boolean invertFlywheel = true;
   private static final int currentLimit = 30;
   private static final double MULTIPLIER = 1.5;
+  private double setpoint;
 
   CANSparkMax flywheelMaster;
   CANSparkMax flywheelFollower;
@@ -188,8 +189,12 @@ public class ShooterFlyWheel extends SubsystemBase {
     if (flywheelMaster == null) {
       return;
     }
-    double setpoint = rpm / MULTIPLIER;
+    setpoint = rpm / MULTIPLIER;
     flywheel_pidController.setReference(setpoint, ControlType.kVelocity);
+  }
+
+  public double getShooterSetpoint() {
+    return setpoint * MULTIPLIER;
   }
 
   public void run(double power) {

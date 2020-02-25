@@ -17,12 +17,13 @@ import frc.robot.util.UpdateLEDInterface;
 
 public class RunShooterFlyWheel extends CommandBase {
 
-  private static final double rpmThreshold = 6000; // rpm at which LED turns solid
+  private static final double percentThreshold = 5; // what percent of target rpm should we be at
 
   private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/setpoint");
   private final ShooterFlyWheel shooterFlyWheel;
   private final UpdateLEDInterface updateLED;
   private boolean lastUpToSpeed = false;
+  private boolean shooterLEDInitialized = false;
 
   /**
    * Creates a new ShooterFlyWheel.
@@ -42,6 +43,7 @@ public class RunShooterFlyWheel extends CommandBase {
     // shooterFlyWheel.run(setpoint.get());
     shooterFlyWheel.setShooterRPM(setpoint.get());
     setRunningLEDs(true);
+    shooterLEDInitialized = false;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -51,8 +53,11 @@ public class RunShooterFlyWheel extends CommandBase {
       // shooterFlyWheel.run(setpoint.get());
       shooterFlyWheel.setShooterRPM(setpoint.get());
     }
-    boolean upToSpeed = shooterFlyWheel.getSpeed() > rpmThreshold;
-    if (upToSpeed != lastUpToSpeed) {
+    double targetRpm = shooterFlyWheel.getShooterSetpoint();
+    double threshold = targetRpm * (1 - (percentThreshold / 100));
+    boolean upToSpeed = shooterFlyWheel.getSpeed() > threshold;
+    if (upToSpeed != lastUpToSpeed || !shooterLEDInitialized) {
+      shooterLEDInitialized = true;
       upToSpeed = lastUpToSpeed;
       updateLED.update(OILED.SHOOTER_SHOOT, upToSpeed ? OILEDState.ON : OILEDState.PULSE_FAST);
     }
@@ -74,6 +79,6 @@ public class RunShooterFlyWheel extends CommandBase {
 
   private void setRunningLEDs(boolean running) {
     updateLED.update(OILED.SHOOTER_RUN, running ? OILEDState.ON : OILEDState.OFF);
-    updateLED.update(OILED.SHOOTER_SHOOT, running ? OILEDState.OFF : OILEDState.ON);
+    updateLED.update(OILED.SHOOTER_STOP, running ? OILEDState.OFF : OILEDState.ON);
   }
 }

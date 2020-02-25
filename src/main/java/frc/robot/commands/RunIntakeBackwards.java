@@ -52,7 +52,7 @@ public class RunIntakeBackwards extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     intake.run(0);
-    updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.ON);
+    updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.OFF);
   }
 
   // Returns true when the command should end.

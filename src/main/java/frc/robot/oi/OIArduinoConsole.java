@@ -83,7 +83,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         // Set up LCD fields
         LCDTimer = new OILCDField("Timer", 6, 0, 8, "??? secs");
         LCDPressure = new OILCDField("Pressure", 0, 1, 7, "PSI: ??");
-        LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 1, 18, "Flywheel: ???? rpm");
+        LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 2, 18, "Flywheel: ???? rpm");
 
         // Set up LED entry
         ledTable = NetworkTableInstance.getDefault().getTable("OperatorInterface");
@@ -100,9 +100,6 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         ledMap.put(OILED.SHOOTER_RUN, 17);
         ledMap.put(OILED.SHOOTER_UNSTICK, 18);
         ledMap.put(OILED.SHOOTER_SHOOT, 19);
-        ledMap.put(OILED.HOOD_TOP, 20);
-        ledMap.put(OILED.HOOD_MIDDLE, 21);
-        ledMap.put(OILED.HOOD_BOTTOM, 22);
 
         ledEntry.setNumberArray(new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });

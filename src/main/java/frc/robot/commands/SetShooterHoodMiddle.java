@@ -10,11 +10,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.oi.IOperatorOI.OILED;
-import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.util.PressureSensor;
-import frc.robot.util.UpdateLEDInterface;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -26,13 +23,10 @@ public class SetShooterHoodMiddle extends SequentialCommandGroup {
   /**
    * Creates a new SetShooterHoodMiddle.
    */
-  public SetShooterHoodMiddle(ShooterHood shooterHood, PressureSensor pressureSensor, UpdateLEDInterface updateLED) {
+  public SetShooterHoodMiddle(ShooterHood shooterHood, PressureSensor pressureSensor) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(new WaitForPressure(pressureSensor),
-        new InstantCommand(() -> updateLED.update(OILED.HOOD_TOP, OILEDState.OFF)),
-        new InstantCommand(() -> updateLED.update(OILED.HOOD_MIDDLE, OILEDState.ON)),
-        new InstantCommand(() -> updateLED.update(OILED.HOOD_BOTTOM, OILEDState.OFF)),
         new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood), new WaitCommand(raiseWait),
         new InstantCommand(() -> shooterHood.setStopPosition(true), shooterHood),
