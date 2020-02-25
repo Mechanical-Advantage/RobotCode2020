@@ -148,16 +148,18 @@ public class RobotContainer {
     setupJoystickModeChooser();
 
     autoChooser.setDefaultOption("Do Nothing", null);
-    autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
-    autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
-    autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
-    autoChooser.addOption("Drive velocity", new VelocityPIDTuner(driveSubsystem));
-    autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
-        new Pose2d(0, 60, new Rotation2d(0)), 0, false, true));
-    autoChooser.addOption("Drive to 5 feet absolute (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
-        new Pose2d(0, 60, new Rotation2d(0)), 0, false, false));
-    autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
-        new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
+    if (Constants.tuningMode) {
+      autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
+      autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
+      autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
+      autoChooser.addOption("Drive velocity", new VelocityPIDTuner(driveSubsystem));
+      autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+          new Pose2d(0, 60, new Rotation2d(0)), 0, false, true));
+      autoChooser.addOption("Drive to 5 feet absolute (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+          new Pose2d(0, 60, new Rotation2d(0)), 0, false, false));
+      autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
+          new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
+    }
     autoChooser.addOption("Aim and fire loaded balls",
         new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel));
     SmartDashboard.putData("Auto Mode", autoChooser);
