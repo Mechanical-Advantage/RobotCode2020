@@ -60,10 +60,12 @@ import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
+import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
+import frc.robot.util.PressureSensor;
 import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 
 /**
@@ -84,9 +86,11 @@ public class RobotContainer {
   private DriveTrainBase driveSubsystem;
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
   private final ShooterRoller shooterRoller = new ShooterRoller();
+  private final ShooterHood shooterHood = new ShooterHood();
   private final Intake intake = new Intake();
   private final Hopper hopper = new Hopper();
   private RobotOdometry odometry;
+  private final PressureSensor pressureSensor = new PressureSensor(0);
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
