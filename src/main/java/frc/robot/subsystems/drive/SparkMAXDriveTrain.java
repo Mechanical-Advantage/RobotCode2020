@@ -49,6 +49,25 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
     super(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
     switch (Constants.getRobot()) {
     case ROBOT_2020:
+      leftMaster = new CANSparkMax(3, MotorType.kBrushless);
+      leftFollower = new CANSparkMax(12, MotorType.kBrushless);
+      rightMaster = new CANSparkMax(16, MotorType.kBrushless);
+      rightFollower = new CANSparkMax(15, MotorType.kBrushless);
+      leftEncoder = leftMaster.getEncoder();
+      rightEncoder = rightMaster.getEncoder();
+      minVelocityLow = 3;
+      maxVelocityLow = 150;
+      kPLow = 0.00015;
+      kILow = 0;
+      kDLow = 0.0015;
+      kFLow = 0.0001821213133;
+      kIZoneLow = 0;
+      wheelDiameter = 6;
+      smartCurrentLimit = 80;
+      reverseOutputLeft = true;
+      reverseOutputRight = false;
+      afterEncoderReduction = 11.5;
+      break;
     case ROBOT_2020_DRIVE:
       leftMaster = new CANSparkMax(2, MotorType.kBrushless);
       leftFollower = new CANSparkMax(12, MotorType.kBrushless);
@@ -68,6 +87,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
       reverseOutputLeft = true;
       reverseOutputRight = false;
       afterEncoderReduction = 11.5;
+      break;
     }
     setCANTimeout(configTimeoutInit);
     leftMaster.restoreFactoryDefaults();

@@ -20,19 +20,44 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * robotics boards.
  */
 public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
-  private Joystick oiController1 = new Joystick(2);
-  private Joystick oiController2 = new Joystick(3);
+  private Joystick oiController1;
+  private Joystick oiController2;
 
-  private Button openLoopDrive = new JoystickButton(oiController2, 10);
-  private Button driveDisableSwitch = new JoystickButton(oiController2, 9);
-  private Button shiftDisableSwitch = new JoystickButton(oiController2, 8);
-  private Button shooterPrototypeFlywheelButton = new JoystickButton(oiController2, 4);
-  private Button shooterPrototypeRollerButton = new JoystickButton(oiController2, 5);
+  private Button openLoopDrive;
+  private Button driveDisableSwitch;
+  private Button shiftDisableSwitch;
+
+  private Button shooterFlywheelRunButton;
+  private Button shooterFlywheelStopButton;
+  private Button shooterRollerButton;
+  private Button shooterUnstickButton;
+
+  private Button intakeExtendButton;
+  private Button intakeRetractButton;
+  private Button intakeForwardsButton;
+  private Button intakeBackwardsButton;
 
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
 
-  public OIeStopConsole() {
+  public OIeStopConsole(int firstID, int secondID) {
+    oiController1 = new Joystick(firstID);
+    oiController2 = new Joystick(secondID);
+
+    openLoopDrive = new JoystickButton(oiController2, 10);
+    driveDisableSwitch = new JoystickButton(oiController2, 9);
+    shiftDisableSwitch = new JoystickButton(oiController2, 8);
+
+    shooterFlywheelRunButton = new JoystickButton(oiController2, 4);
+    shooterFlywheelStopButton = new JoystickButton(oiController2, 3);
+    shooterRollerButton = new JoystickButton(oiController2, 5);
+    shooterUnstickButton = new JoystickButton(oiController1, 11);
+
+    intakeExtendButton = new JoystickButton(oiController1, 9);
+    intakeRetractButton = new JoystickButton(oiController1, 10);
+    intakeForwardsButton = new JoystickButton(oiController2, 2);
+    intakeBackwardsButton = new JoystickButton(oiController2, 1);
+
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
 
@@ -56,13 +81,43 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   }
 
   @Override
-  public Trigger getShooterFlywheelButton() {
-    return shooterPrototypeFlywheelButton;
+  public Trigger getShooterFlywheelRunButton() {
+    return shooterFlywheelRunButton;
+  }
+
+  @Override
+  public Trigger getShooterFlywheelStopButton() {
+    return shooterFlywheelStopButton;
   }
 
   @Override
   public Trigger getShooterRollerButton() {
-    return shooterPrototypeRollerButton;
+    return shooterRollerButton;
+  }
+
+  @Override
+  public Trigger getShooterUnstickButton() {
+    return shooterUnstickButton;
+  }
+
+  @Override
+  public Trigger getIntakeExtendButton() {
+    return intakeExtendButton;
+  }
+
+  @Override
+  public Trigger getIntakeRetractButton() {
+    return intakeRetractButton;
+  }
+
+  @Override
+  public Trigger getRunIntakeForwardsButton() {
+    return intakeForwardsButton;
+  }
+
+  @Override
+  public Trigger getRunIntakeBackwardsButton() {
+    return intakeBackwardsButton;
   }
 
   @Override
