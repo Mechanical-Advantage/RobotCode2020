@@ -20,8 +20,10 @@ public class PressureSensor extends SubsystemBase {
 
     private static final double supplyNormalized = 4.9705882353;
     private AnalogInput sensor;
+    private SetPressureInterface setPressure;
 
-    public PressureSensor(int channel) {
+    public PressureSensor(int channel, SetPressureInterface setPressure) {
+        this.setPressure = setPressure;
         if (available()) {
             sensor = new AnalogInput(channel);
             sensor.setAverageBits(4);
@@ -51,7 +53,7 @@ public class PressureSensor extends SubsystemBase {
     @Override
     public void periodic() {
         if (available()) {
-            SmartDashboard.putNumber("Pressure Sensor", getPressure());
+            setPressure.set(getPressure());
         }
     }
 }

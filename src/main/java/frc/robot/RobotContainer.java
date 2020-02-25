@@ -80,17 +80,23 @@ public class RobotContainer {
   private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine, 0,
       Rotation2d.fromDegrees(0));
 
+  private IDriverOI driverOI;
+  private IDriverOverrideOI driverOverrideOI;
+  private IOperatorOI operatorOI;
+  private String[] lastJoystickNames;
+  private boolean changedToCoast;
+  private int lastMatchTime;
+
   // The robot's subsystems and commands are defined here...
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
-  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
+  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel(operatorOI::setFlyWheelSpeed);
   private final ShooterRoller shooterRoller = new ShooterRoller();
   private final ShooterHood shooterHood = new ShooterHood();
   private final Intake intake = new Intake();
   private final Hopper hopper = new Hopper();
   private RobotOdometry odometry;
-  private final PressureSensor pressureSensor = new PressureSensor(0);
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -98,13 +104,8 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
-  private IDriverOI driverOI;
-  private IDriverOverrideOI driverOverrideOI;
-  private IOperatorOI operatorOI;
-  private String[] lastJoystickNames;
-  private boolean changedToCoast;
-
   private LimelightOdometry limelightOdometry;
+  private final PressureSensor pressureSensor = new PressureSensor(0, operatorOI::setPressure);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -288,6 +289,13 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(driveCommand);
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
+
+    driverOverrideOI.getOpenLoopSwitch().whenActive(() -> operatorOI.updateLED(OILED.OPEN_LOOP, OILEDState.ON));
+    driverOverrideOI.getOpenLoopSwitch().whenInactive(() -> operatorOI.updateLED(OILED.OPEN_LOOP, OILEDState.OFF));
+
+    driverOverrideOI.getDriveDisableSwitch().whenActive(() -> operatorOI.updateLED(OILED.DRIVE_DISABLE, OILEDState.ON));
+    driverOverrideOI.getDriveDisableSwitch()
+        .whenInactive(() -> operatorOI.updateLED(OILED.DRIVE_DISABLE, OILEDState.OFF));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
@@ -341,6 +349,14 @@ public class RobotContainer {
         0, false, false);
     driverOI.getAutoDriveButton().whileActiveContinuous(autoDriveCommand);
     driverOI.getAutoDriveButton().whenInactive(autoDriveCommand::cancel);
+  }
+
+  public void updateOITimer() {
+    int currentMatchTime = (int) DriverStation.getInstance().getMatchTime();
+    if (currentMatchTime != lastMatchTime) {
+      lastMatchTime = currentMatchTime;
+      operatorOI.setTimer(currentMatchTime);
+    }
   }
 
   private void setupJoystickModeChooser() {

@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.util.OILCDField;
 
 /**
  * OI class for the Arduino Leonardo based box/panel.
@@ -49,6 +50,10 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     NetworkTable ledTable;
     NetworkTableEntry ledEntry;
 
+    OILCDField LCDTimer;
+    OILCDField LCDPressure;
+    OILCDField LCDFlyWheelSpeed;
+
     private static final Map<OILED, Integer> ledMap = new HashMap<OILED, Integer>();
 
     public OIArduinoConsole(int firstID, int secondID) {
@@ -75,10 +80,18 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
         hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
+        // Set up LCD fields
+        LCDTimer = new OILCDField("Timer", 6, 0, 8, "??? secs");
+        LCDPressure = new OILCDField("Pressure", 0, 1, 7, "PSI: ??");
+        LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 1, 18, "Flywheel: ???? rpm");
+
+        // Set up LED entry
         ledTable = NetworkTableInstance.getDefault().getTable("OperatorInterface");
         ledEntry = ledTable.getEntry("LEDs");
 
         // Define LED mapping
+        ledMap.put(OILED.OPEN_LOOP, 0);
+        ledMap.put(OILED.DRIVE_DISABLE, 1);
         ledMap.put(OILED.INTAKE_EXTEND, 10);
         ledMap.put(OILED.INTAKE_RETRACT, 11);
         ledMap.put(OILED.INTAKE_FORWARD, 12);
@@ -143,14 +156,27 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     }
 
     @Override
+    public void setTimer(int timeRemaining) {
+        LCDTimer.setValue(Integer.toString(timeRemaining) + " secs");
+    }
+
+    @Override
+    public void setPressure(double pressure) {
+        LCDPressure.setValue("PSI: " + Integer.toString(Math.round((float) pressure)));
+    }
+
+    @Override
+    public void setFlyWheelSpeed(double rpm) {
+        LCDFlyWheelSpeed.setValue("Flywheel: " + Integer.toString(Math.round((float) rpm)) + " rpm");
+    }
+
+    @Override
     public void updateLED(OILED led, OILEDState state) {
         if (ledMap.containsKey(led)) {
-            System.out.println("Trying to update an LED...");
             Double[] array = (Double[]) ledTable.getEntry("LEDs").getNumberArray(
                     new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
             array[ledMap.get(led)] = (double) state.ordinal();
             ledEntry.setNumberArray(array);
-            System.out.println("Successfully updated the LED!");
         }
     }
 }

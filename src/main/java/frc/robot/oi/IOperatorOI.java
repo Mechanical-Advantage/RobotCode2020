@@ -32,12 +32,21 @@ public interface IOperatorOI {
 
     public Trigger getRunIntakeBackwardsButton();
 
+    public default void setTimer(int timeRemaining) {
+    }
+
+    public default void setPressure(double pressure) {
+    }
+
+    public default void setFlyWheelSpeed(double rpm) {
+    }
+
     public default void updateLED(OILED led, OILEDState state) {
     }
 
     public static enum OILED {
-        INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD, INTAKE_BACKWARD, SHOOTER_RUN, SHOOTER_STOP, SHOOTER_SHOOT,
-        SHOOTER_UNSTICK
+        OPEN_LOOP, DRIVE_DISABLE, MANUAL_HOOD, BUDDY_CLIMB, CLIMB_ENABLE, INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD,
+        INTAKE_BACKWARD, SHOOTER_RUN, SHOOTER_STOP, SHOOTER_SHOOT, SHOOTER_UNSTICK
     }
 
     public static enum OILEDState {

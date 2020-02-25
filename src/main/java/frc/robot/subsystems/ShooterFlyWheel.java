@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
+import frc.robot.util.SetFlyWheelSpeedInterface;
 import frc.robot.util.TunableNumber;
 import com.revrobotics.ControlType;
 
@@ -47,22 +48,26 @@ public class ShooterFlyWheel extends SubsystemBase {
   private TunableNumber maxOutput = new TunableNumber("Shooter FlyWheel/Max Output");
   private TunableNumber minOutput = new TunableNumber("Shooter FlyWheel/Min Output");
 
+  private SetFlyWheelSpeedInterface setFlyWheelSpeed;
+
   /**
    * Creates a new ShooterFlyWheel.
    */
-  public ShooterFlyWheel() {
+  public ShooterFlyWheel(SetFlyWheelSpeedInterface setFlyWheelSpeed) {
     switch (Constants.getRobot()) {
-    case ROBOT_2020:
-      flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
-      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-      break;
-    case ROBOT_2020_DRIVE:
-      flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
-      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-      break;
-    default:
-      return;
+      case ROBOT_2020:
+        flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
+        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+        break;
+      case ROBOT_2020_DRIVE:
+        flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
+        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+        break;
+      default:
+        return;
     }
+
+    this.setFlyWheelSpeed = setFlyWheelSpeed;
 
     flywheelMaster.restoreFactoryDefaults();
     flywheelFollower.restoreFactoryDefaults();
@@ -167,6 +172,8 @@ public class ShooterFlyWheel extends SubsystemBase {
       SmartDashboard.putNumber("Shooter FlyWheel/speed", getSpeed());
       SmartDashboard.putNumber("Shooter FlyWheel/applied output", flywheelMaster.getAppliedOutput());
     }
+
+    setFlyWheelSpeed.set(getSpeed());
   }
 
   public void stop() {
