@@ -40,6 +40,8 @@ import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
+import frc.robot.commands.SetShooterHoodMiddle;
+import frc.robot.commands.SetShooterHoodTopBottom;
 import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
@@ -323,6 +325,13 @@ public class RobotContainer {
     RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
+
+    operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
+        .whenActive(new SetShooterHoodTopBottom(shooterHood, false));
+    operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
+        .whenActive(new SetShooterHoodMiddle(shooterHood, pressureSensor));
+    operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
+        .whenActive(new SetShooterHoodTopBottom(shooterHood, true));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);

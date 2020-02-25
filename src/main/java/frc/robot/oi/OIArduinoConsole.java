@@ -115,4 +115,23 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         return driveDisableSwitch;
     }
 
+    @Override
+    public Trigger getManualHoodSwitch() {
+        return manualHoodSwitch;
+    }
+
+    @Override
+    public Trigger getHoodWallButton() {
+        return hoodWallButton;
+    }
+
+    @Override
+    public Trigger getHoodLineButton() {
+        return hoodLineButton;
+    }
+
+    @Override
+    public Trigger getHoodTrenchButton() {
+        return hoodTrenchButton;
+    }
 }

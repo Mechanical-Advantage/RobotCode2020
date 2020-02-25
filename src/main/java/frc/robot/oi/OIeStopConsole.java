@@ -37,6 +37,11 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button intakeForwardsButton;
   private Button intakeBackwardsButton;
 
+  private Button manualHoodSwitch;
+  private Button hoodWallButton;
+  private Button hoodLineButton;
+  private Button hoodTrenchButton;
+
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
 
@@ -57,6 +62,11 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     intakeRetractButton = new JoystickButton(oiController1, 10);
     intakeForwardsButton = new JoystickButton(oiController2, 2);
     intakeBackwardsButton = new JoystickButton(oiController2, 1);
+
+    manualHoodSwitch = new JoystickButton(oiController2, 7);
+    hoodWallButton = new JoystickButton(oiController1, 2);
+    hoodLineButton = new JoystickButton(oiController1, 3);
+    hoodTrenchButton = new JoystickButton(oiController1, 4);
 
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
@@ -118,6 +128,26 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   @Override
   public Trigger getRunIntakeBackwardsButton() {
     return intakeBackwardsButton;
+  }
+
+  @Override
+  public Trigger getManualHoodSwitch() {
+    return manualHoodSwitch;
+  }
+
+  @Override
+  public Trigger getHoodWallButton() {
+    return hoodWallButton;
+  }
+
+  @Override
+  public Trigger getHoodLineButton() {
+    return hoodLineButton;
+  }
+
+  @Override
+  public Trigger getHoodTrenchButton() {
+    return hoodTrenchButton;
   }
 
   @Override
