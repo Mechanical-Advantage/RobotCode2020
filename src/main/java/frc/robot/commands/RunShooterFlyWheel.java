@@ -17,7 +17,7 @@ import frc.robot.util.UpdateLEDInterface;
 
 public class RunShooterFlyWheel extends CommandBase {
 
-  private static final double rpmThreshold = 5500; // rpm at which LED turns solid
+  private static final double rpmThreshold = 6000; // rpm at which LED turns solid
 
   private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/setpoint");
   private final ShooterFlyWheel shooterFlyWheel;
@@ -54,7 +54,7 @@ public class RunShooterFlyWheel extends CommandBase {
     boolean upToSpeed = shooterFlyWheel.getSpeed() > rpmThreshold;
     if (upToSpeed != lastUpToSpeed) {
       upToSpeed = lastUpToSpeed;
-      updateLED.update(OILED.SHOOTER_SHOOT, upToSpeed ? OILEDState.ON : OILEDState.BLINK_FAST);
+      updateLED.update(OILED.SHOOTER_SHOOT, upToSpeed ? OILEDState.ON : OILEDState.PULSE_FAST);
     }
   }
 
