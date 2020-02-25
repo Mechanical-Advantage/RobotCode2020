@@ -26,13 +26,15 @@ public class Climber extends SubsystemBase {
   private static final int currentLimit = 30;
   private static final int masterDeviceID = 6;
   private static final int followerDeviceID = 10;
-  private static final int solenoidChannel = 1;
+  private static final int deploySolenoidChannel = 1;
+  private static final int brakeSolenoidChannel = 2;
   private static final int PCM = 0;
 
   CANSparkMax climberMaster;
   CANSparkMax climberFollower;
 
-  private Solenoid climberSolenoid;
+  private Solenoid climberDeploySolenoid;
+  private Solenoid climberBrakeSolenoid;
 
   /**
    * Creates a new climber.
@@ -42,8 +44,8 @@ public class Climber extends SubsystemBase {
       return;
     }
 
-    climberSolenoid = new Solenoid(solenoidChannel, PCM);
-
+    climberDeploySolenoid = new Solenoid(deploySolenoidChannel, PCM);
+    climberBrakeSolenoid = new Solenoid(brakeSolenoidChannel, PCM);
     climberMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushless);
     climberFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushless);
 
@@ -84,10 +86,17 @@ public class Climber extends SubsystemBase {
     climberMaster.set(power);
   }
 
-  public void extend() {
-    if (climberSolenoid == null) {
+  public void deploy() {
+    if (climberDeploySolenoid == null) {
       return;
     }
-    climberSolenoid.set(true);
+    climberDeploySolenoid.set(true);
+  }
+
+  public void brake() { // look in 2018 code
+    if (climberDeploySolenoid == null) {
+      return;
+    }
+    climberBrakeSolenoid.set(false);
   }
 }

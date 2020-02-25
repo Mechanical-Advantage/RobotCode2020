@@ -42,6 +42,9 @@ public class OIArduinoConsole implements IOperatorOI {
     private Button hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
     private Button hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
+    // TODO check port number
+    private JoystickButton extendClimber = new JoystickButton(arduinoController2, 0);
+
     NetworkTable ledTable;
     NetworkTableEntry ledEntry;
 
@@ -86,6 +89,11 @@ public class OIArduinoConsole implements IOperatorOI {
     @Override
     public Trigger getRunIntakeBackwardsButton() {
         return intakeBackwardsButton;
+    }
+
+    @Override
+    public Trigger getClimbEnableButton() {
+        return climbEnableButton;
     }
 
     @Override

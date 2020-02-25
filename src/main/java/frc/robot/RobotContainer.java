@@ -49,6 +49,7 @@ import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIeStopConsole;
 import frc.robot.subsystems.CameraSystem;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
@@ -80,6 +81,7 @@ public class RobotContainer {
   private final ShooterRoller shooterRoller = new ShooterRoller();
   private final Intake intake = new Intake();
   private final Hopper hopper = new Hopper();
+  private final Climber climber = new Climber();
   private RobotOdometry odometry;
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
@@ -250,6 +252,8 @@ public class RobotContainer {
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
 
     operatorOI.getShooterRollerButton().whileActiveContinuous(new RunShooterRoller(shooterRoller));
+
+    operatorOI.getClimbEnableButton().whenActive(new InstantCommand(climber::deploy, climber));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);

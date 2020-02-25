@@ -17,7 +17,7 @@ public interface IOperatorOI {
     static final Trigger dummyTrigger = new Trigger();
 
     public Trigger getShooterFlywheelRunButton();
-    
+
     public Trigger getShooterFlywheelStopButton();
 
     public Trigger getShooterRollerButton();
@@ -29,6 +29,8 @@ public interface IOperatorOI {
     public Trigger getRunIntakeForwardsButton();
 
     public Trigger getRunIntakeBackwardsButton();
+
+    public Trigger getClimbEnableButton();
 
     public default void updateLED(OILED led, boolean state) {
     }
