@@ -32,6 +32,22 @@ public interface IOperatorOI {
 
     public Trigger getRunIntakeBackwardsButton();
 
+    public default Trigger getManualHoodSwitch() {
+        return dummyTrigger;
+    }
+
+    public default Trigger getHoodWallButton() {
+        return dummyTrigger;
+    }
+
+    public default Trigger getHoodLineButton() {
+        return dummyTrigger;
+    }
+
+    public default Trigger getHoodTrenchButton() {
+        return dummyTrigger;
+    }
+
     public default void setTimer(int timeRemaining) {
     }
 
@@ -42,6 +58,8 @@ public interface IOperatorOI {
     }
 
     public default void updateLED(OILED led, OILEDState state) {
+
+    public default void updateLED(OILED led, boolean state) {
     }
 
     public static enum OILED {

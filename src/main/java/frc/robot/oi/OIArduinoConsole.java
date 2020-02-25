@@ -155,6 +155,25 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         return driveDisableSwitch;
     }
 
+    public Trigger getManualHoodSwitch() {
+        return manualHoodSwitch;
+    }
+
+    @Override
+    public Trigger getHoodWallButton() {
+        return hoodWallButton;
+    }
+
+    @Override
+    public Trigger getHoodLineButton() {
+        return hoodLineButton;
+    }
+
+    @Override
+    public Trigger getHoodTrenchButton() {
+        return hoodTrenchButton;
+    }
+
     @Override
     public void setTimer(int timeRemaining) {
         LCDTimer.setValue(Integer.toString(timeRemaining) + " secs");
