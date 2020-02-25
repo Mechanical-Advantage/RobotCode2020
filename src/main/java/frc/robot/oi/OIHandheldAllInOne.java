@@ -7,6 +7,7 @@
 
 package frc.robot.oi;
 
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -26,6 +27,9 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     private Button intakeForwardsButton;
     private Button intakeBackwardsButton;
 
+    private Button autoAimButton;
+    private Button sniperModeButton;
+
     public OIHandheldAllInOne(int ID) {
         super(ID);
 
@@ -36,9 +40,11 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
 
         intakeExtendButton = new POVButton(driverController, 90);
         intakeRetractButton = new POVButton(driverController, 270);
-        intakeForwardsButton = new POVButton(driverController, 0);
-        intakeBackwardsButton = new POVButton(driverController, 180);
+        intakeForwardsButton = new Button(() -> driverController.getBumper(Hand.kLeft));
+        intakeBackwardsButton = new Button(() -> driverController.getBumper(Hand.kRight));
 
+        autoAimButton = new POVButton(driverController, 0);
+        sniperModeButton = new POVButton(driverController, 180);
     }
 
     @Override
@@ -79,5 +85,15 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     @Override
     public Trigger getRunIntakeBackwardsButton() {
         return intakeBackwardsButton;
+    }
+
+    @Override
+    public boolean getSniperHigh() {
+        return sniperModeButton.get();
+    }
+
+    @Override
+    public Trigger getAutoAimButton() {
+        return autoAimButton;
     }
 }
