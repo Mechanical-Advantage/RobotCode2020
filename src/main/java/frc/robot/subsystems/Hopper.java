@@ -34,9 +34,13 @@ public class Hopper extends SubsystemBase {
   public Hopper() {
     switch (Constants.getRobot()) {
       case ROBOT_2020:
-      case ROBOT_2020_DRIVE:
         hopperLeft = new CANSparkMax(7, MotorType.kBrushless);
         hopperRight = new CANSparkMax(4, MotorType.kBrushless);
+        break;
+      case ROBOT_2020_DRIVE:
+        // Unknown why these are backwards
+        hopperLeft = new CANSparkMax(4, MotorType.kBrushless);
+        hopperRight = new CANSparkMax(7, MotorType.kBrushless);
         break;
       default:
         return;
