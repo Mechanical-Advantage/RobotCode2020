@@ -32,16 +32,13 @@ public class ShooterRoller extends SubsystemBase {
    */
   public ShooterRoller() {
     switch (Constants.getRobot()) {
-    case ROBOT_2020:
-      rollerMaster = new CANSparkMax(8, MotorType.kBrushless);
-      rollerFollower = new CANSparkMax(11, MotorType.kBrushless);
-      break;
-    case ROBOT_2020_DRIVE:
-      rollerMaster = new CANSparkMax(4, MotorType.kBrushless);
-      rollerFollower = new CANSparkMax(11, MotorType.kBrushless);
-      break;
-    default:
-      return;
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        rollerMaster = new CANSparkMax(8, MotorType.kBrushless);
+        rollerFollower = new CANSparkMax(11, MotorType.kBrushless);
+        break;
+      default:
+        return;
     }
 
     rollerMaster.restoreFactoryDefaults();

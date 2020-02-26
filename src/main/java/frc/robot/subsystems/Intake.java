@@ -45,7 +45,7 @@ public class Intake extends SubsystemBase {
         break;
       case ROBOT_2020_DRIVE:
         // This is temporary for testing
-        intake = new CANSparkMax(7, MotorType.kBrushless);
+        intake = new CANSparkMax(5, MotorType.kBrushless);
         break;
       default:
         return;
