@@ -34,6 +34,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button intakeRetractButton = new JoystickButton(oiController1, 10);
   private Button intakeForwardsButton = new JoystickButton(oiController2, 2);
   private Button intakeBackwardsButton = new JoystickButton(oiController2, 1);
+  private Button climbEnableButton;
 
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
@@ -94,6 +95,11 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   @Override
   public Trigger getRunIntakeBackwardsButton() {
     return intakeBackwardsButton;
+  }
+
+  @Override
+  public Trigger getClimbEnableButton() {
+    return climbEnableButton;
   }
 
   @Override

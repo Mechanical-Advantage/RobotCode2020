@@ -32,6 +32,7 @@ import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
+import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
@@ -253,7 +254,9 @@ public class RobotContainer {
 
     operatorOI.getShooterRollerButton().whileActiveContinuous(new RunShooterRoller(shooterRoller));
 
-    operatorOI.getClimbEnableButton().whenActive(new InstantCommand(climber::deploy, climber));
+    // operatorOI.getClimbEnableButton().whenActive(new
+    // InstantCommand(climber::deploy, climber));
+    operatorOI.getClimbEnableButton().whenActive(new RunClimber(climber));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);

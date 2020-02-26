@@ -24,6 +24,7 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     private Button intakeRetractButton = new POVButton(driverController, 270);
     private Button intakeForwardsButton = new POVButton(driverController, 0);
     private Button intakeBackwardsButton = new POVButton(driverController, 180);
+    private Button climbEnableButton;
 
     @Override
     public Trigger getShooterFlywheelRunButton() {
@@ -58,5 +59,10 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     @Override
     public Trigger getRunIntakeBackwardsButton() {
         return intakeBackwardsButton;
+    }
+
+    @Override
+    public Trigger getClimbEnableButton() {
+        return climbEnableButton;
     }
 }

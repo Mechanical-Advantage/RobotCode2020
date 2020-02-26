@@ -11,9 +11,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Relay.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
@@ -24,6 +26,7 @@ import frc.robot.Constants.RobotType;
 public class Climber extends SubsystemBase {
 
   private static final int currentLimit = 30;
+  private static final boolean invertClimber = false;
   private static final int masterDeviceID = 6;
   private static final int followerDeviceID = 10;
   private static final int deploySolenoidChannel = 1;
@@ -55,6 +58,9 @@ public class Climber extends SubsystemBase {
     climberMaster.setSmartCurrentLimit(currentLimit);
     climberFollower.setSmartCurrentLimit(currentLimit);
 
+    climberDeploySolenoid.set(false);
+    climberBrakeSolenoid.set(true);
+
     // Stop by default
     final Climber subsystem = this;
     this.setDefaultCommand(new Command() {
@@ -83,7 +89,7 @@ public class Climber extends SubsystemBase {
     if (climberMaster == null) {
       return;
     }
-    climberMaster.set(power);
+    climberMaster.set(power * (invertClimber ? -1 : 1));
   }
 
   public void deploy() {
@@ -93,10 +99,12 @@ public class Climber extends SubsystemBase {
     climberDeploySolenoid.set(true);
   }
 
-  public void brake() { // look in 2018 code
+  public void brake() {
     if (climberDeploySolenoid == null) {
       return;
     }
     climberBrakeSolenoid.set(false);
+    // from 2018 code format:
+    // climberBrakeSolenoid.set(Value.kForward);
   }
 }
