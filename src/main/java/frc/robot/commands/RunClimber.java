@@ -10,59 +10,37 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
 import frc.robot.subsystems.Climber;
-import frc.robot.util.TunableNumber;
 
 public class RunClimber extends CommandBase {
 
-  private TunableNumber setpoint = new TunableNumber("Climber/setpoint");
   private final Climber climber;
-  private DoubleSupplier oiClimberY;
-  private DoubleSupplier oiGetDeadband;
+  private final DoubleSupplier stickAccess;
 
   /**
    * Creates a new RunClimber.
-   *
-   * @param Climber
    */
-  public RunClimber(Climber climberSub, DoubleSupplier climberY, DoubleSupplier getDeadband) {
-    climber = climberSub;
-    addRequirements(climberSub);
-    oiClimberY = climberY;
-    oiGetDeadband = getDeadband;
+  public RunClimber(Climber climber, DoubleSupplier stickAccess) {
+    addRequirements(climber);
+    this.climber = climber;
+    this.stickAccess = stickAccess;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(0);
-    climber.deploy();
-    climber.run(setpoint.get());
-  }
-
-  private double processJoystickAxis(double joystickAxis) {
-    // cube to improve low speed control, multiply by -1 because negative joystick
-    // means forward, 0 if within deadband
-    return Math.abs(joystickAxis) > oiGetDeadband.getAsDouble() ? joystickAxis * Math.abs(joystickAxis) * -1 : 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Constants.tuningMode) {
-      climber.run(setpoint.get());
-    }
-
-    double joystick = 0;
-    joystick = processJoystickAxis(oiClimberY.getAsDouble());
-    climber.run(joystick);
-
+    climber.run(stickAccess.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    climber.run(0);
   }
 
   // Returns true when the command should end.

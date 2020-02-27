@@ -32,7 +32,13 @@ public interface IOperatorOI {
 
     public Trigger getRunIntakeBackwardsButton();
 
-    public Trigger getClimbEnableButton();
+    public default Trigger getClimbEnableSwitch() {
+        return dummyTrigger;
+    }
+
+    public default double getClimbStickY() {
+        return 0;
+    }
 
     public default Trigger getManualHoodSwitch() {
         return dummyTrigger;

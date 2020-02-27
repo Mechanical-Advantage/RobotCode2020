@@ -25,7 +25,6 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     private Button intakeRetractButton;
     private Button intakeForwardsButton;
     private Button intakeBackwardsButton;
-    private Button climbEnableButton;
 
     public OIHandheldAllInOne(int ID) {
         super(ID);
@@ -80,10 +79,5 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     @Override
     public Trigger getRunIntakeBackwardsButton() {
         return intakeBackwardsButton;
-    }
-
-    @Override
-    public Trigger getClimbEnableButton() {
-        return climbEnableButton;
     }
 }

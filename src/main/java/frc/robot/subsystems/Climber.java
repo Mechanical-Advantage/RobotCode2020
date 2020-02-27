@@ -29,7 +29,7 @@ public class Climber extends SubsystemBase {
   private static final int followerDeviceID = 10;
   private static final int deploySolenoidChannel = 1;
   private static final int PCM = 0;
-  private static boolean climberEnabled = false;
+  private boolean climberEnabled = false;
 
   CANSparkMax climberMaster;
   CANSparkMax climberFollower;
@@ -96,5 +96,14 @@ public class Climber extends SubsystemBase {
     }
     climberDeploySolenoid.set(true);
     climberEnabled = true;
+  }
+
+  public void reset() {
+    if (climberDeploySolenoid == null) {
+      return;
+    }
+    climberDeploySolenoid.set(false);
+    climberEnabled = false;
+    climberMaster.set(0);
   }
 }

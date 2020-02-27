@@ -69,6 +69,8 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     hoodLineButton = new JoystickButton(oiController1, 3);
     hoodTrenchButton = new JoystickButton(oiController1, 4);
 
+    climbEnableButton = new JoystickButton(oiController1, 12);
+
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
 
@@ -132,8 +134,13 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   }
 
   @Override
-  public Trigger getClimbEnableButton() {
+  public Trigger getClimbEnableSwitch() {
     return climbEnableButton;
+  }
+
+  @Override
+  public double getClimbStickY() {
+    return oiController1.getY();
   }
 
   public Trigger getManualHoodSwitch() {

@@ -61,11 +61,6 @@ public class DummyOI implements IDriverOI, IDriverOverrideOI, IOperatorOI {
     }
 
     @Override
-    public Trigger getClimbEnableButton() {
-        return IOperatorOI.dummyTrigger;
-    }
-
-    @Override
     public Trigger getRunIntakeBackwardsButton() {
         return IOperatorOI.dummyTrigger;
     }

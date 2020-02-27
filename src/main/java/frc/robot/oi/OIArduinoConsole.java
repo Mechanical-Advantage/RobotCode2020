@@ -109,9 +109,13 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     }
 
     @Override
-
-    public Trigger getClimbEnableButton() {
+    public Trigger getClimbEnableSwitch() {
         return climbEnableSwitch;
+    }
+
+    @Override
+    public double getClimbStickY() {
+        return arduinoController1.getY();
     }
 
     public Trigger getOpenLoopSwitch() {
