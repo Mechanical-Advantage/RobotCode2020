@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.EncoderType;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Solenoid;
@@ -24,10 +26,11 @@ import frc.robot.Constants.RobotType;
 public class Climber extends SubsystemBase {
 
   private static final int currentLimit = 30;
+  private static final IdleMode idleMode = IdleMode.kBrake;
   private static final boolean invertClimber = false;
-  private static final int masterDeviceID = 6;
-  private static final int followerDeviceID = 10;
-  private static final int deploySolenoidChannel = 1;
+  private static final int masterDeviceID = 2;
+  private static final int followerDeviceID = 1;
+  private static final int deploySolenoidChannel = 2;
   private static final int PCM = 0;
   private boolean climberEnabled = false;
 
@@ -40,11 +43,11 @@ public class Climber extends SubsystemBase {
    * Creates a new climber.
    */
   public Climber() {
-    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
+    if (Constants.getRobot() != RobotType.ROBOT_2020) {
       return;
     }
 
-    climberDeploySolenoid = new Solenoid(deploySolenoidChannel, PCM);
+    climberDeploySolenoid = new Solenoid(PCM, deploySolenoidChannel);
     climberMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushed);
     climberFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushed);
 
@@ -53,6 +56,11 @@ public class Climber extends SubsystemBase {
     climberFollower.follow(climberMaster, true);
     climberMaster.setSmartCurrentLimit(currentLimit);
     climberFollower.setSmartCurrentLimit(currentLimit);
+    // Default feedback device is hall effect sensor so need to change it
+    climberMaster.getEncoder(EncoderType.kNoSensor, 0);
+    climberFollower.getEncoder(EncoderType.kNoSensor, 0);
+    climberMaster.setIdleMode(idleMode);
+    climberFollower.setIdleMode(idleMode);
 
     climberDeploySolenoid.set(false);
 
