@@ -9,48 +9,59 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.ShooterRoller;
 import frc.robot.util.TunableNumber;
 
-public class RunIntakeBackwards extends CommandBase {
+public class FeedUnstick extends CommandBase {
 
-  private TunableNumber setpoint = new TunableNumber("Intake Backwards/setpoint");
-  private final Intake intake;
+  private final ShooterRoller roller;
+  private final Hopper hopper;
+  private final TunableNumber hopperLeftSetpoint = new TunableNumber("Hopper/unstickSetpointLeft");
+  private final TunableNumber hopperRightSetpoint = new TunableNumber("Hopper/unstickSetpointRight");
+  private final TunableNumber rollerSetpoint = new TunableNumber("Shooter Roller/unstickSetpoint");
 
   /**
-   * Creates a new RunIntakeBackwards.
-   * 
-   * @param Intake
+   * Creates a new FeedUnstick.
    */
-  public RunIntakeBackwards(Intake intakeSub) {
-    intake = intakeSub;
-    addRequirements(intakeSub);
+  public FeedUnstick(ShooterRoller roller, Hopper hopper) {
+    this.roller = roller;
+    this.hopper = hopper;
+    addRequirements(roller, hopper);
+    hopperLeftSetpoint.setDefault(-0.5);
+    hopperRightSetpoint.setDefault(-0.4);
+    rollerSetpoint.setDefault(-0.6);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(-1);
-    intake.run(setpoint.get());
+    updateSetpoints();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if (Constants.tuningMode) {
-      intake.run(setpoint.get());
+      updateSetpoints();
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.run(0);
+    hopper.run(0, 0);
+    roller.run(0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
+  }
+
+  private void updateSetpoints() {
+    roller.run(rollerSetpoint.get());
+    hopper.run(hopperLeftSetpoint.get(), hopperRightSetpoint.get());
   }
 }

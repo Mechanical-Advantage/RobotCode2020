@@ -8,49 +8,39 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
-import frc.robot.subsystems.Intake;
-import frc.robot.util.TunableNumber;
+import frc.robot.util.PressureSensor;
 
-public class RunIntakeBackwards extends CommandBase {
+public class WaitForPressure extends CommandBase {
 
-  private TunableNumber setpoint = new TunableNumber("Intake Backwards/setpoint");
-  private final Intake intake;
+  private final double requiredPressure = 40.0;
+  private final PressureSensor pressureSensor;
 
   /**
-   * Creates a new RunIntakeBackwards.
-   * 
-   * @param Intake
+   * Creates a new WaitForPressure.
    */
-  public RunIntakeBackwards(Intake intakeSub) {
-    intake = intakeSub;
-    addRequirements(intakeSub);
+  public WaitForPressure(PressureSensor pressureSensor) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    this.pressureSensor = pressureSensor;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(-1);
-    intake.run(setpoint.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Constants.tuningMode) {
-      intake.run(setpoint.get());
-    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.run(0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return pressureSensor.getPressure() >= requiredPressure;
   }
 }

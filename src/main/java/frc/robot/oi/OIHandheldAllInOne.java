@@ -16,15 +16,31 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * (driver and operator).
  */
 public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOperatorOI {
-    private Button shooterFlywheelRunButton = new Button(driverController::getAButton);
-    private Button shooterFlywheelStopButton = new Button(driverController::getBButton);
-    private Button shooterRollerButton = new Button(driverController::getXButton);
+    private Button shooterFlywheelRunButton;
+    private Button shooterFlywheelStopButton;
+    private Button shooterRollerButton;
+    private Button shooterUnstickButton;
 
-    private Button intakeExtendButton = new POVButton(driverController, 90);
-    private Button intakeRetractButton = new POVButton(driverController, 270);
-    private Button intakeForwardsButton = new POVButton(driverController, 0);
-    private Button intakeBackwardsButton = new POVButton(driverController, 180);
+    private Button intakeExtendButton;
+    private Button intakeRetractButton;
+    private Button intakeForwardsButton;
+    private Button intakeBackwardsButton;
     private Button climbEnableButton;
+
+    public OIHandheldAllInOne(int ID) {
+        super(ID);
+
+        shooterFlywheelRunButton = new Button(driverController::getAButton);
+        shooterFlywheelStopButton = new Button(driverController::getBButton);
+        shooterRollerButton = new Button(driverController::getXButton);
+        shooterUnstickButton = new Button(driverController::getYButton);
+
+        intakeExtendButton = new POVButton(driverController, 90);
+        intakeRetractButton = new POVButton(driverController, 270);
+        intakeForwardsButton = new POVButton(driverController, 0);
+        intakeBackwardsButton = new POVButton(driverController, 180);
+
+    }
 
     @Override
     public Trigger getShooterFlywheelRunButton() {
@@ -39,6 +55,11 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     @Override
     public Trigger getShooterRollerButton() {
         return shooterRollerButton;
+    }
+
+    @Override
+    public Trigger getShooterUnstickButton() {
+        return shooterUnstickButton;
     }
 
     @Override

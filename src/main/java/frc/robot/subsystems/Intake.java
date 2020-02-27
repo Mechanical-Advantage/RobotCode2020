@@ -24,8 +24,7 @@ import frc.robot.Constants.RobotType;
 public class Intake extends SubsystemBase {
 
   private static final boolean invertIntake = false;
-  private static final int deviceID = 7;
-  private static final int channel = 0;
+  private static final int solenoidChannel = 0;
   private static final int PCM = 0;
 
   private static final int currentLimit = 30;
@@ -39,13 +38,19 @@ public class Intake extends SubsystemBase {
    */
   public Intake() {
 
-    if (Constants.getRobot() != RobotType.ROBOT_2020) {
-      return;
+    switch (Constants.getRobot()) {
+      case ROBOT_2020:
+        intake = new CANSparkMax(5, MotorType.kBrushless);
+        intakeSolenoid = new Solenoid(solenoidChannel, PCM);
+        break;
+      case ROBOT_2020_DRIVE:
+        // This is temporary for testing
+        intake = new CANSparkMax(5, MotorType.kBrushless);
+        break;
+      default:
+        return;
     }
 
-    intakeSolenoid = new Solenoid(channel, PCM);
-
-    intake = new CANSparkMax(deviceID, MotorType.kBrushless);
     intake.restoreFactoryDefaults();
     intake.setSmartCurrentLimit(currentLimit);
 
@@ -64,6 +69,7 @@ public class Intake extends SubsystemBase {
         subsystem.run(0);
       }
     });
+    intake.burnFlash();
   }
 
   @Override
@@ -91,5 +97,4 @@ public class Intake extends SubsystemBase {
     }
     intakeSolenoid.set(false);
   }
-
 }

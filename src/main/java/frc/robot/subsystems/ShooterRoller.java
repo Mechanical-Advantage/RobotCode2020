@@ -23,8 +23,6 @@ public class ShooterRoller extends SubsystemBase {
 
   private static final boolean invertRollers = false;
   private static final int currentLimit = 30;
-  private static final int masterDeviceID = 4;
-  private static final int followerDeviceID = 11;
 
   CANSparkMax rollerMaster;
   CANSparkMax rollerFollower;
@@ -33,11 +31,16 @@ public class ShooterRoller extends SubsystemBase {
    * Creates a new ShooterRoller.
    */
   public ShooterRoller() {
-    if (Constants.getRobot() != RobotType.ROBOT_2020 && Constants.getRobot() != RobotType.ROBOT_2020_DRIVE) {
-      return;
+    switch (Constants.getRobot()) {
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        rollerMaster = new CANSparkMax(8, MotorType.kBrushless);
+        rollerFollower = new CANSparkMax(11, MotorType.kBrushless);
+        break;
+      default:
+        return;
     }
-    rollerMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushless);
-    rollerFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushless);
+
     rollerMaster.restoreFactoryDefaults();
     rollerFollower.restoreFactoryDefaults();
     rollerFollower.follow(rollerMaster, true);

@@ -41,6 +41,11 @@ public class DummyOI implements IDriverOI, IDriverOverrideOI, IOperatorOI {
     }
 
     @Override
+    public Trigger getShooterUnstickButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
     public Trigger getIntakeExtendButton() {
         return IOperatorOI.dummyTrigger;
     }

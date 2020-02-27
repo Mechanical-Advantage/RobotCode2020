@@ -18,19 +18,35 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class OIDualJoysticks implements IDriverOI {
     // map left stick to ID 0 and right to ID 1 in driver station
-    private Joystick leftController = new Joystick(0);
-    private Joystick rightController = new Joystick(1);
+    private Joystick leftController;
+    private Joystick rightController;
 
-    private Button frontCameraButton = new JoystickButton(rightController, 3);
-    private Button secondCameraButton = new JoystickButton(rightController, 2);
-    private Button joysticksForward = new JoystickButton(leftController, 3);
-    private Button joysticksReverse = new JoystickButton(leftController, 2);
-    private Button sniperMode = new JoystickButton(rightController, 1);
-    private Button toggleGear = new JoystickButton(leftController, 1);
-    private Button highGear = new JoystickButton(leftController, 5);
-    private Button lowGear = new JoystickButton(leftController, 4);
+    private Button frontCameraButton;
+    private Button secondCameraButton;
+    private Button joysticksForward;
+    private Button joysticksReverse;
+    private Button sniperMode;
+    private Button toggleGear;
+    private Button highGear;
+    private Button lowGear;
 
-    private Button visionTestButton = new JoystickButton(rightController, 8);
+    private Button visionTestButton;
+
+    public OIDualJoysticks(int leftID, int rightID) {
+        leftController = new Joystick(leftID);
+        rightController = new Joystick(rightID);
+
+        frontCameraButton = new JoystickButton(rightController, 3);
+        secondCameraButton = new JoystickButton(rightController, 2);
+        joysticksForward = new JoystickButton(leftController, 3);
+        joysticksReverse = new JoystickButton(leftController, 2);
+        sniperMode = new JoystickButton(rightController, 1);
+        toggleGear = new JoystickButton(leftController, 1);
+        highGear = new JoystickButton(leftController, 5);
+        lowGear = new JoystickButton(leftController, 4);
+
+        visionTestButton = new JoystickButton(rightController, 8);
+    }
 
     @Override
     public double getLeftDriveY() {

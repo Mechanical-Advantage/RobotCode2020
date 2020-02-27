@@ -11,18 +11,26 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * Driver OI class for an XBox style controller.
  */
 public class OIHandheld implements IDriverOI {
-    XboxController driverController = new XboxController(0);
+    XboxController driverController;
 
-    private POVButton joysticksForward = new POVButton(driverController, 0);
-    private POVButton joysticksReverse = new POVButton(driverController, 180);
+    private POVButton joysticksForward;
+    private POVButton joysticksReverse;
 
     private static final double sniperHighLevel = 0.3; // used for right trigger when using handheld control
     private static final double sniperLowLevel = 0.15; // used for left trigger when using handheld control
 
-    private Button autoAimButton = new Button(() -> driverController.getBumper(Hand.kLeft)); // create a lamda
-    private Button autoDriveButton = new POVButton(driverController, 90);
+    private Button autoAimButton;
+    private Button autoDriveButton;
 
-    public OIHandheld() {
+    public OIHandheld(int ID) {
+        driverController = new XboxController(ID);
+
+        joysticksForward = new POVButton(driverController, 0);
+        joysticksReverse = new POVButton(driverController, 180);
+
+        autoAimButton = new Button(() -> driverController.getBumper(Hand.kLeft));
+        autoDriveButton = new POVButton(driverController, 90);
+
         resetRumble();
     }
 
@@ -65,12 +73,12 @@ public class OIHandheld implements IDriverOI {
     public void setDriverRumble(DriverOIRumbleType type, double value) {
         value = value > 1 ? 1 : value;
         switch (type) {
-        case LEFT:
-            driverController.setRumble(RumbleType.kLeftRumble, value);
-            break;
-        case RIGHT:
-            driverController.setRumble(RumbleType.kRightRumble, value);
-            break;
+            case LEFT:
+                driverController.setRumble(RumbleType.kLeftRumble, value);
+                break;
+            case RIGHT:
+                driverController.setRumble(RumbleType.kRightRumble, value);
+                break;
         }
     }
 
@@ -103,7 +111,7 @@ public class OIHandheld implements IDriverOI {
 
     @Override
     public boolean hasDualSniperMode() {
-        return true;
+        return false;
     }
 
     // @Override
