@@ -225,6 +225,8 @@ public class RobotContainer {
         switch (joystickNames[joystickNum]) {
           case "Controller (XBOX 360 For Windows)":
           case "Controller (Gamepad F310)":
+          case "XBOX 360 For Windows (Controller)":
+          case "Gamepad F310 (Controller)":
             if (firstControllerName == null) {
               firstControllerName = joystickName;
               if (operatorOIFound) {
