@@ -18,7 +18,7 @@ import frc.robot.util.PressureSensor;
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
 public class SetShooterHoodMiddle extends SequentialCommandGroup {
 
-  private static final double raiseWait = 0.25; // seconds to wait after lowering before moving back up
+  private static final double raiseWait = 0.5; // seconds to wait after lowering before moving back up
 
   /**
    * Creates a new SetShooterHoodMiddle.
