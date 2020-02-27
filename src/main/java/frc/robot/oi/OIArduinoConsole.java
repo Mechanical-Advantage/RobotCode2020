@@ -26,7 +26,6 @@ public class OIArduinoConsole implements IOperatorOI {
     private Button openLoopDriveButton = new JoystickButton(arduinoController1, 1);
     private Button driveDisableSwitchButton = new JoystickButton(arduinoController1, 2);
     private Button manualHoodButton = new JoystickButton(arduinoController1, 4);
-    private Button buddyClimbButton = new JoystickButton(arduinoController1, 5);
     private Button climbEnableButton = new JoystickButton(arduinoController1, 6);
 
     private Button intakeExtendButton = new JoystickButton(arduinoController1, 7);
@@ -42,7 +41,8 @@ public class OIArduinoConsole implements IOperatorOI {
     private Button hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
     private Button hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
-    // TODO check port number
+    // TODO check port number:
+    // set up like drive train- x and y positions
     private JoystickButton extendClimber = new JoystickButton(arduinoController2, 0);
 
     NetworkTable ledTable;
