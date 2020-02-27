@@ -16,15 +16,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.RobotType;
 
 public class Intake extends SubsystemBase {
 
   private static final boolean invertIntake = false;
-  private static final int solenoidChannel = 0;
+  private static final int solenoidChannel = 3;
   private static final int PCM = 0;
 
   private static final int currentLimit = 30;
