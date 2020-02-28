@@ -13,6 +13,7 @@ import java.util.Map;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -81,9 +82,9 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
         // Set up LCD fields
-        LCDTimer = new OILCDField("Timer", 6, 0, 8, "??? secs");
-        LCDPressure = new OILCDField("Pressure", 0, 1, 7, "PSI: ??");
-        LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 2, 18, "Flywheel: ???? rpm");
+        LCDTimer = new OILCDField("Timer", 0, 0, 20, "   Unknown - ?:??");
+        LCDPressure = new OILCDField("Pressure", 0, 1, 16, "Pressure: ?? PSI");
+        LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 2, 18, "Flywheel: ???? RPM");
 
         // Set up LED entry
         ledTable = NetworkTableInstance.getDefault().getTable("OperatorInterface");
@@ -175,18 +176,41 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     }
 
     @Override
-    public void setTimer(int timeRemaining) {
-        LCDTimer.setValue(Integer.toString(timeRemaining) + " secs");
+    public void updateTimer() {
+        int time = (int) DriverStation.getInstance().getMatchTime();
+        String timeString = "??? secs";
+        if (time == -1) {
+            timeString = "Finished";
+        } else if (time > 0) {
+            int minutes = Math.floorDiv(time, 60);
+            int seconds = time - (minutes * 60);
+            timeString = Integer.toString(minutes) + ":" + String.format("%2s", Integer.toString(seconds));
+        }
+
+        String mode = "Teleop";
+        if (DriverStation.getInstance().isDisabled()) {
+            mode = "Disabled";
+        } else if (DriverStation.getInstance().isAutonomous()) {
+            mode = "Auto";
+        }
+
+        String fullText = mode + " - " + timeString;
+        int totalPadding = 20 - fullText.length();
+        if (totalPadding < 0) {
+            totalPadding = 0;
+        }
+        int leftPadding = Math.floorDiv(totalPadding, 2);
+        LCDTimer.setValue(String.format("%1$" + leftPadding + "s", fullText));
     }
 
     @Override
     public void setPressure(double pressure) {
-        LCDPressure.setValue("PSI: " + Integer.toString(Math.round((float) pressure)));
+        LCDPressure.setValue("Pressure: " + Integer.toString(Math.round((float) pressure)) + " PSI");
     }
 
     @Override
     public void setFlyWheelSpeed(double rpm) {
-        LCDFlyWheelSpeed.setValue("Flywheel: " + Integer.toString(Math.round((float) rpm)) + " rpm");
+        LCDFlyWheelSpeed.setValue("Flywheel: " + Integer.toString(Math.round((float) rpm)) + " RPM");
     }
 
     @Override

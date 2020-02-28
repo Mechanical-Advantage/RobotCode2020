@@ -21,8 +21,12 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.util.SetFlyWheelSpeedInterface;
 import frc.robot.util.TunableNumber;
+import frc.robot.util.UpdateLEDInterface;
+
 import com.revrobotics.ControlType;
 
 public class ShooterFlyWheel extends SubsystemBase {
@@ -31,7 +35,9 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final boolean invertFlywheel = true;
   private static final int currentLimit = 30;
   private static final double MULTIPLIER = 1.5;
-  private double setpoint;
+  private static final double LEDSlowPulseThreshold = 0.5; // percent of setpoint rpm
+  private static final double LEDFastPulseThreshold = 0.9; // percent of setpoint rpm
+  private double setpoint = 0;
 
   CANSparkMax flywheelMaster;
   CANSparkMax flywheelFollower;
@@ -40,6 +46,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   public double kP, kI, kD, kFF, kMaxOutput, kMinOutput, maxRPM;
 
   private Double lastRampRate = null; // Force this to be updated once
+  private OILEDState lastShooterLEDState = OILEDState.OFF;
 
   private TunableNumber P = new TunableNumber("Shooter FlyWheel PID/P");
   private TunableNumber I = new TunableNumber("Shooter FlyWheel PID/I");
@@ -49,12 +56,16 @@ public class ShooterFlyWheel extends SubsystemBase {
   private TunableNumber maxOutput = new TunableNumber("Shooter FlyWheel/Max Output");
   private TunableNumber minOutput = new TunableNumber("Shooter FlyWheel/Min Output");
 
+  private UpdateLEDInterface updateLED;
   private SetFlyWheelSpeedInterface setFlyWheelSpeed;
 
   /**
    * Creates a new ShooterFlyWheel.
    */
-  public ShooterFlyWheel(SetFlyWheelSpeedInterface setFlyWheelSpeed) {
+  public ShooterFlyWheel(UpdateLEDInterface updateLED, SetFlyWheelSpeedInterface setFlyWheelSpeed) {
+    this.updateLED = updateLED;
+    updateRunningLEDs(false);
+
     switch (Constants.getRobot()) {
       case ROBOT_2020:
         flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
@@ -175,14 +186,32 @@ public class ShooterFlyWheel extends SubsystemBase {
     }
 
     setFlyWheelSpeed.set(getSpeed());
+
+    // Update shooter LED
+    double targetRpm = setpoint * MULTIPLIER;
+    double currentRpm = getSpeed();
+    OILEDState shooterLEDState = OILEDState.OFF;
+    if (currentRpm > targetRpm * LEDFastPulseThreshold) {
+      shooterLEDState = OILEDState.ON;
+    } else if (currentRpm > targetRpm * LEDSlowPulseThreshold) {
+      shooterLEDState = OILEDState.PULSE_FAST;
+    } else if (currentRpm > 0) {
+      shooterLEDState = OILEDState.PULSE_SLOW;
+    }
+    if (shooterLEDState != lastShooterLEDState) {
+      updateLED.update(OILED.SHOOTER_SHOOT, shooterLEDState);
+      lastShooterLEDState = shooterLEDState;
+    }
   }
 
   public void stop() {
     if (flywheelMaster == null) {
       return;
     }
+    setpoint = 0;
     flywheelMaster.stopMotor();
     flywheelFollower.stopMotor();
+    updateRunningLEDs(false);
   }
 
   public void setShooterRPM(double rpm) {
@@ -191,10 +220,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     }
     setpoint = rpm / MULTIPLIER;
     flywheel_pidController.setReference(setpoint, ControlType.kVelocity);
-  }
-
-  public double getShooterSetpoint() {
-    return setpoint * MULTIPLIER;
+    updateRunningLEDs(rpm != 0);
   }
 
   public void run(double power) {
@@ -202,6 +228,7 @@ public class ShooterFlyWheel extends SubsystemBase {
       return;
     }
     flywheelMaster.set(power);
+    updateRunningLEDs(power != 0);
   }
 
   public double getSpeed() {
@@ -209,5 +236,10 @@ public class ShooterFlyWheel extends SubsystemBase {
       return 0;
     }
     return flywheelEncoder.getVelocity() * MULTIPLIER;
+  }
+
+  private void updateRunningLEDs(boolean running) {
+    updateLED.update(OILED.SHOOTER_RUN, running ? OILEDState.ON : OILEDState.OFF);
+    updateLED.update(OILED.SHOOTER_STOP, running ? OILEDState.OFF : OILEDState.ON);
   }
 }

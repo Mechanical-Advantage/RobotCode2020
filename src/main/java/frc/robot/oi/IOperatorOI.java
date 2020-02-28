@@ -48,7 +48,7 @@ public interface IOperatorOI {
         return dummyTrigger;
     }
 
-    public default void setTimer(int timeRemaining) {
+    public default void updateTimer() {
     }
 
     public default void setPressure(double pressure) {

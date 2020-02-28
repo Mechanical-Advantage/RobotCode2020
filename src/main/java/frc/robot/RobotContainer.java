@@ -93,10 +93,11 @@ public class RobotContainer {
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
-  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((rpm) -> operatorOI.setFlyWheelSpeed(rpm));
+  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((led, state) -> operatorOI.updateLED(led, state),
+      (rpm) -> operatorOI.setFlyWheelSpeed(rpm));
   private final ShooterRoller shooterRoller = new ShooterRoller();
   private final ShooterHood shooterHood = new ShooterHood();
-  private final Intake intake = new Intake();
+  private final Intake intake = new Intake((led, state) -> operatorOI.updateLED(led, state));
   private final Hopper hopper = new Hopper();
   private RobotOdometry odometry;
 
@@ -328,21 +329,17 @@ public class RobotContainer {
     operatorOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
-    IntakeExtendRetract intakeExtend = new IntakeExtendRetract(true, intake, operatorOI::updateLED);
-    IntakeExtendRetract intakeRetract = new IntakeExtendRetract(false, intake, operatorOI::updateLED);
-    operatorOI.getIntakeExtendButton().whenActive(intakeExtend);
-    operatorOI.getIntakeRetractButton().whenActive(intakeRetract);
-    operatorOI.updateLED(OILED.INTAKE_RETRACT, OILEDState.ON);
+    operatorOI.getIntakeExtendButton().whenActive(new IntakeExtendRetract(true, intake));
+    operatorOI.getIntakeRetractButton().whenActive(new IntakeExtendRetract(false, intake));
 
-    RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake, operatorOI::updateLED);
-    RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake, operatorOI::updateLED);
+    RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
+    RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
     operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntakeForwards);
     operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntakeBackwards);
 
-    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel, operatorOI::updateLED);
+    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
-    operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
         .whenActive(new SetShooterHoodTopBottom(shooterHood, false));
@@ -364,11 +361,7 @@ public class RobotContainer {
 
   public void updateOITimer() {
     if (operatorOI != null) {
-      int currentMatchTime = (int) DriverStation.getInstance().getMatchTime();
-      if (currentMatchTime != lastMatchTime) {
-        lastMatchTime = currentMatchTime;
-        operatorOI.setTimer(currentMatchTime);
-      }
+      operatorOI.updateTimer();
     }
   }
 

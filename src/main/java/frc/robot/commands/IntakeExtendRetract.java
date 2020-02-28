@@ -8,10 +8,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.oi.IOperatorOI.OILED;
-import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.Intake;
-import frc.robot.util.UpdateLEDInterface;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -20,13 +17,11 @@ public class IntakeExtendRetract extends InstantCommand {
 
   private final boolean extend;
   private final Intake intake;
-  private final UpdateLEDInterface updateLED;
 
-  public IntakeExtendRetract(boolean extend, Intake intake, UpdateLEDInterface updateLED) {
+  public IntakeExtendRetract(boolean extend, Intake intake) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.extend = extend;
     this.intake = intake;
-    this.updateLED = updateLED;
     addRequirements(intake);
   }
 
@@ -38,7 +33,5 @@ public class IntakeExtendRetract extends InstantCommand {
     } else {
       intake.retract();
     }
-    updateLED.update(OILED.INTAKE_EXTEND, extend ? OILEDState.ON : OILEDState.OFF);
-    updateLED.update(OILED.INTAKE_RETRACT, extend ? OILEDState.OFF : OILEDState.ON);
   }
 }
