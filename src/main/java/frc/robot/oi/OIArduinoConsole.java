@@ -102,6 +102,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         // Define LED mapping
         ledMap.put(OILED.OPEN_LOOP, 0);
         ledMap.put(OILED.DRIVE_DISABLE, 1);
+        ledMap.put(OILED.LIMELIGHT_DISABLE, 1);
         ledMap.put(OILED.MANUAL_HOOD, 3);
         ledMap.put(OILED.BUDDY_CLIMB, 4);
         ledMap.put(OILED.CLIMB_ENABLE, 5);

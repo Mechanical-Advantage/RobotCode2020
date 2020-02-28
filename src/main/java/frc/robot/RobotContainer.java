@@ -376,6 +376,11 @@ public class RobotContainer {
     operatorOI.getManualHoodSwitch()
         .whenInactive(new SetLEDOverride(OILED.MANUAL_HOOD, OILEDState.OFF, operatorOI::updateLED));
 
+    driverOverrideOI.getLimelightLEDDisableSwitch()
+        .whenActive(new SetLEDOverride(OILED.LIMELIGHT_DISABLE, OILEDState.ON, operatorOI::updateLED));
+    driverOverrideOI.getLimelightLEDDisableSwitch()
+        .whenInactive(new SetLEDOverride(OILED.LIMELIGHT_DISABLE, OILEDState.OFF, operatorOI::updateLED));
+
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
     driverOI.getAutoAimButton().whenInactive(autoAimCommand::cancel);
