@@ -30,6 +30,7 @@ public class Climber extends SubsystemBase {
   private static final boolean invertClimber = false;
   private static final int masterDeviceID = 2;
   private static final int followerDeviceID = 1;
+  private static final double followerMultiplier = 1;
   private static final int deploySolenoidChannel = 2;
   private static final int PCM = 0;
   private boolean climberEnabled = false;
@@ -53,7 +54,6 @@ public class Climber extends SubsystemBase {
 
     climberMaster.restoreFactoryDefaults();
     climberFollower.restoreFactoryDefaults();
-    climberFollower.follow(climberMaster, true);
     climberMaster.setSmartCurrentLimit(currentLimit);
     climberFollower.setSmartCurrentLimit(currentLimit);
     // Default feedback device is hall effect sensor so need to change it
@@ -95,6 +95,7 @@ public class Climber extends SubsystemBase {
 
     if (climberEnabled) {
       climberMaster.set(power * (invertClimber ? -1 : 1));
+      climberFollower.set(power * (invertClimber ? 1 : -1) * followerMultiplier);
     }
   }
 
@@ -113,5 +114,6 @@ public class Climber extends SubsystemBase {
     climberDeploySolenoid.set(false);
     climberEnabled = false;
     climberMaster.set(0);
+    climberFollower.set(0);
   }
 }
