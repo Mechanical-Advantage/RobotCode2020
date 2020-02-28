@@ -64,7 +64,6 @@ public class ShooterFlyWheel extends SubsystemBase {
    */
   public ShooterFlyWheel(UpdateLEDInterface updateLED, SetFlyWheelSpeedInterface setFlyWheelSpeed) {
     this.updateLED = updateLED;
-    updateRunningLEDs(false);
 
     switch (Constants.getRobot()) {
       case ROBOT_2020:
@@ -208,7 +207,6 @@ public class ShooterFlyWheel extends SubsystemBase {
     if (flywheelMaster == null) {
       return;
     }
-    setpoint = 0;
     flywheelMaster.stopMotor();
     flywheelFollower.stopMotor();
     updateRunningLEDs(false);

@@ -41,7 +41,6 @@ public class Intake extends SubsystemBase {
    */
   public Intake(UpdateLEDInterface updateLED) {
     this.updateLED = updateLED;
-    updateLED.update(OILED.INTAKE_RETRACT, OILEDState.ON);
 
     switch (Constants.getRobot()) {
       case ROBOT_2020:

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.ShooterHood;
+import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.util.PressureSensor;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -30,6 +31,7 @@ public class SetShooterHoodMiddleTop extends SequentialCommandGroup {
         new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood), new WaitCommand(raiseWait),
         new InstantCommand(() -> shooterHood.setStopPosition(!top), shooterHood),
-        new InstantCommand(() -> shooterHood.setLiftPosition(true), shooterHood));
+        new InstantCommand(() -> shooterHood.setLiftPosition(true), shooterHood),
+        new InstantCommand(() -> shooterHood.setLEDs(top ? HoodPosition.TOP : HoodPosition.MIDDLE)));
   }
 }

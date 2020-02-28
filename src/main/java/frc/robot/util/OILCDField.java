@@ -55,4 +55,11 @@ public class OILCDField {
         table.getEntry("Length").setNumber(length);
         table.getEntry("String").setString(value);
     }
+
+    /**
+     * Clears all fields in Network Tables. Run before initalizaing fields
+     */
+    public static void clearFields() {
+        NetworkTableInstance.getDefault().getTable("OperatorInterface").delete("LCD");
+    }
 }

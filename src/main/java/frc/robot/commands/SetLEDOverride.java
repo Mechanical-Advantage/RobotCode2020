@@ -8,25 +8,33 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.subsystems.ShooterHood;
-import frc.robot.subsystems.ShooterHood.HoodPosition;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
+import frc.robot.util.UpdateLEDInterface;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
-public class SetShooterHoodBottom extends SequentialCommandGroup {
-  /**
-   * Creates a new SetShooterHoodEdge.
-   * 
-   * @param shooterHood Shooter hood subsystem
-   * @param top         Position to move to
-   */
-  public SetShooterHoodBottom(ShooterHood shooterHood) {
-    // Add your commands in the super() call, e.g.
-    // super(new FooCommand(), new BarCommand());
-    super(new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
-        new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood),
-        new InstantCommand(() -> shooterHood.setLEDs(HoodPosition.BOTTOM)));
+public class SetLEDOverride extends InstantCommand {
+  private final OILED led;
+  private final OILEDState state;
+  private final UpdateLEDInterface updateLED;
+
+  public SetLEDOverride(OILED led, OILEDState state, UpdateLEDInterface updateLED) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    this.led = led;
+    this.state = state;
+    this.updateLED = updateLED;
+  }
+
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize() {
+    updateLED.update(led, state);
+  }
+
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
   }
 }

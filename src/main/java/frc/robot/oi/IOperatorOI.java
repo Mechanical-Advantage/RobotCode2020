@@ -8,6 +8,7 @@
 package frc.robot.oi;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.ShooterHood.HoodPosition;
 
 /**
  * OI interface for operator controls.
@@ -65,12 +66,16 @@ public interface IOperatorOI {
     public default void setFlyWheelSpeed(double rpm) {
     }
 
+    public default void setHoodPosition(HoodPosition position) {
+    }
+
     public default void updateLED(OILED led, OILEDState state) {
     }
 
     public static enum OILED {
-        OPEN_LOOP, DRIVE_DISABLE, MANUAL_HOOD, BUDDY_CLIMB, CLIMB_ENABLE, INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD,
-        INTAKE_BACKWARD, SHOOTER_RUN, SHOOTER_STOP, SHOOTER_SHOOT, SHOOTER_UNSTICK
+        OPEN_LOOP, DRIVE_DISABLE, MANUAL_HOOD, BUDDY_CLIMB, CLIMB_ENABLE, HOOD_BOTTOM, HOOD_MIDDLE, HOOD_TOP,
+        INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD, INTAKE_BACKWARD, SHOOTER_RUN, SHOOTER_STOP, SHOOTER_SHOOT,
+        SHOOTER_UNSTICK
     }
 
     public static enum OILEDState {

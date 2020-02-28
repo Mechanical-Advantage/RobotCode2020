@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.util.OILCDField;
 
 /**
@@ -55,6 +56,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     OILCDField LCDTimer;
     OILCDField LCDPressure;
     OILCDField LCDFlyWheelSpeed;
+    OILCDField LCDHoodPosition;
 
     private static final Map<OILED, Integer> ledMap = new HashMap<OILED, Integer>();
 
@@ -85,9 +87,11 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
         // Set up LCD fields
+        OILCDField.clearFields();
         LCDTimer = new OILCDField("Timer", 0, 0, 20, "   Unknown - ?:??");
-        LCDPressure = new OILCDField("Pressure", 0, 1, 16, "Pressure: ?? PSI");
-        LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 2, 18, "Flywheel: ???? RPM");
+        LCDPressure = new OILCDField("Pressure", 0, 1, 20, "Pressure: ?? PSI");
+        LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 2, 20, "Flywheel: ???? RPM");
+        LCDHoodPosition = new OILCDField("HoodPosition", 0, 3, 20, "Hood: Unknown");
 
         // Set up LED entry
         ledTable = NetworkTableInstance.getDefault().getTable("OperatorInterface");
@@ -96,6 +100,12 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         // Define LED mapping
         ledMap.put(OILED.OPEN_LOOP, 0);
         ledMap.put(OILED.DRIVE_DISABLE, 1);
+        ledMap.put(OILED.MANUAL_HOOD, 3);
+        ledMap.put(OILED.BUDDY_CLIMB, 4);
+        ledMap.put(OILED.CLIMB_ENABLE, 5);
+        ledMap.put(OILED.HOOD_BOTTOM, 7);
+        ledMap.put(OILED.HOOD_MIDDLE, 8);
+        ledMap.put(OILED.HOOD_TOP, 9);
         ledMap.put(OILED.INTAKE_EXTEND, 10);
         ledMap.put(OILED.INTAKE_RETRACT, 11);
         ledMap.put(OILED.INTAKE_FORWARD, 12);
@@ -190,13 +200,15 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     @Override
     public void updateTimer() {
         int time = (int) DriverStation.getInstance().getMatchTime();
-        String timeString = "??? secs";
-        if (time == -1) {
-            timeString = "Finished";
-        } else if (time > 0) {
+        String timeString = "?:??";
+        if (time >= 0) {
             int minutes = Math.floorDiv(time, 60);
             int seconds = time - (minutes * 60);
-            timeString = Integer.toString(minutes) + ":" + String.format("%2s", Integer.toString(seconds));
+            String secondsText = Integer.toString(seconds);
+            if (secondsText.length() < 2) {
+                secondsText = "0" + secondsText;
+            }
+            timeString = Integer.toString(minutes) + ":" + secondsText;
         }
 
         String mode = "Teleop";
@@ -212,7 +224,11 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
             totalPadding = 0;
         }
         int leftPadding = Math.floorDiv(totalPadding, 2);
-        LCDTimer.setValue(String.format("%1$" + leftPadding + "s", fullText));
+        String padding = "";
+        for (int i = 0; i < leftPadding; i++) {
+            padding = " " + padding;
+        }
+        LCDTimer.setValue(padding + fullText);
     }
 
     @Override
@@ -223,6 +239,26 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     @Override
     public void setFlyWheelSpeed(double rpm) {
         LCDFlyWheelSpeed.setValue("Flywheel: " + Integer.toString(Math.round((float) rpm)) + " RPM");
+    }
+
+    @Override
+    public void setHoodPosition(HoodPosition position) {
+        String text;
+        switch (position) {
+            case BOTTOM:
+                text = "Wall";
+                break;
+            case MIDDLE:
+                text = "Line";
+                break;
+            case TOP:
+                text = "Trench";
+                break;
+            default:
+                text = "Unknown";
+                break;
+        }
+        LCDHoodPosition.setValue("Hood: " + text);
     }
 
     @Override

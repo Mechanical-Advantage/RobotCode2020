@@ -42,6 +42,7 @@ import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
+import frc.robot.commands.SetLEDOverride;
 import frc.robot.commands.SetShooterHoodMiddleTop;
 import frc.robot.commands.SetShooterHoodBottom;
 import frc.robot.commands.TurnToAngle;
@@ -96,9 +97,10 @@ public class RobotContainer {
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((led, state) -> operatorOI.updateLED(led, state),
-      (rpm) -> operatorOI.setFlyWheelSpeed(rpm));
+      (double rpm) -> operatorOI.setFlyWheelSpeed(rpm));
   private final ShooterRoller shooterRoller = new ShooterRoller();
-  private final ShooterHood shooterHood = new ShooterHood();
+  private final ShooterHood shooterHood = new ShooterHood((led, state) -> operatorOI.updateLED(led, state),
+      (position) -> operatorOI.setHoodPosition(position));
   private final Intake intake = new Intake((led, state) -> operatorOI.updateLED(led, state));
   private final Hopper hopper = new Hopper();
   private final Climber climber = new Climber();
@@ -168,8 +170,8 @@ public class RobotContainer {
       autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
-    autoChooser.addOption("Aim and fire loaded balls", new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs,
-        hopper, shooterRoller, shooterFlyWheel, operatorOI::updateLED));
+    autoChooser.addOption("Aim and fire loaded balls",
+        new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -300,12 +302,15 @@ public class RobotContainer {
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
 
-    driverOverrideOI.getOpenLoopSwitch().whenActive(() -> operatorOI.updateLED(OILED.OPEN_LOOP, OILEDState.ON));
-    driverOverrideOI.getOpenLoopSwitch().whenInactive(() -> operatorOI.updateLED(OILED.OPEN_LOOP, OILEDState.OFF));
+    driverOverrideOI.getOpenLoopSwitch()
+        .whenActive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.ON, operatorOI::updateLED));
+    driverOverrideOI.getOpenLoopSwitch()
+        .whenInactive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.OFF, operatorOI::updateLED));
 
-    driverOverrideOI.getDriveDisableSwitch().whenActive(() -> operatorOI.updateLED(OILED.DRIVE_DISABLE, OILEDState.ON));
     driverOverrideOI.getDriveDisableSwitch()
-        .whenInactive(() -> operatorOI.updateLED(OILED.DRIVE_DISABLE, OILEDState.OFF));
+        .whenActive(new SetLEDOverride(OILED.DRIVE_DISABLE, OILEDState.ON, operatorOI::updateLED));
+    driverOverrideOI.getDriveDisableSwitch()
+        .whenInactive(new SetLEDOverride(OILED.DRIVE_DISABLE, OILEDState.OFF, operatorOI::updateLED));
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
@@ -336,6 +341,7 @@ public class RobotContainer {
 
     operatorOI.getIntakeExtendButton().whenActive(new IntakeExtendRetract(true, intake));
     operatorOI.getIntakeRetractButton().whenActive(new IntakeExtendRetract(false, intake));
+    operatorOI.updateLED(OILED.INTAKE_RETRACT, OILEDState.ON);
 
     RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
     RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
@@ -345,6 +351,7 @@ public class RobotContainer {
     RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
+    operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
         .whenActive(new SetShooterHoodBottom(shooterHood));
@@ -356,6 +363,16 @@ public class RobotContainer {
     operatorOI.getClimbEnableSwitch().whenActive(climber::deploy, climber);
     operatorOI.getClimbEnableSwitch().whenInactive(climber::reset, climber);
     operatorOI.getClimbEnableSwitch().whileActiveContinuous(new RunClimber(climber, operatorOI::getClimbStickY));
+
+    operatorOI.getClimbEnableSwitch()
+        .whenActive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.ON, operatorOI::updateLED));
+    operatorOI.getClimbEnableSwitch()
+        .whenInactive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.OFF, operatorOI::updateLED));
+
+    operatorOI.getManualHoodSwitch()
+        .whenActive(new SetLEDOverride(OILED.MANUAL_HOOD, OILEDState.ON, operatorOI::updateLED));
+    operatorOI.getManualHoodSwitch()
+        .whenInactive(new SetLEDOverride(OILED.MANUAL_HOOD, OILEDState.OFF, operatorOI::updateLED));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
