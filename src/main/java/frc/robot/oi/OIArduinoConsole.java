@@ -178,6 +178,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         return driveDisableSwitch;
     }
 
+    @Override
     public Trigger getManualHoodSwitch() {
         return manualHoodSwitch;
     }
