@@ -16,10 +16,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.RobotType;
 import frc.robot.oi.IOperatorOI.OILED;
 import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.util.UpdateLEDInterface;
@@ -27,7 +25,7 @@ import frc.robot.util.UpdateLEDInterface;
 public class Intake extends SubsystemBase {
 
   private static final boolean invertIntake = false;
-  private static final int solenoidChannel = 0;
+  private static final int solenoidChannel = 3;
   private static final int PCM = 0;
 
   private static final int currentLimit = 30;
@@ -48,11 +46,11 @@ public class Intake extends SubsystemBase {
     switch (Constants.getRobot()) {
       case ROBOT_2020:
         intake = new CANSparkMax(5, MotorType.kBrushless);
-        intakeSolenoid = new Solenoid(solenoidChannel, PCM);
+        intakeSolenoid = new Solenoid(PCM, solenoidChannel);
         break;
       case ROBOT_2020_DRIVE:
         // This is temporary for testing
-        intake = new CANSparkMax(7, MotorType.kBrushless);
+        intake = new CANSparkMax(5, MotorType.kBrushless);
         break;
       default:
         return;

@@ -34,6 +34,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button shooterFlywheelStopButton;
   private Button shooterRollerButton;
   private Button shooterUnstickButton;
+  private Button climbEnableButton;
 
   private Button intakeExtendButton;
   private Button intakeRetractButton;
@@ -72,6 +73,8 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     hoodWallButton = new JoystickButton(oiController1, 2);
     hoodLineButton = new JoystickButton(oiController1, 3);
     hoodTrenchButton = new JoystickButton(oiController1, 4);
+
+    climbEnableButton = new JoystickButton(oiController1, 12);
 
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
@@ -139,6 +142,16 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   @Override
   public Trigger getRunIntakeBackwardsButton() {
     return intakeBackwardsButton;
+  }
+
+  @Override
+  public Trigger getClimbEnableSwitch() {
+    return climbEnableButton;
+  }
+
+  @Override
+  public double getClimbStickY() {
+    return oiController1.getY();
   }
 
   public Trigger getManualHoodSwitch() {

@@ -35,14 +35,15 @@ import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
+import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
-import frc.robot.commands.SetShooterHoodMiddle;
-import frc.robot.commands.SetShooterHoodTopBottom;
+import frc.robot.commands.SetShooterHoodMiddleTop;
+import frc.robot.commands.SetShooterHoodBottom;
 import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
@@ -57,6 +58,7 @@ import frc.robot.oi.OIeStopConsole;
 import frc.robot.oi.IOperatorOI.OILED;
 import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.CameraSystem;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
@@ -99,6 +101,7 @@ public class RobotContainer {
   private final ShooterHood shooterHood = new ShooterHood();
   private final Intake intake = new Intake((led, state) -> operatorOI.updateLED(led, state));
   private final Hopper hopper = new Hopper();
+  private final Climber climber = new Climber();
   private RobotOdometry odometry;
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
@@ -227,6 +230,8 @@ public class RobotContainer {
         switch (joystickNames[joystickNum]) {
           case "Controller (XBOX 360 For Windows)":
           case "Controller (Gamepad F310)":
+          case "XBOX 360 For Windows (Controller)":
+          case "Gamepad F310 (Controller)":
             if (firstControllerName == null) {
               firstControllerName = joystickName;
               if (operatorOIFound) {
@@ -342,11 +347,15 @@ public class RobotContainer {
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodTopBottom(shooterHood, false));
+        .whenActive(new SetShooterHoodBottom(shooterHood));
     operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddle(shooterHood, pressureSensor));
+        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, false));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodTopBottom(shooterHood, true));
+        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, true));
+
+    operatorOI.getClimbEnableSwitch().whenActive(climber::deploy, climber);
+    operatorOI.getClimbEnableSwitch().whenInactive(climber::reset, climber);
+    operatorOI.getClimbEnableSwitch().whileActiveContinuous(new RunClimber(climber, operatorOI::getClimbStickY));
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);

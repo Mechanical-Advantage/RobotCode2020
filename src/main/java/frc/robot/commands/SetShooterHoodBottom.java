@@ -14,17 +14,17 @@ import frc.robot.subsystems.ShooterHood;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
-public class SetShooterHoodTopBottom extends SequentialCommandGroup {
+public class SetShooterHoodBottom extends SequentialCommandGroup {
   /**
    * Creates a new SetShooterHoodEdge.
    * 
    * @param shooterHood Shooter hood subsystem
    * @param top         Position to move to
    */
-  public SetShooterHoodTopBottom(ShooterHood shooterHood, boolean top) {
+  public SetShooterHoodBottom(ShooterHood shooterHood) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
-        new InstantCommand(() -> shooterHood.setLiftPosition(top), shooterHood));
+        new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood));
   }
 }

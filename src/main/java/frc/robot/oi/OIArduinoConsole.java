@@ -47,6 +47,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Button hoodWallButton;
     private Button hoodLineButton;
     private Button hoodTrenchButton;
+    private JoystickButton extendClimber;
 
     NetworkTable ledTable;
     NetworkTableEntry ledEntry;
@@ -60,6 +61,8 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     public OIArduinoConsole(int firstID, int secondID) {
         arduinoController1 = new Joystick(firstID);
         arduinoController2 = new Joystick(secondID);
+
+        extendClimber = new JoystickButton(arduinoController2, 0);
 
         openLoopSwitch = new JoystickButton(arduinoController1, 1);
         driveDisableSwitch = new JoystickButton(arduinoController1, 2);
@@ -147,6 +150,15 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     }
 
     @Override
+    public Trigger getClimbEnableSwitch() {
+        return climbEnableSwitch;
+    }
+
+    @Override
+    public double getClimbStickY() {
+        return arduinoController1.getY();
+    }
+
     public Trigger getOpenLoopSwitch() {
         return openLoopSwitch;
     }
