@@ -34,6 +34,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Button manualHoodSwitch;
     private Button buddyClimbSwitch;
     private Button climbEnableSwitch;
+    private Button limelightLEDDisableSwitch;
 
     private Button intakeExtendButton;
     private Button intakeRetractButton;
@@ -71,6 +72,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         manualHoodSwitch = new JoystickButton(arduinoController1, 4);
         buddyClimbSwitch = new JoystickButton(arduinoController1, 5);
         climbEnableSwitch = new JoystickButton(arduinoController1, 6);
+        limelightLEDDisableSwitch = new JoystickButton(arduinoController1, 3);
 
         intakeExtendButton = new JoystickButton(arduinoController1, 7);
         intakeRetractButton = new JoystickButton(arduinoController1, 8);
@@ -176,6 +178,11 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     @Override
     public Trigger getDriveDisableSwitch() {
         return driveDisableSwitch;
+    }
+
+    @Override
+    public Trigger getLimelightLEDDisableSwitch() {
+        return limelightLEDDisableSwitch;
     }
 
     @Override

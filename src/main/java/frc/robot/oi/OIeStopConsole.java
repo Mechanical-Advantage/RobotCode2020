@@ -29,6 +29,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button openLoopDrive;
   private Button driveDisableSwitch;
   private Button shiftDisableSwitch;
+  private Button limelightLEDDisableSwitch;
 
   private Button shooterFlywheelRunButton;
   private Button shooterFlywheelStopButton;
@@ -58,6 +59,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     openLoopDrive = new JoystickButton(oiController2, 10);
     driveDisableSwitch = new JoystickButton(oiController2, 9);
     shiftDisableSwitch = new JoystickButton(oiController2, 8);
+    limelightLEDDisableSwitch = new JoystickButton(oiController2, 8);
 
     shooterFlywheelRunButton = new JoystickButton(oiController2, 4);
     shooterFlywheelStopButton = new JoystickButton(oiController2, 3);
@@ -102,6 +104,11 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   @Override
   public Trigger getShiftLockSwitch() {
     return shiftDisableSwitch;
+  }
+
+  @Override
+  public Trigger getLimelightLEDDisableSwitch() {
+    return limelightLEDDisableSwitch;
   }
 
   @Override
