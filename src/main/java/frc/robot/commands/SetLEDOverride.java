@@ -20,6 +20,13 @@ public class SetLEDOverride extends InstantCommand {
   private final OILEDState state;
   private final UpdateLEDInterface updateLED;
 
+  /**
+   * Allows override LEDs to function when disabled
+   * 
+   * @param led       LED to set
+   * @param state     state of LED
+   * @param updateLED updateLED function of operator OI
+   */
   public SetLEDOverride(OILED led, OILEDState state, UpdateLEDInterface updateLED) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.led = led;
