@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.FeedUnstick;
+import frc.robot.commands.IdleLimelightControl;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
@@ -147,6 +148,7 @@ public class RobotContainer {
     odometry = new RobotOdometry(driveSubsystem, ahrs);
     limelightOdometry = new LimelightOdometry(limelight, odometry);
     odometry.setDefaultCommand(limelightOdometry);
+    limelight.setDefaultCommand(new IdleLimelightControl(limelight));
 
     setupJoystickModeChooser();
 

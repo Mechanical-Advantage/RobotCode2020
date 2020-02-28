@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 import frc.robot.util.LatencyData;
@@ -53,47 +54,47 @@ public class PointAtTarget extends CommandBase {
     this.ahrs = ahrs;
     this.limelight = limelight;
     switch (Constants.getRobot()) {
-    case REBOT:
-      kP = 0.0077; // 0.008
-      kI = 0;
-      kD = 0.0137; // 0.014
-      toleranceDegrees = 1.0;
-      toleranceValuesToAverage = 10;
-      break;
-    case ORIGINAL_ROBOT_2018:
-      kP = 0.007;
-      kI = 0;
-      kD = 0.02;
-      toleranceDegrees = 1;
-      toleranceValuesToAverage = 3;
-      gear = DriveGear.LOW;
-      break;
-    case NOTBOT:
-      // This has a slower update rate (0.05 sec) before so these gains are probably
-      // wrong (too high)
-      kP = 0.01;
-      kI = 0;
-      kD = 0.003;
-      toleranceDegrees = 1.0;
-      toleranceValuesToAverage = 10;
-      break;
-    case ROBOT_2019:
-      kP = 0.007;
-      kI = 0;
-      kD = 0.00015; // 0.015 in old command
-      toleranceDegrees = 1;
-      toleranceValuesToAverage = 3;
-      break;
-    case ROBOT_2020:
-    case ROBOT_2020_DRIVE:
-      kP = 0.012;
-      kI = 0;
-      kD = 0.00030;
-      toleranceDegrees = 1;
-      toleranceValuesToAverage = 10;
-      minOutput = 0.03;
-    default:
-      break;
+      case REBOT:
+        kP = 0.0077; // 0.008
+        kI = 0;
+        kD = 0.0137; // 0.014
+        toleranceDegrees = 1.0;
+        toleranceValuesToAverage = 10;
+        break;
+      case ORIGINAL_ROBOT_2018:
+        kP = 0.007;
+        kI = 0;
+        kD = 0.02;
+        toleranceDegrees = 1;
+        toleranceValuesToAverage = 3;
+        gear = DriveGear.LOW;
+        break;
+      case NOTBOT:
+        // This has a slower update rate (0.05 sec) before so these gains are probably
+        // wrong (too high)
+        kP = 0.01;
+        kI = 0;
+        kD = 0.003;
+        toleranceDegrees = 1.0;
+        toleranceValuesToAverage = 10;
+        break;
+      case ROBOT_2019:
+        kP = 0.007;
+        kI = 0;
+        kD = 0.00015; // 0.015 in old command
+        toleranceDegrees = 1;
+        toleranceValuesToAverage = 3;
+        break;
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        kP = 0.012;
+        kI = 0;
+        kD = 0.00030;
+        toleranceDegrees = 1;
+        toleranceValuesToAverage = 10;
+        minOutput = 0.03;
+      default:
+        break;
     }
     turnController = new PIDController(kP, kI, kD);
     turnController.setTolerance(toleranceDegrees);
@@ -114,6 +115,7 @@ public class PointAtTarget extends CommandBase {
     angleData.clear();
     lastAngle = ahrs.getAngle();
     dataRecieved = false;
+    limelight.setLEDMode(LimelightLEDMode.ON);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -141,6 +143,7 @@ public class PointAtTarget extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     driveTrain.stop();
+    limelight.setLEDMode(LimelightLEDMode.OFF);
   }
 
   // Returns true when the command should end.
