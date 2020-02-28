@@ -7,7 +7,6 @@
 
 package frc.robot.oi;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -50,7 +49,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
 
-  private static final Map<OILED, Integer> ledMap = new HashMap<OILED, Integer>();
+  private static final Map<OILED, Integer> ledMap = Map.ofEntries();
 
   public OIeStopConsole(int firstID, int secondID) {
     oiController1 = new Joystick(firstID);
@@ -80,12 +79,6 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
 
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
-
-    // Define LED mapping
-    // ledMap.put(OILED.INTAKE_EXTEND, 0);
-    // ledMap.put(OILED.INTAKE_RETRACT, 1);
-    // ledMap.put(OILED.INTAKE_FORWARD, 2);
-    // ledMap.put(OILED.INTAKE_BACKWARD, 3);
 
     ledEntry.setBooleanArray(new boolean[] { false, false, false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false });

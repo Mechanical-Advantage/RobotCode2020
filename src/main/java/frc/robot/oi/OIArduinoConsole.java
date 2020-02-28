@@ -7,7 +7,6 @@
 
 package frc.robot.oi;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -58,7 +57,10 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     OILCDField LCDFlyWheelSpeed;
     OILCDField LCDHoodPosition;
 
-    private static final Map<OILED, Integer> ledMap = new HashMap<OILED, Integer>();
+    private static final Map<OILED, Integer> ledMap = Map.ofEntries(Map.entry(OILED.OPEN_LOOP, 0),
+            Map.entry(OILED.DRIVE_DISABLE, 1), Map.entry(OILED.LIMELIGHT_DISABLE, 2), Map.entry(OILED.MANUAL_HOOD, 3),
+            Map.entry(OILED.BUDDY_CLIMB, 4), Map.entry(OILED.CLIMB_ENABLE, 5), Map.entry(OILED.HOOD_BOTTOM, 7),
+            Map.entry(OILED.HOOD_MIDDLE, 8), Map.entry(OILED.HOOD_TOP, 9), Map.entry(OILED.INTAKE_EXTEND, 10));
 
     public OIArduinoConsole(int firstID, int secondID) {
         arduinoController1 = new Joystick(firstID);
@@ -97,25 +99,6 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         // Set up LED entry
         ledTable = NetworkTableInstance.getDefault().getTable("OperatorInterface");
         ledEntry = ledTable.getEntry("LEDs");
-
-        // Define LED mapping
-        ledMap.put(OILED.OPEN_LOOP, 0);
-        ledMap.put(OILED.DRIVE_DISABLE, 1);
-        ledMap.put(OILED.LIMELIGHT_DISABLE, 1);
-        ledMap.put(OILED.MANUAL_HOOD, 3);
-        ledMap.put(OILED.BUDDY_CLIMB, 4);
-        ledMap.put(OILED.CLIMB_ENABLE, 5);
-        ledMap.put(OILED.HOOD_BOTTOM, 7);
-        ledMap.put(OILED.HOOD_MIDDLE, 8);
-        ledMap.put(OILED.HOOD_TOP, 9);
-        ledMap.put(OILED.INTAKE_EXTEND, 10);
-        ledMap.put(OILED.INTAKE_RETRACT, 11);
-        ledMap.put(OILED.INTAKE_FORWARD, 12);
-        ledMap.put(OILED.INTAKE_BACKWARD, 13);
-        ledMap.put(OILED.SHOOTER_STOP, 16);
-        ledMap.put(OILED.SHOOTER_RUN, 17);
-        ledMap.put(OILED.SHOOTER_UNSTICK, 18);
-        ledMap.put(OILED.SHOOTER_SHOOT, 19);
 
         ledEntry.setNumberArray(new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
