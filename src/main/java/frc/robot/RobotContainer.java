@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoShooterHood;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
@@ -329,14 +330,16 @@ public class RobotContainer {
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
 
-    operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodTopBottom(shooterHood, false));
+    Command shooterBottomCommand = new SetShooterHoodTopBottom(shooterHood, false);
+    operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch()).whenActive(shooterBottomCommand);
     operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
         .whenActive(new SetShooterHoodMiddle(shooterHood, pressureSensor));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
         .whenActive(new SetShooterHoodTopBottom(shooterHood, true));
-    operatorOI.getManualHoodSwitch().negate()
+    Trigger flywheelRunning = new Trigger(runShooter::isScheduled);
+    operatorOI.getManualHoodSwitch().negate().and(flywheelRunning)
         .whileActiveContinuous(new AutoShooterHood(shooterHood, odometry, pressureSensor));
+    flywheelRunning.whenInactive(shooterBottomCommand);
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
