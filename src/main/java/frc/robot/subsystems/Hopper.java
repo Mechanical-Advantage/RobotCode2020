@@ -21,8 +21,8 @@ import frc.robot.Constants.RobotType;
 
 public class Hopper extends SubsystemBase {
 
-  private static final boolean invertLeft = true;
-  private static final boolean invertRight = false;
+  private static final boolean invertLeft = false;
+  private static final boolean invertRight = true;
   private static final int currentLimit = 30;
 
   CANSparkMax hopperLeft;
@@ -38,9 +38,8 @@ public class Hopper extends SubsystemBase {
         hopperRight = new CANSparkMax(4, MotorType.kBrushless);
         break;
       case ROBOT_2020_DRIVE:
-        // Unknown why these are backwards
-        hopperLeft = new CANSparkMax(4, MotorType.kBrushless);
-        hopperRight = new CANSparkMax(7, MotorType.kBrushless);
+        hopperLeft = new CANSparkMax(7, MotorType.kBrushless);
+        hopperRight = new CANSparkMax(4, MotorType.kBrushless);
         break;
       default:
         return;

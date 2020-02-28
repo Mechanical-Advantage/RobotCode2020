@@ -21,7 +21,7 @@ import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
 
-  private static final boolean invertIntake = false;
+  private static final boolean invertIntake = true;
   private static final int solenoidChannel = 3;
   private static final int PCM = 0;
 
