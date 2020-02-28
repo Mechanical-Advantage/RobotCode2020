@@ -105,6 +105,7 @@ public class RobotContainer {
   private final Hopper hopper = new Hopper();
   private final Climber climber = new Climber();
   private RobotOdometry odometry;
+  private final PressureSensor pressureSensor = new PressureSensor(0, (pressure) -> operatorOI.setPressure(pressure));
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -113,7 +114,6 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
   private LimelightOdometry limelightOdometry;
-  private final PressureSensor pressureSensor = new PressureSensor(0, (pressure) -> operatorOI.setPressure(pressure));
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
