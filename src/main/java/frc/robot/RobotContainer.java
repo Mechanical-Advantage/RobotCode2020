@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.FeedUnstick;
-import frc.robot.commands.IntakeExtendRetract;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
@@ -339,8 +338,8 @@ public class RobotContainer {
     operatorOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
-    operatorOI.getIntakeExtendButton().whenActive(new IntakeExtendRetract(true, intake));
-    operatorOI.getIntakeRetractButton().whenActive(new IntakeExtendRetract(false, intake));
+    operatorOI.getIntakeExtendButton().whenActive(() -> intake.extend());
+    operatorOI.getIntakeRetractButton().whenActive(() -> intake.retract());
     operatorOI.updateLED(OILED.INTAKE_RETRACT, OILEDState.ON);
 
     RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
