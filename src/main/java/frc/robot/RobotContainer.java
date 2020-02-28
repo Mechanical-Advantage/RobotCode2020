@@ -90,7 +90,6 @@ public class RobotContainer {
   private IOperatorOI operatorOI;
   private String[] lastJoystickNames;
   private boolean changedToCoast;
-  private int lastMatchTime;
 
   // The robot's subsystems and commands are defined here...
   private final CameraSystem cameraSubsystem = new CameraSystem();
