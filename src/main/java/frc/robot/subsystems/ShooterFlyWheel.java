@@ -21,11 +21,11 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
+import frc.robot.oi.IOperatorOI.SetFlyWheelSpeedInterface;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.oi.IOperatorOI.OILED;
 import frc.robot.oi.IOperatorOI.OILEDState;
-import frc.robot.util.SetFlyWheelSpeedInterface;
 import frc.robot.util.TunableNumber;
-import frc.robot.util.UpdateLEDInterface;
 
 import com.revrobotics.ControlType;
 

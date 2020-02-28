@@ -11,10 +11,6 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
-import frc.robot.oi.IOperatorOI.OILED;
-import frc.robot.oi.IOperatorOI.OILEDState;
-import frc.robot.util.SetHoodPositionLCDInterface;
-import frc.robot.util.UpdateLEDInterface;
 
 public class ShooterHood extends SubsystemBase {
 
@@ -24,15 +20,10 @@ public class ShooterHood extends SubsystemBase {
   private Solenoid liftSolenoid;
   private Solenoid stopSolenoid;
 
-  private final UpdateLEDInterface updateLED;
-  private final SetHoodPositionLCDInterface setHoodLCD;
-
   /**
    * Creates a new ShooterHood.
    */
-  public ShooterHood(UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
-    this.updateLED = updateLED;
-    this.setHoodLCD = setHoodLCD;
+  public ShooterHood() {
     if (!available()) {
       return;
     }
@@ -71,18 +62,6 @@ public class ShooterHood extends SubsystemBase {
         stopSolenoid.set(stopped);
       }
     }
-  }
-
-  /**
-   * Updates hood position LEDs
-   * 
-   * @param led LED to illuminate
-   */
-  public void setLEDs(HoodPosition position) {
-    setHoodLCD.set(position);
-    updateLED.update(OILED.HOOD_BOTTOM, position == HoodPosition.BOTTOM ? OILEDState.ON : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_MIDDLE, position == HoodPosition.MIDDLE ? OILEDState.ON : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_TOP, position == HoodPosition.TOP ? OILEDState.ON : OILEDState.OFF);
   }
 
   public static enum HoodPosition {

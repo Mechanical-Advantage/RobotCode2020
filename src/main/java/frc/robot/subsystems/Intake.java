@@ -18,9 +18,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.oi.IOperatorOI.OILED;
 import frc.robot.oi.IOperatorOI.OILEDState;
-import frc.robot.util.UpdateLEDInterface;
 
 public class Intake extends SubsystemBase {
 

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
+import frc.robot.oi.IOperatorOI.SetPressureInterface;
 
 /**
  * Class for the REV analog pressure sensor.
@@ -53,6 +54,7 @@ public class PressureSensor extends SubsystemBase {
     @Override
     public void periodic() {
         if (available()) {
+            SmartDashboard.putNumber("Pressure Sensor", getPressure());
             setPressure.set(getPressure());
         }
     }

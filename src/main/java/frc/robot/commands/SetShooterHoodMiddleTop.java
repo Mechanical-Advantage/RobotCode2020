@@ -10,6 +10,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.util.PressureSensor;
@@ -24,7 +26,8 @@ public class SetShooterHoodMiddleTop extends SequentialCommandGroup {
   /**
    * Creates a new SetShooterHoodMiddle.
    */
-  public SetShooterHoodMiddleTop(ShooterHood shooterHood, PressureSensor pressureSensor, boolean top) {
+  public SetShooterHoodMiddleTop(ShooterHood shooterHood, PressureSensor pressureSensor, boolean top,
+      UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(new WaitForPressure(pressureSensor),
@@ -32,6 +35,6 @@ public class SetShooterHoodMiddleTop extends SequentialCommandGroup {
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood), new WaitCommand(raiseWait),
         new InstantCommand(() -> shooterHood.setStopPosition(!top), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(true), shooterHood),
-        new InstantCommand(() -> shooterHood.setLEDs(top ? HoodPosition.TOP : HoodPosition.MIDDLE)));
+        new SetHoodPositionLEDs(top ? HoodPosition.TOP : HoodPosition.MIDDLE, updateLED, setHoodLCD));
   }
 }

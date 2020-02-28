@@ -99,8 +99,7 @@ public class RobotContainer {
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((led, state) -> operatorOI.updateLED(led, state),
       (double rpm) -> operatorOI.setFlyWheelSpeed(rpm));
   private final ShooterRoller shooterRoller = new ShooterRoller();
-  private final ShooterHood shooterHood = new ShooterHood((led, state) -> operatorOI.updateLED(led, state),
-      (position) -> operatorOI.setHoodPosition(position));
+  private final ShooterHood shooterHood = new ShooterHood();
   private final Intake intake = new Intake((led, state) -> operatorOI.updateLED(led, state));
   private final Hopper hopper = new Hopper();
   private final Climber climber = new Climber();
@@ -341,8 +340,8 @@ public class RobotContainer {
     operatorOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
-    operatorOI.getIntakeExtendButton().whenActive(() -> intake.extend());
-    operatorOI.getIntakeRetractButton().whenActive(() -> intake.retract());
+    operatorOI.getIntakeExtendButton().whenActive(intake::extend, intake);
+    operatorOI.getIntakeRetractButton().whenActive(intake::retract, intake);
     operatorOI.updateLED(OILED.INTAKE_RETRACT, OILEDState.ON);
 
     RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
@@ -356,11 +355,14 @@ public class RobotContainer {
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodBottom(shooterHood));
+        .whenActive(new SetShooterHoodBottom(shooterHood, (led, state) -> operatorOI.updateLED(led, state),
+            (position) -> operatorOI.setHoodPosition(position)));
     operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, false));
+        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, false,
+            (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position)));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, true));
+        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, true,
+            (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position)));
 
     operatorOI.getClimbEnableSwitch().whenActive(climber::deploy, climber);
     operatorOI.getClimbEnableSwitch().whenInactive(climber::reset, climber);

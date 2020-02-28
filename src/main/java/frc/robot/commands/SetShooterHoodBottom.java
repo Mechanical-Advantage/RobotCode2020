@@ -9,6 +9,8 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.ShooterHood.HoodPosition;
 
@@ -22,11 +24,12 @@ public class SetShooterHoodBottom extends SequentialCommandGroup {
    * @param shooterHood Shooter hood subsystem
    * @param top         Position to move to
    */
-  public SetShooterHoodBottom(ShooterHood shooterHood) {
+  public SetShooterHoodBottom(ShooterHood shooterHood, UpdateLEDInterface updateLED,
+      SetHoodPositionLCDInterface setHoodLCD) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood),
-        new InstantCommand(() -> shooterHood.setLEDs(HoodPosition.BOTTOM)));
+        new SetHoodPositionLEDs(HoodPosition.BOTTOM, updateLED, setHoodLCD));
   }
 }

@@ -81,4 +81,35 @@ public interface IOperatorOI {
     public static enum OILEDState {
         OFF, BLINK_SLOW, BLINK_FAST, PULSE_SLOW, PULSE_FAST, DIM, MED, ON
     }
+
+    /**
+     * A functional interface for the update LED method
+     */
+    @FunctionalInterface
+    public interface UpdateLEDInterface {
+        void update(OILED led, OILEDState state);
+    }
+
+    /**
+     * A functional interface for the setPressure() method of operatorOI
+     */
+    public interface SetFlyWheelSpeedInterface {
+        void set(double rpm);
+    }
+
+    /**
+     * A functional interface for the setHoodPosition() method of operatorOI
+     */
+    @FunctionalInterface
+    public interface SetHoodPositionLCDInterface {
+        void set(HoodPosition position);
+    }
+
+    /**
+     * A functional interface for the setPressure() method of operatorOI
+     */
+    @FunctionalInterface
+    public interface SetPressureInterface {
+        void set(double pressure);
+    }
 }

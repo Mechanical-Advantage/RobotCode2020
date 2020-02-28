@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.ShooterHood.HoodPosition;
-import frc.robot.util.OILCDField;
 
 /**
  * OI class for the Arduino Leonardo based box/panel.
@@ -89,7 +88,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
         // Set up LCD fields
-        OILCDField.clearFields();
+        NetworkTableInstance.getDefault().getTable("OperatorInterface").delete("LCD");
         LCDTimer = new OILCDField("Timer", 0, 0, 20, "   Unknown - ?:??");
         LCDPressure = new OILCDField("Pressure", 0, 1, 20, "Pressure: ?? PSI");
         LCDFlyWheelSpeed = new OILCDField("FlyWheelSpeed", 0, 2, 20, "Flywheel: ???? RPM");
@@ -277,6 +276,53 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
                     new Integer[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
             array[ledMap.get(led)] = (double) state.ordinal();
             ledEntry.setNumberArray(array);
+        }
+    }
+
+    /**
+     * Represents a field for the LCD on the operator panel
+     */
+    public class OILCDField {
+
+        private final NetworkTable table;
+        private final int x;
+        private final int y;
+        private final int length;
+        private String value;
+
+        /**
+         * Initializes field parameters and creates table
+         * 
+         * @param key          Arbitrary field identifier (not visible on LCD)
+         * @param x            X location of this field (0 is left)
+         * @param y            location a/k/a line of this field (0 is top)
+         * @param lengthLength Length of this field (will be truncated)
+         * @param initialValue Initial text to display
+         */
+        public OILCDField(String key, int x, int y, int length, String initialValue) {
+            table = NetworkTableInstance.getDefault().getTable("OperatorInterface/LCD/" + key);
+            this.x = x;
+            this.y = y;
+            this.length = length;
+            value = initialValue;
+            updateTable();
+        }
+
+        /**
+         * Updates the field text
+         * 
+         * @param value New text to display
+         */
+        public void setValue(String value) {
+            this.value = value;
+            updateTable();
+        }
+
+        private void updateTable() {
+            table.getEntry("X").setNumber(x);
+            table.getEntry("Y").setNumber(y);
+            table.getEntry("Length").setNumber(length);
+            table.getEntry("String").setString(value);
         }
     }
 }
