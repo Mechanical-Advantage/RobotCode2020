@@ -23,4 +23,8 @@ public interface IDriverOverrideOI {
     public default Trigger getShiftLockSwitch() {
         return dummyTrigger;
     }
+
+    public default Trigger getLimelightLEDDisableSwitch() {
+        return dummyTrigger;
+    }
 }

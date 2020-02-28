@@ -148,7 +148,8 @@ public class RobotContainer {
     odometry = new RobotOdometry(driveSubsystem, ahrs);
     limelightOdometry = new LimelightOdometry(limelight, odometry);
     odometry.setDefaultCommand(limelightOdometry);
-    limelight.setDefaultCommand(new IdleLimelightControl(limelight));
+    limelight.setDefaultCommand(
+        new IdleLimelightControl(limelight, () -> driverOverrideOI.getLimelightLEDDisableSwitch().get()));
 
     setupJoystickModeChooser();
 

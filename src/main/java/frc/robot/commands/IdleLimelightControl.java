@@ -7,6 +7,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -32,6 +34,7 @@ public class IdleLimelightControl extends CommandBase {
   private static final double targetLossDelay = 2;
 
   private final LimelightInterface limelight;
+  private final BooleanSupplier disableSwitch;
   private boolean hasTarget;
   private boolean ledsOn;
   private final Timer targetLossTimer = new Timer();
@@ -40,9 +43,10 @@ public class IdleLimelightControl extends CommandBase {
   /**
    * Creates a new IdleLimelightControl.
    */
-  public IdleLimelightControl(LimelightInterface limelight) {
+  public IdleLimelightControl(LimelightInterface limelight, BooleanSupplier disableSwitchAccess) {
     addRequirements(limelight);
     this.limelight = limelight;
+    this.disableSwitch = disableSwitchAccess;
   }
 
   // Called when the command is initially scheduled.
@@ -64,7 +68,7 @@ public class IdleLimelightControl extends CommandBase {
     } else if (ledsOn && targetLossTimer.hasElapsed(targetLossDelay)) {
       hasTarget = false;
     }
-    if (blink && DriverStation.getInstance().isEnabled()) {
+    if (blink && DriverStation.getInstance().isEnabled() && !disableSwitch.getAsBoolean()) {
       double currentStageTime;
       if (ledsOn) {
         if (hasTarget) {
