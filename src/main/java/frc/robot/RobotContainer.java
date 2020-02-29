@@ -170,8 +170,8 @@ public class RobotContainer {
       autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
-    autoChooser.addOption("Aim and fire loaded balls",
-        new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel));
+    autoChooser.addOption("Aim and fire loaded balls", new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs,
+        hopper, shooterRoller, shooterFlyWheel, shooterHood, pressureSensor));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -232,8 +232,10 @@ public class RobotContainer {
         switch (joystickNames[joystickNum]) {
           case "Controller (XBOX 360 For Windows)":
           case "Controller (Gamepad F310)":
+          case "Controller (Gamepad for Xbox 360)":
           case "XBOX 360 For Windows (Controller)":
           case "Gamepad F310 (Controller)":
+          case "Gamepad for Xbox 360 (Controller)":
             if (firstControllerName == null) {
               firstControllerName = joystickName;
               if (operatorOIFound) {
