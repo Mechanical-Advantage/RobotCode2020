@@ -14,12 +14,14 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
 import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
@@ -43,17 +45,21 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
    * Creates a new PointAtTargetAndShootTrenchRun.
    */
   public PointAtTargetAndShootTrenchRun(DriveTrainBase driveTrain, RobotOdometry odometry, LimelightInterface limelight,
-      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood,
+      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, Intake intake,
       PressureSensor pressureSensor, UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
-    super(new PointAtTarget(driveTrain, limelight, ahrs)
-        .alongWith(new SetShooterHoodMiddleTop(hood, pressureSensor, false, updateLED, setHoodLCD))
-        .alongWith(new WaitCommand(7).withInterrupt(() -> flywheel.getSpeed() > 6000))
-        .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(2))
-        .andThen(new RunMotionProfile(driveTrain, odometry, List.of(trenchStart), endPose, 0, false, false))
-        .andThen(new TurnToAngle(driveTrain, ahrs, -20, true)).andThen(new PointAtTarget(driveTrain, limelight, ahrs))
-        .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(5)),
+    super(
+        new PointAtTarget(driveTrain, limelight, ahrs)
+            .alongWith(new SetShooterHoodMiddleTop(hood, pressureSensor, false, updateLED, setHoodLCD))
+            .alongWith(new WaitCommand(7).withInterrupt(() -> flywheel.getSpeed() > 6000))
+            .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(2))
+            .andThen(new InstantCommand(intake::extend))
+            .andThen(new RunMotionProfile(driveTrain, odometry, List.of(trenchStart), endPose, 0, false, false)
+                .deadlineWith(new RunIntakeForwards(intake)))
+            .andThen(new TurnToAngle(driveTrain, ahrs, -20, true))
+            .andThen(new PointAtTarget(driveTrain, limelight, ahrs))
+            .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(5)),
         new RunShooterFlyWheel(flywheel));
   }
 }

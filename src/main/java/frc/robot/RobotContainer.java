@@ -178,7 +178,7 @@ public class RobotContainer {
             (position) -> operatorOI.setHoodPosition(position)));
     autoChooser.addOption("6 ball auto",
         new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller,
-            shooterFlyWheel, shooterHood, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+            shooterFlyWheel, shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
