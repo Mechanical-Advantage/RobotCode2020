@@ -10,26 +10,34 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.oi.IOperatorOI.OILEDState;
+import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.ShooterHood;
+import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.util.PressureSensor;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
-public class SetShooterHoodMiddle extends SequentialCommandGroup {
+public class SetShooterHoodMiddleTop extends SequentialCommandGroup {
 
-  private static final double raiseWait = 0.25; // seconds to wait after lowering before moving back up
+  private static final double raiseWait = 0.5; // seconds to wait after lowering before moving back up
 
   /**
    * Creates a new SetShooterHoodMiddle.
    */
-  public SetShooterHoodMiddle(ShooterHood shooterHood, PressureSensor pressureSensor) {
+  public SetShooterHoodMiddleTop(ShooterHood shooterHood, PressureSensor pressureSensor, boolean top,
+      UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
-    super(new WaitForPressure(pressureSensor),
-        new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
+    super(
+        new SetHoodPositionLEDs(top ? HoodPosition.TOP : HoodPosition.MIDDLE, updateLED, setHoodLCD,
+            OILEDState.PULSE_FAST),
+        new WaitForPressure(pressureSensor), new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood), new WaitCommand(raiseWait),
-        new InstantCommand(() -> shooterHood.setStopPosition(true), shooterHood),
-        new InstantCommand(() -> shooterHood.setLiftPosition(true), shooterHood));
+        new InstantCommand(() -> shooterHood.setStopPosition(!top), shooterHood),
+        new InstantCommand(() -> shooterHood.setLiftPosition(true), shooterHood),
+        new SetHoodPositionLEDs(top ? HoodPosition.TOP : HoodPosition.MIDDLE, updateLED, setHoodLCD, OILEDState.ON));
   }
 }

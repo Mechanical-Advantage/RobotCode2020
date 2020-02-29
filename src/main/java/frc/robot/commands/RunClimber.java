@@ -7,47 +7,40 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
-import frc.robot.subsystems.ShooterFlyWheel;
-import frc.robot.util.TunableNumber;
+import frc.robot.subsystems.Climber;
 
-public class RunShooterFlyWheel extends CommandBase {
+public class RunClimber extends CommandBase {
 
-  private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/setpoint");
-  private final ShooterFlyWheel shooterFlyWheel;
+  private final Climber climber;
+  private final DoubleSupplier stickAccess;
 
   /**
-   * Creates a new ShooterFlyWheel.
-   * 
-   * @param ShooterFlyWheel
+   * Creates a new RunClimber.
    */
-  public RunShooterFlyWheel(ShooterFlyWheel shooterFlyWheelSub) {
-    shooterFlyWheel = shooterFlyWheelSub;
-    addRequirements(shooterFlyWheelSub);
+  public RunClimber(Climber climber, DoubleSupplier stickAccess) {
+    addRequirements(climber);
+    this.climber = climber;
+    this.stickAccess = stickAccess;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(6000);
-    // shooterFlyWheel.run(setpoint.get());
-    shooterFlyWheel.setShooterRPM(setpoint.get());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Constants.tuningMode) {
-      // shooterFlyWheel.run(setpoint.get());
-      shooterFlyWheel.setShooterRPM(setpoint.get());
-    }
+    climber.run(stickAccess.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    shooterFlyWheel.stop();
+    climber.run(0);
   }
 
   // Returns true when the command should end.

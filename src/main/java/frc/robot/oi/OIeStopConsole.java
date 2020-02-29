@@ -7,6 +7,8 @@
 
 package frc.robot.oi;
 
+import java.util.Map;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -26,11 +28,13 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   private Button openLoopDrive;
   private Button driveDisableSwitch;
   private Button shiftDisableSwitch;
+  private Button limelightLEDDisableSwitch;
 
   private Button shooterFlywheelRunButton;
   private Button shooterFlywheelStopButton;
   private Button shooterRollerButton;
   private Button shooterUnstickButton;
+  private Button climbEnableButton;
 
   private Button intakeExtendButton;
   private Button intakeRetractButton;
@@ -45,6 +49,8 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   NetworkTable ledTable;
   NetworkTableEntry ledEntry;
 
+  private static final Map<OILED, Integer> ledMap = Map.ofEntries();
+
   public OIeStopConsole(int firstID, int secondID) {
     oiController1 = new Joystick(firstID);
     oiController2 = new Joystick(secondID);
@@ -52,6 +58,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     openLoopDrive = new JoystickButton(oiController2, 10);
     driveDisableSwitch = new JoystickButton(oiController2, 9);
     shiftDisableSwitch = new JoystickButton(oiController2, 8);
+    limelightLEDDisableSwitch = new JoystickButton(oiController2, 8);
 
     shooterFlywheelRunButton = new JoystickButton(oiController2, 4);
     shooterFlywheelStopButton = new JoystickButton(oiController2, 3);
@@ -67,6 +74,8 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
     hoodWallButton = new JoystickButton(oiController1, 2);
     hoodLineButton = new JoystickButton(oiController1, 3);
     hoodTrenchButton = new JoystickButton(oiController1, 4);
+
+    climbEnableButton = new JoystickButton(oiController1, 12);
 
     ledTable = NetworkTableInstance.getDefault().getTable("LEDs");
     ledEntry = ledTable.getEntry("OI LEDs");
@@ -88,6 +97,11 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   @Override
   public Trigger getShiftLockSwitch() {
     return shiftDisableSwitch;
+  }
+
+  @Override
+  public Trigger getLimelightLEDDisableSwitch() {
+    return limelightLEDDisableSwitch;
   }
 
   @Override
@@ -131,6 +145,15 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   }
 
   @Override
+  public Trigger getClimbEnableSwitch() {
+    return climbEnableButton;
+  }
+
+  @Override
+  public double getClimbStickY() {
+    return oiController1.getY();
+  }
+
   public Trigger getManualHoodSwitch() {
     return manualHoodSwitch;
   }
@@ -151,10 +174,12 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   }
 
   @Override
-  public void updateLED(OILED led, boolean state) {
-    boolean[] array = ledTable.getEntry("OI LEDs").getBooleanArray(new boolean[] { false, false, false, false, false,
-        false, false, false, false, false, false, false, false, false, false, false, false });
-    array[led.ordinal()] = state;
-    ledEntry.setBooleanArray(array);
+  public void updateLED(OILED led, OILEDState state) {
+    if (ledMap.containsKey(led)) {
+      boolean[] array = ledTable.getEntry("OI LEDs").getBooleanArray(new boolean[] { false, false, false, false, false,
+          false, false, false, false, false, false, false, false, false, false, false, false });
+      array[ledMap.get(led)] = state != OILEDState.OFF;
+      ledEntry.setBooleanArray(array);
+    }
   }
 }
