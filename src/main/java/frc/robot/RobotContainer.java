@@ -62,6 +62,7 @@ import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterRoller;
+import frc.robot.subsystems.LimelightInterface.LimelightStreamingMode;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.CTREDriveTrain;
@@ -150,6 +151,7 @@ public class RobotContainer {
     odometry.setDefaultCommand(limelightOdometry);
     limelight.setDefaultCommand(
         new IdleLimelightControl(limelight, () -> driverOverrideOI.getLimelightLEDDisableSwitch().get()));
+    limelight.setStreamingMode(LimelightStreamingMode.PIP_SECONDARY);
 
     setupJoystickModeChooser();
 
