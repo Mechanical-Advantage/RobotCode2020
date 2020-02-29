@@ -14,6 +14,8 @@ import frc.robot.subsystems.Climber;
 
 public class RunClimber extends CommandBase {
 
+  private static final double deadband = 0.05;
+
   private final Climber climber;
   private final DoubleSupplier stickAccess;
 
@@ -34,7 +36,8 @@ public class RunClimber extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climber.run(stickAccess.getAsDouble());
+    double stickVal = stickAccess.getAsDouble();
+    climber.run(Math.abs(stickVal) <= deadband ? 0 : stickVal);
   }
 
   // Called once the command ends or is interrupted.
