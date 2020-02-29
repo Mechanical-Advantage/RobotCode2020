@@ -34,6 +34,7 @@ import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
+import frc.robot.commands.PointAtTargetAndShootTrenchRun;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
@@ -162,6 +163,8 @@ public class RobotContainer {
     }
     autoChooser.addOption("Aim and fire loaded balls",
         new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel));
+    autoChooser.addOption("6 ball auto", new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs,
+        hopper, shooterRoller, shooterFlyWheel));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
