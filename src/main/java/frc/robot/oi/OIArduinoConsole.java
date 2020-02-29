@@ -224,7 +224,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
 
     @Override
     public void setPressure(double pressure) {
-        LCDPressure.setValue("Pressure: " + Integer.toString(Math.round((float) pressure)) + " PSI");
+        LCDPressure.setValue("Pressure: " + Integer.toString(pressure < 0 ? 0 : Math.round((float) pressure)) + " PSI");
     }
 
     @Override
