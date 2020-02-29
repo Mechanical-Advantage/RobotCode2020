@@ -28,9 +28,9 @@ public class Climber extends SubsystemBase {
   private static final int currentLimit = 30;
   private static final IdleMode idleMode = IdleMode.kBrake;
   private static final boolean invertClimber = false;
-  private static final int masterDeviceID = 2;
-  private static final int followerDeviceID = 1;
-  private static final double followerMultiplier = 1;
+  private static final int masterDeviceID = 2; // left
+  private static final int followerDeviceID = 1; // right
+  private static final double followerMultiplier = 0.8;
   private static final int deploySolenoidChannel = 2;
   private static final int PCM = 0;
   private boolean climberEnabled = false;
@@ -76,7 +76,7 @@ public class Climber extends SubsystemBase {
 
       @Override
       public void execute() {
-        subsystem.run(0);
+        subsystem.run(0, 0);
       }
     });
     climberMaster.burnFlash();
@@ -88,14 +88,14 @@ public class Climber extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void run(double power) {
+  public void run(double left, double right) {
     if (climberMaster == null) {
       return;
     }
 
     if (climberEnabled) {
-      climberMaster.set(power * (invertClimber ? -1 : 1));
-      climberFollower.set(power * (invertClimber ? 1 : -1) * followerMultiplier);
+      climberMaster.set(left * (invertClimber ? -1 : 1));
+      climberFollower.set(right * (invertClimber ? 1 : -1) * followerMultiplier);
     }
   }
 

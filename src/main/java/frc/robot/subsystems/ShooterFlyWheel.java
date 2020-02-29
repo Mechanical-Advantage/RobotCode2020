@@ -195,7 +195,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     } else if (currentRpm > targetRpm * LEDSlowPulseThreshold) {
       shooterLEDState = OILEDState.PULSE_FAST;
     } else if (currentRpm > 0) {
-      shooterLEDState = OILEDState.PULSE_SLOW;
+      shooterLEDState = OILEDState.BLINK_SLOW;
     }
     if (shooterLEDState != lastShooterLEDState) {
       updateLED.update(OILED.SHOOTER_SHOOT, shooterLEDState);
