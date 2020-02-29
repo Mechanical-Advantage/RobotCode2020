@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.RobotType;
@@ -21,9 +22,15 @@ import frc.robot.util.RobotIdentification;
  * project.
  */
 public class Robot extends TimedRobot {
+
+  // How often to rescan inputs when disabled
+  private static final double oiUpdateFrequency = 10; // sec
+
   private Command autonomousCommand;
 
   private RobotContainer robotContainer;
+
+  private final Timer oiUpdateTimer = new Timer();
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -69,11 +76,16 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
+    oiUpdateTimer.reset();
+    oiUpdateTimer.start();
   }
 
   @Override
   public void disabledPeriodic() {
     robotContainer.coastIfNotMoving();
+    if (oiUpdateTimer.advanceIfElapsed(oiUpdateFrequency)) {
+      robotContainer.updateOIType();
+    }
   }
 
   /**

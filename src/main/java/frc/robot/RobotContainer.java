@@ -310,11 +310,14 @@ public class RobotContainer {
         .whenActive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.ON, operatorOI::updateLED));
     driverOverrideOI.getOpenLoopSwitch()
         .whenInactive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.OPEN_LOOP, driverOverrideOI.getOpenLoopSwitch().get() ? OILEDState.ON : OILEDState.OFF);
 
     driverOverrideOI.getDriveDisableSwitch()
         .whenActive(new SetLEDOverride(OILED.DRIVE_DISABLE, OILEDState.ON, operatorOI::updateLED));
     driverOverrideOI.getDriveDisableSwitch()
         .whenInactive(new SetLEDOverride(OILED.DRIVE_DISABLE, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.DRIVE_DISABLE,
+        driverOverrideOI.getDriveDisableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
@@ -375,16 +378,20 @@ public class RobotContainer {
         .whenActive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.ON, operatorOI::updateLED));
     operatorOI.getClimbEnableSwitch()
         .whenInactive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.CLIMB_ENABLE, operatorOI.getClimbEnableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
 
     operatorOI.getManualHoodSwitch()
         .whenActive(new SetLEDOverride(OILED.MANUAL_HOOD, OILEDState.ON, operatorOI::updateLED));
     operatorOI.getManualHoodSwitch()
         .whenInactive(new SetLEDOverride(OILED.MANUAL_HOOD, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.MANUAL_HOOD, operatorOI.getManualHoodSwitch().get() ? OILEDState.ON : OILEDState.OFF);
 
     driverOverrideOI.getLimelightLEDDisableSwitch()
         .whenActive(new SetLEDOverride(OILED.LIMELIGHT_DISABLE, OILEDState.ON, operatorOI::updateLED));
     driverOverrideOI.getLimelightLEDDisableSwitch()
         .whenInactive(new SetLEDOverride(OILED.LIMELIGHT_DISABLE, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.LIMELIGHT_DISABLE,
+        driverOverrideOI.getLimelightLEDDisableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
