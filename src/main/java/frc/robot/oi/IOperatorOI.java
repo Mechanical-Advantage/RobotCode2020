@@ -8,6 +8,7 @@
 package frc.robot.oi;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.ShooterHood.HoodPosition;
 
 /**
  * OI interface for operator controls.
@@ -56,11 +57,59 @@ public interface IOperatorOI {
         return dummyTrigger;
     }
 
-    public default void updateLED(OILED led, boolean state) {
+    public default void updateTimer() {
+    }
+
+    public default void setPressure(double pressure) {
+    }
+
+    public default void setFlyWheelSpeed(double rpm) {
+    }
+
+    public default void setHoodPosition(HoodPosition position) {
+    }
+
+    public default void updateLED(OILED led, OILEDState state) {
     }
 
     public static enum OILED {
-        MISC_1, MISC_2, MISC_3, INTAKE_RETRACT, INTAKE_ON_OFF, VAC_PICKUP, VAC_TAIL, TOGGLE_LOW, TOGGLE_HIGH,
-        JOYSTICK_YELLOW, ARM_ALT, ARM_FLOOR, ARM_CARGO_SHIP, ARM_ROCKET_LOW, ARM_ROCKET_MID, ARM_ROCKET_HIGH, ARM_HOME
+        OPEN_LOOP, DRIVE_DISABLE, LIMELIGHT_DISABLE, MANUAL_HOOD, BUDDY_CLIMB, CLIMB_ENABLE, HOOD_BOTTOM, HOOD_MIDDLE,
+        HOOD_TOP, INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD, INTAKE_BACKWARD, SHOOTER_RUN, SHOOTER_STOP,
+        SHOOTER_SHOOT, SHOOTER_UNSTICK
+    }
+
+    public static enum OILEDState {
+        OFF, BLINK_SLOW, BLINK_FAST, PULSE_SLOW, PULSE_FAST, DIM, MED, ON
+    }
+
+    /**
+     * A functional interface for the update LED method
+     */
+    @FunctionalInterface
+    public interface UpdateLEDInterface {
+        void update(OILED led, OILEDState state);
+    }
+
+    /**
+     * A functional interface for the setPressure() method of operatorOI
+     */
+    public interface SetFlyWheelSpeedInterface {
+        void set(double rpm);
+    }
+
+    /**
+     * A functional interface for the setHoodPosition() method of operatorOI
+     */
+    @FunctionalInterface
+    public interface SetHoodPositionLCDInterface {
+        void set(HoodPosition position);
+    }
+
+    /**
+     * A functional interface for the setPressure() method of operatorOI
+     */
+    @FunctionalInterface
+    public interface SetPressureInterface {
+        void set(double pressure);
     }
 }

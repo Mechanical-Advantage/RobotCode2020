@@ -11,6 +11,8 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.ShooterFlyWheel;
@@ -27,11 +29,12 @@ public class PointAtTargetAndShoot extends ParallelDeadlineGroup {
    * Creates a new PointAtTargetAndShoot.
    */
   public PointAtTargetAndShoot(DriveTrainBase driveTrain, LimelightInterface limelight, AHRS ahrs, Hopper hopper,
-      ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, PressureSensor pressureSensor) {
+      ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, PressureSensor pressureSensor,
+      UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(new PointAtTarget(driveTrain, limelight, ahrs)
-        .alongWith(new SetShooterHoodMiddleTop(hood, pressureSensor, false))
+        .alongWith(new SetShooterHoodMiddleTop(hood, pressureSensor, false, updateLED, setHoodLCD))
         .alongWith(new WaitCommand(7).withInterrupt(() -> flywheel.getSpeed() > 6000)).andThen(new WaitCommand(0.5))
         .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(5))
         .andThen(new DriveDistanceOnHeading(driveTrain, ahrs, -60)), new RunShooterFlyWheel(flywheel));

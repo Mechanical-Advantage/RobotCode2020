@@ -18,6 +18,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
 
 public class Intake extends SubsystemBase {
 
@@ -27,6 +30,8 @@ public class Intake extends SubsystemBase {
 
   private static final int currentLimit = 30;
 
+  private final UpdateLEDInterface updateLED;
+
   CANSparkMax intake;
 
   private Solenoid intakeSolenoid;
@@ -34,7 +39,8 @@ public class Intake extends SubsystemBase {
   /**
    * Creates a new Intake.
    */
-  public Intake() {
+  public Intake(UpdateLEDInterface updateLED) {
+    this.updateLED = updateLED;
 
     switch (Constants.getRobot()) {
       case ROBOT_2020:
@@ -80,6 +86,7 @@ public class Intake extends SubsystemBase {
       return;
     }
     intake.set(power * (invertIntake ? -1 : 1));
+    setRunLEDs(power);
   }
 
   public void extend() {
@@ -87,6 +94,7 @@ public class Intake extends SubsystemBase {
       return;
     }
     intakeSolenoid.set(true);
+    setExtendRetractLEDs(true);
   }
 
   public void retract() {
@@ -94,5 +102,30 @@ public class Intake extends SubsystemBase {
       return;
     }
     intakeSolenoid.set(false);
+    setExtendRetractLEDs(false);
+  }
+
+  private void setExtendRetractLEDs(boolean extended) {
+    updateLED.update(OILED.INTAKE_EXTEND, extended ? OILEDState.ON : OILEDState.OFF);
+    updateLED.update(OILED.INTAKE_RETRACT, extended ? OILEDState.OFF : OILEDState.ON);
+  }
+
+  private void setRunLEDs(double power) {
+    if (power == 0) {
+      updateLED.update(OILED.INTAKE_FORWARD, OILEDState.OFF);
+      updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.OFF);
+    } else if (power > 0) {
+      updateLED.update(OILED.INTAKE_FORWARD, OILEDState.ON);
+    } else if (power < 0) {
+      updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.ON);
+    }
+  }
+
+  public void updateLEDs() {
+    if (intakeSolenoid == null || intake == null) {
+      return;
+    }
+    setExtendRetractLEDs(intakeSolenoid.get());
+    setRunLEDs(intake.getAppliedOutput());
   }
 }

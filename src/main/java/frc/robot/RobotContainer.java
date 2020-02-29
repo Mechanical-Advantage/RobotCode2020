@@ -42,6 +42,7 @@ import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
+import frc.robot.commands.SetLEDOverride;
 import frc.robot.commands.SetShooterHoodMiddleTop;
 import frc.robot.commands.SetShooterHoodBottom;
 import frc.robot.commands.TurnToAngle;
@@ -55,6 +56,8 @@ import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheld;
 import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIeStopConsole;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Hopper;
@@ -83,30 +86,31 @@ public class RobotContainer {
   private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine, 0,
       Rotation2d.fromDegrees(0));
 
+  private IDriverOI driverOI;
+  private IDriverOverrideOI driverOverrideOI;
+  private IOperatorOI operatorOI;
+  private String[] lastJoystickNames;
+  private boolean changedToCoast;
+
   // The robot's subsystems and commands are defined here...
   private final CameraSystem cameraSubsystem = new CameraSystem();
   private final LimelightInterface limelight = new LimelightInterface();
   private DriveTrainBase driveSubsystem;
-  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel();
+  private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((led, state) -> operatorOI.updateLED(led, state),
+      (double rpm) -> operatorOI.setFlyWheelSpeed(rpm));
   private final ShooterRoller shooterRoller = new ShooterRoller();
   private final ShooterHood shooterHood = new ShooterHood();
-  private final Intake intake = new Intake();
+  private final Intake intake = new Intake((led, state) -> operatorOI.updateLED(led, state));
   private final Hopper hopper = new Hopper();
   private final Climber climber = new Climber();
   private RobotOdometry odometry;
-  private final PressureSensor pressureSensor = new PressureSensor(0);
+  private final PressureSensor pressureSensor = new PressureSensor(0, (pressure) -> operatorOI.setPressure(pressure));
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
   private SendableChooser<JoystickMode> joystickModeChooser;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
-
-  private IDriverOI driverOI;
-  private IDriverOverrideOI driverOverrideOI;
-  private IOperatorOI operatorOI;
-  private String[] lastJoystickNames;
-  private boolean changedToCoast;
 
   private LimelightOdometry limelightOdometry;
 
@@ -168,8 +172,10 @@ public class RobotContainer {
       autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
-    autoChooser.addOption("Aim and fire loaded balls", new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs,
-        hopper, shooterRoller, shooterFlyWheel, shooterHood, pressureSensor));
+    autoChooser.addOption("Aim and fire loaded balls",
+        new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood,
+            pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+            (position) -> operatorOI.setHoodPosition(position)));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -301,6 +307,19 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(driveCommand);
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
+
+    driverOverrideOI.getOpenLoopSwitch()
+        .whenActive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.ON, operatorOI::updateLED));
+    driverOverrideOI.getOpenLoopSwitch()
+        .whenInactive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.OPEN_LOOP, driverOverrideOI.getOpenLoopSwitch().get() ? OILEDState.ON : OILEDState.OFF);
+
+    driverOverrideOI.getDriveDisableSwitch()
+        .whenActive(new SetLEDOverride(OILED.DRIVE_DISABLE, OILEDState.ON, operatorOI::updateLED));
+    driverOverrideOI.getDriveDisableSwitch()
+        .whenInactive(new SetLEDOverride(OILED.DRIVE_DISABLE, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.DRIVE_DISABLE,
+        driverOverrideOI.getDriveDisableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
     // The DriveTrain will enforce the switches but this makes sure they are applied
     // immediately
     // neutralOutput is safer than stop since it prevents the motors from running
@@ -326,30 +345,56 @@ public class RobotContainer {
 
     operatorOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
-    operatorOI.getShooterUnstickButton().whileActiveContinuous(new FeedUnstick(shooterRoller, hopper));
+    operatorOI.getShooterUnstickButton()
+        .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
-    operatorOI.getIntakeExtendButton().whenActive(new InstantCommand(intake::extend, intake));
-    operatorOI.getIntakeRetractButton().whenActive(new InstantCommand(intake::retract, intake));
+    operatorOI.getIntakeExtendButton().whenActive(intake::extend, intake);
+    operatorOI.getIntakeRetractButton().whenActive(intake::retract, intake);
 
     RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
     RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
     operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntakeForwards);
     operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntakeBackwards);
 
+    intake.updateLEDs();
+
     RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
+    operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodBottom(shooterHood));
+        .whenActive(new SetShooterHoodBottom(shooterHood, (led, state) -> operatorOI.updateLED(led, state),
+            (position) -> operatorOI.setHoodPosition(position)));
     operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, false));
+        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, false,
+            (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position)));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, true));
+        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, true,
+            (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position)));
 
     operatorOI.getClimbEnableSwitch().whenActive(climber::deploy, climber);
     operatorOI.getClimbEnableSwitch().whenInactive(climber::reset, climber);
     operatorOI.getClimbEnableSwitch().whileActiveContinuous(new RunClimber(climber, operatorOI::getClimbStickY));
+
+    operatorOI.getClimbEnableSwitch()
+        .whenActive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.ON, operatorOI::updateLED));
+    operatorOI.getClimbEnableSwitch()
+        .whenInactive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.CLIMB_ENABLE, operatorOI.getClimbEnableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
+
+    operatorOI.getManualHoodSwitch()
+        .whenActive(new SetLEDOverride(OILED.MANUAL_HOOD, OILEDState.ON, operatorOI::updateLED));
+    operatorOI.getManualHoodSwitch()
+        .whenInactive(new SetLEDOverride(OILED.MANUAL_HOOD, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.MANUAL_HOOD, operatorOI.getManualHoodSwitch().get() ? OILEDState.ON : OILEDState.OFF);
+
+    driverOverrideOI.getLimelightLEDDisableSwitch()
+        .whenActive(new SetLEDOverride(OILED.LIMELIGHT_DISABLE, OILEDState.ON, operatorOI::updateLED));
+    driverOverrideOI.getLimelightLEDDisableSwitch()
+        .whenInactive(new SetLEDOverride(OILED.LIMELIGHT_DISABLE, OILEDState.OFF, operatorOI::updateLED));
+    operatorOI.updateLED(OILED.LIMELIGHT_DISABLE,
+        driverOverrideOI.getLimelightLEDDisableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
 
     PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
@@ -360,6 +405,12 @@ public class RobotContainer {
         0, false, false);
     driverOI.getAutoDriveButton().whileActiveContinuous(autoDriveCommand);
     driverOI.getAutoDriveButton().whenInactive(autoDriveCommand::cancel);
+  }
+
+  public void updateOITimer() {
+    if (operatorOI != null) {
+      operatorOI.updateTimer();
+    }
   }
 
   private void setupJoystickModeChooser() {
