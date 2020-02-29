@@ -21,21 +21,23 @@ public class SetHoodPositionLEDs extends InstantCommand {
   private final HoodPosition position;
   private final UpdateLEDInterface updateLED;
   private final SetHoodPositionLCDInterface setHoodLCD;
+  private final OILEDState state;
 
   public SetHoodPositionLEDs(HoodPosition position, UpdateLEDInterface updateLED,
-      SetHoodPositionLCDInterface setHoodLCD) {
+      SetHoodPositionLCDInterface setHoodLCD, OILEDState state) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.position = position;
     this.updateLED = updateLED;
     this.setHoodLCD = setHoodLCD;
+    this.state = state;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     setHoodLCD.set(position);
-    updateLED.update(OILED.HOOD_BOTTOM, position == HoodPosition.BOTTOM ? OILEDState.ON : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_MIDDLE, position == HoodPosition.MIDDLE ? OILEDState.ON : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_TOP, position == HoodPosition.TOP ? OILEDState.ON : OILEDState.OFF);
+    updateLED.update(OILED.HOOD_BOTTOM, position == HoodPosition.BOTTOM ? state : OILEDState.OFF);
+    updateLED.update(OILED.HOOD_MIDDLE, position == HoodPosition.MIDDLE ? state : OILEDState.OFF);
+    updateLED.update(OILED.HOOD_TOP, position == HoodPosition.TOP ? state : OILEDState.OFF);
   }
 }

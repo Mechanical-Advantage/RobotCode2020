@@ -348,12 +348,13 @@ public class RobotContainer {
 
     operatorOI.getIntakeExtendButton().whenActive(intake::extend, intake);
     operatorOI.getIntakeRetractButton().whenActive(intake::retract, intake);
-    operatorOI.updateLED(OILED.INTAKE_RETRACT, OILEDState.ON);
 
     RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
     RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
     operatorOI.getRunIntakeForwardsButton().whileActiveContinuous(runIntakeForwards);
     operatorOI.getRunIntakeBackwardsButton().whileActiveContinuous(runIntakeBackwards);
+
+    intake.updateLEDs();
 
     RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
     operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);

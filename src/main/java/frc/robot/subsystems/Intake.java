@@ -86,14 +86,7 @@ public class Intake extends SubsystemBase {
       return;
     }
     intake.set(power * (invertIntake ? -1 : 1));
-    if (power == 0) {
-      updateLED.update(OILED.INTAKE_FORWARD, OILEDState.OFF);
-      updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.OFF);
-    } else if (power > 0) {
-      updateLED.update(OILED.INTAKE_FORWARD, OILEDState.ON);
-    } else if (power < 0) {
-      updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.ON);
-    }
+    setRunLEDs(power);
   }
 
   public void extend() {
@@ -115,5 +108,24 @@ public class Intake extends SubsystemBase {
   private void setExtendRetractLEDs(boolean extended) {
     updateLED.update(OILED.INTAKE_EXTEND, extended ? OILEDState.ON : OILEDState.OFF);
     updateLED.update(OILED.INTAKE_RETRACT, extended ? OILEDState.OFF : OILEDState.ON);
+  }
+
+  private void setRunLEDs(double power) {
+    if (power == 0) {
+      updateLED.update(OILED.INTAKE_FORWARD, OILEDState.OFF);
+      updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.OFF);
+    } else if (power > 0) {
+      updateLED.update(OILED.INTAKE_FORWARD, OILEDState.ON);
+    } else if (power < 0) {
+      updateLED.update(OILED.INTAKE_BACKWARD, OILEDState.ON);
+    }
+  }
+
+  public void updateLEDs() {
+    if (intakeSolenoid == null || intake == null) {
+      return;
+    }
+    setExtendRetractLEDs(intakeSolenoid.get());
+    setRunLEDs(intake.getAppliedOutput());
   }
 }

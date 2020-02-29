@@ -47,7 +47,6 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private Button hoodWallButton;
     private Button hoodLineButton;
     private Button hoodTrenchButton;
-    private JoystickButton extendClimber;
 
     NetworkTable ledTable;
     NetworkTableEntry ledEntry;
@@ -60,13 +59,14 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     private static final Map<OILED, Integer> ledMap = Map.ofEntries(Map.entry(OILED.OPEN_LOOP, 0),
             Map.entry(OILED.DRIVE_DISABLE, 1), Map.entry(OILED.LIMELIGHT_DISABLE, 2), Map.entry(OILED.MANUAL_HOOD, 3),
             Map.entry(OILED.BUDDY_CLIMB, 4), Map.entry(OILED.CLIMB_ENABLE, 5), Map.entry(OILED.HOOD_BOTTOM, 7),
-            Map.entry(OILED.HOOD_MIDDLE, 8), Map.entry(OILED.HOOD_TOP, 9), Map.entry(OILED.INTAKE_EXTEND, 10));
+            Map.entry(OILED.HOOD_MIDDLE, 8), Map.entry(OILED.HOOD_TOP, 9), Map.entry(OILED.INTAKE_EXTEND, 10),
+            Map.entry(OILED.INTAKE_RETRACT, 11), Map.entry(OILED.INTAKE_FORWARD, 12),
+            Map.entry(OILED.INTAKE_BACKWARD, 13), Map.entry(OILED.SHOOTER_STOP, 16), Map.entry(OILED.SHOOTER_RUN, 17),
+            Map.entry(OILED.SHOOTER_UNSTICK, 18), Map.entry(OILED.SHOOTER_SHOOT, 19));
 
     public OIArduinoConsole(int firstID, int secondID) {
         arduinoController1 = new Joystick(firstID);
         arduinoController2 = new Joystick(secondID);
-
-        extendClimber = new JoystickButton(arduinoController2, 0);
 
         openLoopSwitch = new JoystickButton(arduinoController1, 1);
         driveDisableSwitch = new JoystickButton(arduinoController1, 2);

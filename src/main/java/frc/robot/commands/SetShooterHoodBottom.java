@@ -9,6 +9,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
 import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.ShooterHood;
@@ -30,6 +31,6 @@ public class SetShooterHoodBottom extends SequentialCommandGroup {
     // super(new FooCommand(), new BarCommand());
     super(new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood),
-        new SetHoodPositionLEDs(HoodPosition.BOTTOM, updateLED, setHoodLCD));
+        new SetHoodPositionLEDs(HoodPosition.BOTTOM, updateLED, setHoodLCD, OILEDState.ON));
   }
 }
