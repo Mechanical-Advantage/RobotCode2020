@@ -238,6 +238,6 @@ public class ShooterFlyWheel extends SubsystemBase {
 
   private void updateRunningLEDs(boolean running) {
     updateLED.update(OILED.SHOOTER_RUN, running ? OILEDState.ON : OILEDState.OFF);
-    updateLED.update(OILED.SHOOTER_STOP, running ? OILEDState.OFF : OILEDState.ON);
+    updateLED.update(OILED.SHOOTER_STOP, running ? OILEDState.OFF : OILEDState.MED);
   }
 }
