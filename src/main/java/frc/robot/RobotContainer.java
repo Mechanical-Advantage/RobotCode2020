@@ -237,9 +237,11 @@ public class RobotContainer {
           case "Controller (XBOX 360 For Windows)":
           case "Controller (Gamepad F310)":
           case "Controller (Gamepad for Xbox 360)":
+          case "Controller (Afterglow Gamepad for Xbox 360)":
           case "XBOX 360 For Windows (Controller)":
           case "Gamepad F310 (Controller)":
           case "Gamepad for Xbox 360 (Controller)":
+          case "Afterglow Gamepad for Xbox 360 (Controller)":
             if (firstControllerName == null) {
               firstControllerName = joystickName;
               if (operatorOIFound) {
