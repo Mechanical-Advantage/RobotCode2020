@@ -248,6 +248,7 @@ public class RobotContainer {
             if (firstControllerName == null) {
               firstControllerName = joystickName;
               firstController = joystickNum;
+              xboxControllerFound = true;
             } else if (!operatorOIFound) {
               operatorOI = new OIOperatorHandheld(joystickNum);
               operatorOIFound = true;
@@ -271,17 +272,20 @@ public class RobotContainer {
         if (operatorOIFound && !xboxOperator) {
           driverOI = new OIHandheld(firstController);
           System.out.println("Driver: XBox/F310 controller");
+          driverOIFound = true;
         } else if (operatorOIFound) {
           OIHandheldWithOverrides driverWithOverrides = new OIHandheldWithOverrides(firstController);
           driverOI = driverWithOverrides;
           driverOverrideOI = driverWithOverrides;
           System.out.println("Driver: XBox/F310 controller w/ overrides");
+          driverOIFound = true;
         } else {
           OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(joystickNum);
           driverOI = handheldAllInOne;
           operatorOI = handheldAllInOne;
           driverOverrideOI = handheldAllInOne;
           operatorOIFound = true;
+          driverOIFound = true;
           System.out.println("Driver/operator: XBox/F310 controller");
         }
         driverOIFound = true;
