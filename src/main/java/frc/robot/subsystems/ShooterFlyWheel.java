@@ -191,11 +191,11 @@ public class ShooterFlyWheel extends SubsystemBase {
     double currentRpm = getSpeed();
     OILEDState shooterLEDState = OILEDState.OFF;
     if (currentRpm > targetRpm * LEDFastPulseThreshold) {
-      shooterLEDState = OILEDState.ON;
+      shooterLEDState = OILEDState.MED;
     } else if (currentRpm > targetRpm * LEDSlowPulseThreshold) {
       shooterLEDState = OILEDState.PULSE_FAST;
     } else if (currentRpm > 0) {
-      shooterLEDState = OILEDState.PULSE_SLOW;
+      shooterLEDState = OILEDState.BLINK_SLOW;
     }
     if (shooterLEDState != lastShooterLEDState) {
       updateLED.update(OILED.SHOOTER_SHOOT, shooterLEDState);
@@ -237,7 +237,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   }
 
   private void updateRunningLEDs(boolean running) {
-    updateLED.update(OILED.SHOOTER_RUN, running ? OILEDState.ON : OILEDState.OFF);
+    updateLED.update(OILED.SHOOTER_RUN, running ? OILEDState.MED : OILEDState.OFF);
     updateLED.update(OILED.SHOOTER_STOP, running ? OILEDState.OFF : OILEDState.MED);
   }
 }

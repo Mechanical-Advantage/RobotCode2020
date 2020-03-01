@@ -57,6 +57,8 @@ import frc.robot.oi.OIArduinoConsole;
 import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheld;
 import frc.robot.oi.OIHandheldAllInOne;
+import frc.robot.oi.OIHandheldWithOverrides;
+import frc.robot.oi.OIOperatorHandheld;
 import frc.robot.oi.OIeStopConsole;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.Climber;
@@ -235,9 +237,11 @@ public class RobotContainer {
 
       // Look for driver controller
       firstControllerName = null;
+      boolean xboxControllerFound = false;
+      boolean xboxOperator = false;
       for (joystickNum = 0; joystickNum < 6; joystickNum++) {
         joystickName = joystickNames[joystickNum];
-        switch (joystickNames[joystickNum]) {
+        switch (joystickName) {
           case "Controller (XBOX 360 For Windows)":
           case "Controller (Gamepad F310)":
           case "Controller (Gamepad for Xbox 360)":
@@ -248,18 +252,12 @@ public class RobotContainer {
           case "Afterglow Gamepad for Xbox 360 (Controller)":
             if (firstControllerName == null) {
               firstControllerName = joystickName;
-              if (operatorOIFound) {
-                driverOI = new OIHandheld(joystickNum);
-                System.out.println("Driver: XBox/F310 controller");
-              } else {
-                OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(joystickNum);
-                driverOI = handheldAllInOne;
-                operatorOI = handheldAllInOne;
-                driverOverrideOI = handheldAllInOne;
-                operatorOIFound = true;
-                System.out.println("Driver/operator: XBox/F310 controller");
-              }
-              driverOIFound = true;
+              firstController = joystickNum;
+            } else if (!operatorOIFound) {
+              operatorOI = new OIOperatorHandheld(joystickNum);
+              operatorOIFound = true;
+              xboxOperator = true;
+              System.out.println("Operator: XBox/F310 controller");
             }
             break;
           case "Logitech Attack 3":
@@ -274,13 +272,34 @@ public class RobotContainer {
             break;
         }
       }
+      if (xboxControllerFound) {
+        if (operatorOIFound && !xboxOperator) {
+          driverOI = new OIHandheld(firstController);
+          System.out.println("Driver: XBox/F310 controller");
+        } else if (operatorOIFound) {
+          OIHandheldWithOverrides driverWithOverrides = new OIHandheldWithOverrides(firstController);
+          driverOI = driverWithOverrides;
+          driverOverrideOI = driverWithOverrides;
+          System.out.println("Driver: XBox/F310 controller w/ overrides");
+        } else {
+          OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(joystickNum);
+          driverOI = handheldAllInOne;
+          operatorOI = handheldAllInOne;
+          driverOverrideOI = handheldAllInOne;
+          operatorOIFound = true;
+          System.out.println("Driver/operator: XBox/F310 controller");
+        }
+        driverOIFound = true;
+      }
 
       DummyOI dummyOI = null;
       if (!operatorOIFound) {
         DriverStation.reportWarning("No operator controller found", false);
         dummyOI = new DummyOI();
         operatorOI = dummyOI;
-        // At the moment all the operator OIs also implement IDriverOverrideOI
+        // At the moment all the operator OIs also implement IDriverOverrideOI except
+        // for XBox driving which would be its own operator OI if there was not a
+        // seperate one anyway
         driverOverrideOI = dummyOI;
       }
       if (!driverOIFound) {
@@ -381,7 +400,8 @@ public class RobotContainer {
 
     operatorOI.getClimbEnableSwitch().whenActive(climber::deploy, climber);
     operatorOI.getClimbEnableSwitch().whenInactive(climber::reset, climber);
-    operatorOI.getClimbEnableSwitch().whileActiveContinuous(new RunClimber(climber, operatorOI::getClimbStickY));
+    operatorOI.getClimbEnableSwitch()
+        .whileActiveContinuous(new RunClimber(climber, operatorOI::getClimbStickY, operatorOI::getClimbStickX));
 
     operatorOI.getClimbEnableSwitch()
         .whenActive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.ON, operatorOI::updateLED));

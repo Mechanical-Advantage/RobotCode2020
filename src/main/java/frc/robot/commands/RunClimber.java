@@ -14,16 +14,20 @@ import frc.robot.subsystems.Climber;
 
 public class RunClimber extends CommandBase {
 
+  private static final double deadband = 0.07;
+
   private final Climber climber;
   private final DoubleSupplier stickAccess;
+  private final DoubleSupplier horizStickAccess;
 
   /**
    * Creates a new RunClimber.
    */
-  public RunClimber(Climber climber, DoubleSupplier stickAccess) {
+  public RunClimber(Climber climber, DoubleSupplier stickAccess, DoubleSupplier horizStickAccess) {
     addRequirements(climber);
     this.climber = climber;
     this.stickAccess = stickAccess;
+    this.horizStickAccess = horizStickAccess;
   }
 
   // Called when the command is initially scheduled.
@@ -34,13 +38,23 @@ public class RunClimber extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climber.run(stickAccess.getAsDouble());
+    double stickVal = stickAccess.getAsDouble();
+    stickVal = (Math.abs(stickVal) <= deadband) ? 0 : stickVal;
+    double horizStickVal = horizStickAccess.getAsDouble();
+    horizStickVal = (Math.abs(horizStickVal) <= deadband) ? 0 : horizStickVal;
+    double left = stickVal, right = stickVal;
+    if (horizStickVal > 0) {
+      left *= (1 - Math.abs(horizStickVal));
+    } else if (horizStickVal < 0) {
+      right *= (1 - Math.abs(horizStickVal));
+    }
+    climber.run(left, right);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    climber.run(0);
+    climber.run(0, 0);
   }
 
   // Returns true when the command should end.

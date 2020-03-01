@@ -41,6 +41,10 @@ public interface IOperatorOI {
         return 0;
     }
 
+    public default double getClimbStickX() {
+        return 0;
+    }
+
     public default Trigger getManualHoodSwitch() {
         return dummyTrigger;
     }
