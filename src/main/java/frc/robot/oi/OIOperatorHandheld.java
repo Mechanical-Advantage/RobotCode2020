@@ -56,7 +56,7 @@ public class OIOperatorHandheld implements IOperatorOI {
 
         climbEnableButton = new Button(controller::getStartButton);
         climbEnableButton.whenPressed(() -> climbEnabled = true);
-        climbDisableButton = new Button(controller::getStartButton);
+        climbDisableButton = new Button(controller::getBackButton);
         climbDisableButton.whenPressed(() -> climbEnabled = false);
         fakeClimbEnableSwitch = new Trigger(() -> climbEnabled);
 
