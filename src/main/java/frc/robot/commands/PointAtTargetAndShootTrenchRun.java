@@ -58,7 +58,7 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
             .andThen(new InstantCommand(intake::extend))
             .andThen(new RunMotionProfile(driveTrain, odometry, List.of(trenchStart), endPose, 0, false, false)
                 .deadlineWith(new RunIntakeForwards(intake)))
-            .andThen(new TurnToAngle(driveTrain, ahrs, -20, true))
+            .andThen(new RunMotionProfile(driveTrain, odometry, List.of(), secondShootPosition, 0, false, false))
             .andThen(new PointAtTarget(driveTrain, limelight, ahrs))
             .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(5)),
         new RunShooterFlyWheel(flywheel));
