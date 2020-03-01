@@ -58,6 +58,8 @@ public class OIHandheldWithOverrides extends OIHandheld implements IDriverOverri
                 return true;
             }
         });
+        SmartDashboard.putBoolean("Open Loop", openLoop);
+        SmartDashboard.putBoolean("Drive Enabled", driveEnabled);
     }
 
     @Override
