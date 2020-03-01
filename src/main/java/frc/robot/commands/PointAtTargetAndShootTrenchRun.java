@@ -40,6 +40,7 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
       Rotation2d.fromDegrees(180));
   private static final Translation2d trenchStart = new Translation2d(powerCellLineX,
       Constants.fieldLength / 2 + Constants.trenchRunLength / 2);
+  private static final Pose2d secondShootPosition = new Pose2d(trenchStart, Rotation2d.fromDegrees(0));
 
   /**
    * Creates a new PointAtTargetAndShootTrenchRun.
