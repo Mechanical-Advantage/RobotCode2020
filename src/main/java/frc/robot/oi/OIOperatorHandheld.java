@@ -36,6 +36,7 @@ public class OIOperatorHandheld implements IOperatorOI {
     private Button wallButton;
     private Button lineButton;
     private Button trenchButton;
+    private Trigger fakeManualHoodSwitch = dummyTrigger.negate();
 
     private boolean climbEnabled;
 
@@ -132,5 +133,10 @@ public class OIOperatorHandheld implements IOperatorOI {
     @Override
     public Trigger getHoodTrenchButton() {
         return trenchButton;
+    }
+
+    @Override
+    public Trigger getManualHoodSwitch() {
+        return fakeManualHoodSwitch;
     }
 }
