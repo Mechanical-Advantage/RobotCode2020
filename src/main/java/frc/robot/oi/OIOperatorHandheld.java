@@ -21,8 +21,8 @@ public class OIOperatorHandheld implements IOperatorOI {
 
     private Button shooterFlywheelRunButton;
     private Button shooterFlywheelStopButton;
-    private Button shooterRollerButton;
-    private Button shooterUnstickButton;
+    // private Button shooterRollerButton;
+    // private Button shooterUnstickButton;
 
     private Button intakeExtendButton;
     private Button intakeRetractButton;
@@ -45,8 +45,8 @@ public class OIOperatorHandheld implements IOperatorOI {
 
         shooterFlywheelRunButton = new Button(controller::getAButton);
         shooterFlywheelStopButton = new Button(controller::getBButton);
-        shooterRollerButton = new Button(controller::getXButton);
-        shooterUnstickButton = new Button(controller::getYButton);
+        // shooterRollerButton = new Button(controller::getXButton);
+        // shooterUnstickButton = new Button(controller::getYButton);
 
         intakeExtendButton = new Button(() -> controller.getBumper(Hand.kRight));
         intakeRetractButton = new Button(() -> controller.getBumper(Hand.kLeft));
@@ -75,15 +75,13 @@ public class OIOperatorHandheld implements IOperatorOI {
         return shooterFlywheelStopButton;
     }
 
-    @Override
-    public Trigger getShooterRollerButton() {
-        return shooterRollerButton;
-    }
-
-    @Override
-    public Trigger getShooterUnstickButton() {
-        return shooterUnstickButton;
-    }
+    /*
+     * @Override public Trigger getShooterRollerButton() { return
+     * shooterRollerButton; }
+     * 
+     * @Override public Trigger getShooterUnstickButton() { return
+     * shooterUnstickButton; }
+     */
 
     @Override
     public Trigger getIntakeExtendButton() {

@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOperatorOI {
     private Button shooterFlywheelRunButton;
     private Button shooterFlywheelStopButton;
-    private Button shooterRollerButton;
-    private Button shooterUnstickButton;
 
     private Button intakeExtendButton;
     private Button intakeRetractButton;
@@ -31,8 +29,6 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
 
         shooterFlywheelRunButton = new Button(driverController::getAButton);
         shooterFlywheelStopButton = new Button(driverController::getBButton);
-        shooterRollerButton = new Button(driverController::getXButton);
-        shooterUnstickButton = new Button(driverController::getYButton);
 
         intakeExtendButton = new POVButton(driverController, 90);
         intakeRetractButton = new POVButton(driverController, 270);
@@ -49,16 +45,6 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     @Override
     public Trigger getShooterFlywheelStopButton() {
         return shooterFlywheelStopButton;
-    }
-
-    @Override
-    public Trigger getShooterRollerButton() {
-        return shooterRollerButton;
-    }
-
-    @Override
-    public Trigger getShooterUnstickButton() {
-        return shooterUnstickButton;
     }
 
     @Override

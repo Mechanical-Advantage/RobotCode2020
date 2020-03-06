@@ -367,9 +367,9 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    operatorOI.getShooterRollerButton()
+    driverOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
-    operatorOI.getShooterUnstickButton()
+    driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
     operatorOI.getIntakeExtendButton().whenActive(intake::extend, intake);
