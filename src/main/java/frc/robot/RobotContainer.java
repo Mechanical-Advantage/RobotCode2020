@@ -280,7 +280,7 @@ public class RobotContainer {
           System.out.println("Driver: XBox/F310 controller w/ overrides");
           driverOIFound = true;
         } else {
-          OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(joystickNum);
+          OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(firstController);
           driverOI = handheldAllInOne;
           operatorOI = handheldAllInOne;
           driverOverrideOI = handheldAllInOne;
