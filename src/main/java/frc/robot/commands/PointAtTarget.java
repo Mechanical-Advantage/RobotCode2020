@@ -92,7 +92,7 @@ public class PointAtTarget extends CommandBase {
         kD = 0.00030;
         toleranceDegrees = 1;
         toleranceValuesToAverage = 10;
-        minOutput = 0.03;
+        minOutput = 0.05;
       default:
         break;
     }
@@ -123,6 +123,8 @@ public class PointAtTarget extends CommandBase {
   public void execute() {
     double currentAngle = ahrs.getAngle();
     double angleChange = currentAngle - lastAngle;
+    // The gyro angle and Limelight angle work in opposite directions
+    angleChange *= -1;
     angleData.addDataPoint(angleData.getCurrentPoint() + angleChange);
     lastAngle = currentAngle;
     if (limelight.hasValidTarget()) {
