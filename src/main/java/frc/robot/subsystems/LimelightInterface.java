@@ -10,12 +10,16 @@ package frc.robot.subsystems;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LimelightInterface extends SubsystemBase {
 
   // Limelight docs say to use at least 11ms
   private static final double imageCaptureLatency = 11; // ms
+  private static final boolean enablePCMLight = true;
+  private static final int PCMID = 0;
+  private static final int lightSolenoid = 4;
 
   private NetworkTableEntry targetValid;
   private NetworkTableEntry horizAngle;
@@ -52,6 +56,8 @@ public class LimelightInterface extends SubsystemBase {
   private NetworkTableEntry crosshairAY;
   private NetworkTableEntry crosshairBX;
   private NetworkTableEntry crosshairBY;
+
+  private Solenoid PCMLight;
 
   /**
    * Creates a new LimelightInterface.
@@ -93,6 +99,10 @@ public class LimelightInterface extends SubsystemBase {
     crosshairAY = table.getEntry("cy0");
     crosshairBX = table.getEntry("cx1");
     crosshairBY = table.getEntry("cy1");
+
+    if (enablePCMLight) {
+      PCMLight = new Solenoid(PCMID, lightSolenoid);
+    }
   }
 
   @Override
@@ -107,6 +117,16 @@ public class LimelightInterface extends SubsystemBase {
    */
   public void setLEDMode(LimelightLEDMode mode) {
     ledMode.forceSetNumber(mode.modeID);
+    if (enablePCMLight) {
+      switch (mode) {
+        case ON:
+          PCMLight.set(true);
+          break;
+        default:
+          PCMLight.set(false);
+          break;
+      }
+    }
   }
 
   /**
@@ -311,13 +331,13 @@ public class LimelightInterface extends SubsystemBase {
   public double getCrosshairX(LimelightCrosshair crosshair) {
     NetworkTableEntry entry;
     switch (crosshair) {
-    default:
-    case A:
-      entry = crosshairAX;
-      break;
-    case B:
-      entry = crosshairBX;
-      break;
+      default:
+      case A:
+        entry = crosshairAX;
+        break;
+      case B:
+        entry = crosshairBX;
+        break;
     }
     return entry.getDouble(0);
   }
@@ -331,13 +351,13 @@ public class LimelightInterface extends SubsystemBase {
   public double getCrosshairY(LimelightCrosshair crosshair) {
     NetworkTableEntry entry;
     switch (crosshair) {
-    default:
-    case A:
-      entry = crosshairAY;
-      break;
-    case B:
-      entry = crosshairBY;
-      break;
+      default:
+      case A:
+        entry = crosshairAY;
+        break;
+      case B:
+        entry = crosshairBY;
+        break;
     }
     return entry.getDouble(0);
   }
@@ -351,16 +371,16 @@ public class LimelightInterface extends SubsystemBase {
   public double getRawContourX(int contourID) {
     NetworkTableEntry entry;
     switch (contourID) {
-    default:
-    case 0:
-      entry = rawContour0X;
-      break;
-    case 1:
-      entry = rawContour1X;
-      break;
-    case 2:
-      entry = rawContour2X;
-      break;
+      default:
+      case 0:
+        entry = rawContour0X;
+        break;
+      case 1:
+        entry = rawContour1X;
+        break;
+      case 2:
+        entry = rawContour2X;
+        break;
     }
     return entry.getDouble(0);
   }
@@ -374,16 +394,16 @@ public class LimelightInterface extends SubsystemBase {
   public double getRawContourY(int contourID) {
     NetworkTableEntry entry;
     switch (contourID) {
-    default:
-    case 0:
-      entry = rawContour0Y;
-      break;
-    case 1:
-      entry = rawContour1Y;
-      break;
-    case 2:
-      entry = rawContour2Y;
-      break;
+      default:
+      case 0:
+        entry = rawContour0Y;
+        break;
+      case 1:
+        entry = rawContour1Y;
+        break;
+      case 2:
+        entry = rawContour2Y;
+        break;
     }
     return entry.getDouble(0);
   }
@@ -397,16 +417,16 @@ public class LimelightInterface extends SubsystemBase {
   public double getRawContourArea(int contourID) {
     NetworkTableEntry entry;
     switch (contourID) {
-    default:
-    case 0:
-      entry = rawContour0Area;
-      break;
-    case 1:
-      entry = rawContour1Area;
-      break;
-    case 2:
-      entry = rawContour2Area;
-      break;
+      default:
+      case 0:
+        entry = rawContour0Area;
+        break;
+      case 1:
+        entry = rawContour1Area;
+        break;
+      case 2:
+        entry = rawContour2Area;
+        break;
     }
     return entry.getDouble(0);
   }
@@ -420,16 +440,16 @@ public class LimelightInterface extends SubsystemBase {
   public double getRawContourSkew(int contourID) {
     NetworkTableEntry entry;
     switch (contourID) {
-    default:
-    case 0:
-      entry = rawContour0Skew;
-      break;
-    case 1:
-      entry = rawContour1Skew;
-      break;
-    case 2:
-      entry = rawContour2Skew;
-      break;
+      default:
+      case 0:
+        entry = rawContour0Skew;
+        break;
+      case 1:
+        entry = rawContour1Skew;
+        break;
+      case 2:
+        entry = rawContour2Skew;
+        break;
     }
     return entry.getDouble(0);
   }

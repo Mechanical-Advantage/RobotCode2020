@@ -14,8 +14,8 @@ import frc.robot.Constants.RobotType;
 
 public class ShooterHood extends SubsystemBase {
 
-  private static final int liftSolenoidChannel = 6;
-  private static final int stopSolenoidChannel = 5;
+  private static final int liftSolenoidChannel = 0;
+  private static final int stopSolenoidChannel = 1;
 
   private Solenoid liftSolenoid;
   private Solenoid stopSolenoid;
@@ -62,5 +62,9 @@ public class ShooterHood extends SubsystemBase {
         stopSolenoid.set(stopped);
       }
     }
+  }
+
+  public static enum HoodPosition {
+    BOTTOM, MIDDLE, TOP
   }
 }

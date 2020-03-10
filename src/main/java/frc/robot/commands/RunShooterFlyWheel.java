@@ -48,7 +48,6 @@ public class RunShooterFlyWheel extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     shooterFlyWheel.stop();
-
   }
 
   // Returns true when the command should end.

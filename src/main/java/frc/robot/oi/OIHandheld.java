@@ -21,6 +21,8 @@ public class OIHandheld implements IDriverOI {
 
     private Button autoAimButton;
     private Button autoDriveButton;
+    private Button shooterRollerButton;
+    private Button shooterUnstickButton;
 
     public OIHandheld(int ID) {
         driverController = new XboxController(ID);
@@ -30,6 +32,9 @@ public class OIHandheld implements IDriverOI {
 
         autoAimButton = new Button(() -> driverController.getBumper(Hand.kLeft));
         autoDriveButton = new POVButton(driverController, 90);
+
+        shooterRollerButton = new Button(driverController::getXButton);
+        shooterUnstickButton = new Button(driverController::getYButton);
 
         resetRumble();
     }
@@ -135,7 +140,17 @@ public class OIHandheld implements IDriverOI {
     // }
 
     @Override
+    public Trigger getShooterRollerButton() {
+        return shooterRollerButton;
+    }
+
+    @Override
+    public Trigger getShooterUnstickButton() {
+        return shooterUnstickButton;
+    }
+
+    @Override
     public double getDeadband() {
-        return 0.09;
+        return 0.10;
     }
 }

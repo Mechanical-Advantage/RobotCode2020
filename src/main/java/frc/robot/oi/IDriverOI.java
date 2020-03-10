@@ -109,6 +109,10 @@ public interface IDriverOI {
         return dummyTrigger;
     }
 
+    public Trigger getShooterRollerButton();
+
+    public Trigger getShooterUnstickButton();
+
     public default void setDriverRumble(DriverOIRumbleType type, double value) {
     }
 
