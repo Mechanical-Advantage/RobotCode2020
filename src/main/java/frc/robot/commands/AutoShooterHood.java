@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
+import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
+import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.util.PressureSensor;
@@ -35,15 +37,16 @@ public class AutoShooterHood extends CommandBase {
   /**
    * Creates a new AutoShooterHood.
    */
-  public AutoShooterHood(ShooterHood hood, RobotOdometry odometry, PressureSensor pressureSensor) {
+  public AutoShooterHood(ShooterHood hood, RobotOdometry odometry, PressureSensor pressureSensor,
+      UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     // Nothing is required because the commands called here are what actually
     // intereact with the hood and this command must not have exclusive control of
     // the odometry
     this.odometry = odometry;
 
-    wallCommand = new SetShooterHoodTopBottom(hood, false);
-    lineCommand = new SetShooterHoodMiddle(hood, pressureSensor);
-    trenchCommand = new SetShooterHoodTopBottom(hood, true);
+    wallCommand = new SetShooterHoodBottom(hood, updateLED, setHoodLCD);
+    lineCommand = new SetShooterHoodMiddleTop(hood, pressureSensor, false, updateLED, setHoodLCD);
+    trenchCommand = new SetShooterHoodMiddleTop(hood, pressureSensor, true, updateLED, setHoodLCD);
   }
 
   // Called when the command is initially scheduled.
