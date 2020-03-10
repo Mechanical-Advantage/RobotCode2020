@@ -34,14 +34,32 @@ public class OIHandheldWithOverrides extends OIHandheld implements IDriverOverri
 
         // The toggle buttons are not exposed and this class fakes having a disable
         // switch
-        toggleDriveEnabled.whenPressed(new InstantCommand(() -> {
-            driveEnabled = !driveEnabled;
-            SmartDashboard.putBoolean("Drive Enabled", driveEnabled);
-        }));
-        toggleOpenLoop.whenPressed(new InstantCommand(() -> {
-            openLoop = !openLoop;
-            SmartDashboard.putBoolean("Open Loop", openLoop);
-        }));
+        toggleDriveEnabled.whenPressed(new InstantCommand() {
+            @Override
+            public void initialize() {
+                driveEnabled = !driveEnabled;
+                SmartDashboard.putBoolean("Drive Enabled", driveEnabled);
+            }
+
+            @Override
+            public boolean runsWhenDisabled() {
+                return true;
+            }
+        });
+        toggleOpenLoop.whenPressed(new InstantCommand() {
+            @Override
+            public void initialize() {
+                openLoop = !openLoop;
+                SmartDashboard.putBoolean("Open Loop", openLoop);
+            }
+
+            @Override
+            public boolean runsWhenDisabled() {
+                return true;
+            }
+        });
+        SmartDashboard.putBoolean("Open Loop", openLoop);
+        SmartDashboard.putBoolean("Drive Enabled", driveEnabled);
     }
 
     @Override

@@ -253,6 +253,7 @@ public class RobotContainer {
             if (firstControllerName == null) {
               firstControllerName = joystickName;
               firstController = joystickNum;
+              xboxControllerFound = true;
             } else if (!operatorOIFound) {
               operatorOI = new OIOperatorHandheld(joystickNum);
               operatorOIFound = true;
@@ -276,17 +277,20 @@ public class RobotContainer {
         if (operatorOIFound && !xboxOperator) {
           driverOI = new OIHandheld(firstController);
           System.out.println("Driver: XBox/F310 controller");
+          driverOIFound = true;
         } else if (operatorOIFound) {
           OIHandheldWithOverrides driverWithOverrides = new OIHandheldWithOverrides(firstController);
           driverOI = driverWithOverrides;
           driverOverrideOI = driverWithOverrides;
           System.out.println("Driver: XBox/F310 controller w/ overrides");
+          driverOIFound = true;
         } else {
-          OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(joystickNum);
+          OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(firstController);
           driverOI = handheldAllInOne;
           operatorOI = handheldAllInOne;
           driverOverrideOI = handheldAllInOne;
           operatorOIFound = true;
+          driverOIFound = true;
           System.out.println("Driver/operator: XBox/F310 controller");
         }
         driverOIFound = true;
@@ -368,9 +372,9 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    operatorOI.getShooterRollerButton()
+    driverOI.getShooterRollerButton()
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
-    operatorOI.getShooterUnstickButton()
+    driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
     operatorOI.getIntakeExtendButton().whenActive(intake::extend, intake);
