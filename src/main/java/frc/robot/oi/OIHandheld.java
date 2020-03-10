@@ -22,6 +22,8 @@ public class OIHandheld implements IDriverOI {
     private Button autoAimButton;
     private Button autoDriveButton;
 
+    private Button backupFromWallButton;
+
     public OIHandheld(int ID) {
         driverController = new XboxController(ID);
 
@@ -30,6 +32,8 @@ public class OIHandheld implements IDriverOI {
 
         autoAimButton = new Button(() -> driverController.getBumper(Hand.kLeft));
         autoDriveButton = new POVButton(driverController, 90);
+
+        backupFromWallButton = new Button(() -> driverController.getBumper(Hand.kRight));
 
         resetRumble();
     }
@@ -73,12 +77,12 @@ public class OIHandheld implements IDriverOI {
     public void setDriverRumble(DriverOIRumbleType type, double value) {
         value = value > 1 ? 1 : value;
         switch (type) {
-            case LEFT:
-                driverController.setRumble(RumbleType.kLeftRumble, value);
-                break;
-            case RIGHT:
-                driverController.setRumble(RumbleType.kRightRumble, value);
-                break;
+        case LEFT:
+            driverController.setRumble(RumbleType.kLeftRumble, value);
+            break;
+        case RIGHT:
+            driverController.setRumble(RumbleType.kRightRumble, value);
+            break;
         }
     }
 
@@ -127,6 +131,11 @@ public class OIHandheld implements IDriverOI {
     @Override
     public Trigger getAutoAimButton() {
         return autoAimButton;
+    }
+
+    @Override
+    public Trigger getBackupFromWallButton() {
+        return backupFromWallButton;
     }
 
     // @Override

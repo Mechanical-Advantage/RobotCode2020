@@ -66,6 +66,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         hoodWallButton = new JoystickButton(arduinoController2, 6); // 18
         hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
         hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
+
     }
 
     @Override
@@ -109,13 +110,9 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     }
 
     @Override
+
     public Trigger getClimbEnableSwitch() {
         return climbEnableSwitch;
-    }
-
-    @Override
-    public double getClimbStickY() {
-        return arduinoController1.getY();
     }
 
     public Trigger getOpenLoopSwitch() {

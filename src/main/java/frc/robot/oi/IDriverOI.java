@@ -101,6 +101,10 @@ public interface IDriverOI {
         return dummyTrigger;
     }
 
+    public default Trigger getBackupFromWallButton() {
+        return dummyTrigger;
+    }
+
     public default Trigger getAutoDriveButton() {
         return dummyTrigger;
     }
