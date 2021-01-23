@@ -59,7 +59,8 @@ public class RunMotionProfile extends CommandBase {
   private RamseteCommand followerCommand;
 
   /**
-   * Creates a new RunMotionProfile that starts from a fixed position.
+   * Creates a new RunMotionProfile that starts from a fixed position, using the
+   * intuitive coorindate system.
    * 
    * @param driveTrain         The drive train
    * @param odometry           The robot odometry
@@ -81,14 +82,44 @@ public class RunMotionProfile extends CommandBase {
     // The other constructor's relative trajectory handling is unneccessary with a
     // defined start point so always pass false and do the other neccessary logic
     // here
-    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, false);
-    dynamicTrajectory = false;
-    relativeTrajectory = relative;
-    startGeneration(convertPose(initialPosition), initialVelocity);
+    this(driveTrain, odometry, initialPosition, initialVelocity, intermediatePoints, endPosition, endVelocity, reversed,
+        relative, true);
   }
 
   /**
-   * Creates a new RunMotionProfile that starts from the robot's current position
+   * Creates a new RunMotionProfile that starts from a fixed position, with an
+   * option to use the WPILib coorindate system.
+   * 
+   * @param driveTrain         The drive train
+   * @param odometry           The robot odometry
+   * @param initialPosition    The starting pose for the profile
+   * @param initialVelocity    The velocity at the beginning of the profile
+   * @param intermediatePoints The points in between the start and end of the
+   *                           profile (translation only)
+   * @param endPosition        The end pose
+   * @param endVelocity        The target velocity at the end of the profile
+   * @param reversed           Whether the robot drives backwards during the
+   *                           profile
+   * @param relative           Whether the profile is a relative change to the
+   *                           robot position as opposed to field coordinates
+   * @param useIntuitive       Whether the pose inputs are in the intuitive system
+   * 
+   */
+  public RunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
+      double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
+      boolean reversed, boolean relative, boolean useIntuitive) {
+    // The other constructor's relative trajectory handling is unneccessary with a
+    // defined start point so always pass false and do the other neccessary logic
+    // here
+    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, false, useIntuitive);
+    dynamicTrajectory = false;
+    relativeTrajectory = relative;
+    startGeneration(useIntuitive ? convertPose(initialPosition) : initialPosition, initialVelocity);
+  }
+
+  /**
+   * Creates a new RunMotionProfile that starts from the robot's current position,
+   * using the intuitive coorindate system.
    * 
    * @param driveTrain         The drive train
    * @param odometry           The robot odometry
@@ -101,45 +132,68 @@ public class RunMotionProfile extends CommandBase {
    * @param relative           Whether the profile is a relative change to the
    *                           robot position as opposed to field coordinates
    */
-  @SuppressWarnings("incomplete-switch")
   public RunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
+    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, relative, true);
+  }
+
+  /**
+   * Creates a new RunMotionProfile that starts from the robot's current position,
+   * with an option to use the WPILib coorindate system.
+   * 
+   * @param driveTrain         The drive train
+   * @param odometry           The robot odometry
+   * @param intermediatePoints The points in between the start and end of the
+   *                           profile (translation only)
+   * @param endPosition        The end pose
+   * @param endVelocity        The target velocity at the end of the profile
+   * @param reversed           Whether the robot drives backwards during the
+   *                           profile
+   * @param relative           Whether the profile is a relative change to the
+   *                           robot position as opposed to field coordinates
+   * @param useIntuitive       Whether the pose inputs are in the intuitive system
+   */
+  @SuppressWarnings("incomplete-switch")
+  public RunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
+      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative, boolean useIntuitive) {
     this.driveTrain = driveTrain;
     addRequirements(driveTrain);
     this.odometry = odometry;
     dynamicTrajectory = true;
     switch (Constants.getRobot()) {
-    case ROBOT_2019:
-      kS = 1.21;
-      kV = 0.0591;
-      kA = 0.0182;
-      trackWidth = 27.5932064868814;
-      maxVelocity = 150;
-      maxAcceleration = 50;
-      break;
-    case ROBOT_2020:
-    case ROBOT_2020_DRIVE:
-      kS = 0.14;
-      kV = 0.0758;
-      kA = 0.0128;
-      trackWidth = 24.890470780033485;
-      maxVelocity = 120;
-      maxAcceleration = 50;
-      break;
+      case ROBOT_2019:
+        kS = 1.21;
+        kV = 0.0591;
+        kA = 0.0182;
+        trackWidth = 27.5932064868814;
+        maxVelocity = 150;
+        maxAcceleration = 50;
+        break;
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        kS = 0.14;
+        kV = 0.0758;
+        kA = 0.0128;
+        trackWidth = 24.890470780033485;
+        maxVelocity = 120;
+        maxAcceleration = 50;
+        break;
     }
     driveKinematics = new DifferentialDriveKinematics(trackWidth);
     DifferentialDriveVoltageConstraint voltageConstraint = new DifferentialDriveVoltageConstraint(
         new SimpleMotorFeedforward(kS, kV, kA), driveKinematics, maxVoltage);
     // Convert from intuitive to WPILib
-    try {
-      convertTranslationList(intermediatePoints);
-    } catch (UnsupportedOperationException e) {
-      // Make the list modifiable and try again
-      intermediatePoints = new ArrayList<Translation2d>(intermediatePoints);
-      convertTranslationList(intermediatePoints);
+    if (useIntuitive) {
+      try {
+        convertTranslationList(intermediatePoints);
+      } catch (UnsupportedOperationException e) {
+        // Make the list modifiable and try again
+        intermediatePoints = new ArrayList<Translation2d>(intermediatePoints);
+        convertTranslationList(intermediatePoints);
+      }
     }
     this.intermediatePoints = intermediatePoints;
-    this.endPosition = convertPose(endPosition);
+    this.endPosition = useIntuitive ? convertPose(endPosition) : endPosition;
     config = new TrajectoryConfig(maxVelocity, maxAcceleration).setKinematics(driveKinematics)
         .addConstraint(voltageConstraint).setEndVelocity(endVelocity).setReversed(reversed);
     if (relative) {
