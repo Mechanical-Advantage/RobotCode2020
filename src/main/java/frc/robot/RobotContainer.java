@@ -35,6 +35,10 @@ import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunClimber;
+import frc.robot.commands.RunGalacticSearchABlue;
+import frc.robot.commands.RunGalacticSearchARed;
+import frc.robot.commands.RunGalacticSearchBBlue;
+import frc.robot.commands.RunGalacticSearchBRed;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
@@ -177,6 +181,10 @@ public class RobotContainer {
         new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood,
             pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
+    autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem));
+    autoChooser.addOption("Galactic Search (A/Red)", new RunGalacticSearchARed(odometry, driveSubsystem));
+    autoChooser.addOption("Galactic Search (B/Blue)", new RunGalacticSearchBBlue(odometry, driveSubsystem));
+    autoChooser.addOption("Galactic Search (B/Red)", new RunGalacticSearchBRed(odometry, driveSubsystem));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
