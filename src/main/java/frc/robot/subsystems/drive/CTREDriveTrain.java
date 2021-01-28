@@ -47,109 +47,109 @@ public class CTREDriveTrain extends DriveTrainBase {
     boolean reverseSensorLeft = false;
     boolean reverseSensorRight = false;
     switch (Constants.getRobot()) {
-    case NOTBOT:
-      leftMaster = new TalonSRX(1);
-      leftFollower1 = new TalonSRX(2);
-      rightMaster = new TalonSRX(3);
-      rightFollower1 = new TalonSRX(4);
-      maxVelocityLow = 122.282131;
-      minVelocityLow = 5.14872;
-      encoderType = FeedbackDevice.QuadEncoder;
-      ticksPerRotation = 1440;
-      wheelDiameter = 5.9000000002; // 6
-      reverseSensorRight = false;
-      reverseSensorLeft = false;
-      reverseOutputLeft = false;
-      reverseOutputRight = true;
-      kPLow = 2;
-      kILow = 0;
-      kDLow = 40;
-      kFLow = 1.07;
-      kIZoneLow = 0;
-      break;
-    case ORIGINAL_ROBOT_2018:
-      leftMaster = new TalonSRX(12);
-      leftFollower1 = new TalonSRX(13);
-      rightMaster = new TalonSRX(2);
-      rightFollower1 = new TalonSRX(0);
-      leftGearSolenoid1 = 0;
-      leftGearSolenoid2 = 1;
-      leftGearPCM = 1;
-      rightGearSolenoid1 = 2;
-      rightGearSolenoid2 = 3;
-      rightGearPCM = 0;
-      maxVelocityLow = 106;
-      maxVelocityHigh = 230;
-      minVelocityLow = 3.25971;
-      minVelocityHigh = 13.038837;
-      dualGear = true;
-      encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
-      ticksPerRotation = 4096;
-      wheelDiameter = 4.25;
-      reverseSensorRight = false;
-      reverseSensorLeft = false;
-      reverseOutputLeft = true;
-      reverseOutputRight = false;
-      kPLow = 0.5;
-      kILow = 0.003;
-      kIZoneLow = 300;
-      kDLow = 30;
-      kFLow = 0.3145756458;
-      kPHigh = 0.8;
-      kIHigh = 0;
-      kDHigh = 10;
-      kFHigh = 0.1449829932;
-      break;
-    case ROBOT_2019:
-      leftMaster = new TalonSRX(12);
-      leftFollower1 = new VictorSPX(14);
-      leftFollower2 = new VictorSPX(13);
-      rightMaster = new TalonSRX(3);
-      rightFollower1 = new VictorSPX(2);
-      rightFollower2 = new VictorSPX(1);
-      ptoSolenoid1 = 3;
-      ptoSolenoid2 = 2;
-      ptoPCM = 1;
-      maxVelocityLow = 170.566392;
-      minVelocityLow = 8.8836662;
-      sixMotorDrive = true;
-      encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
-      ticksPerRotation = 4096;
-      wheelDiameter = 4.633; // Testing of DriveDistanceOnHeading suggests this may not be right
-      reverseSensorRight = true;
-      reverseSensorLeft = true;
-      reverseOutputLeft = true;
-      reverseOutputRight = false;
-      kPLow = 0.8;
-      kILow = 0;
-      kIZoneLow = 0;
-      kDLow = 30;
-      kFLow = 0.23; // Calculated 0.213125
-      hasPTO = true;
-      break;
-    case REBOT:
-      leftMaster = new TalonSRX(12);
-      leftFollower1 = new VictorSPX(13);
-      leftFollower2 = new VictorSPX(14);
-      rightMaster = new TalonSRX(1);
-      rightFollower1 = new VictorSPX(2);
-      rightFollower2 = new VictorSPX(3);
-      maxVelocityLow = 125.94;
-      minVelocityLow = 5.18;
-      sixMotorDrive = true;
-      encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
-      ticksPerRotation = 4096;
-      wheelDiameter = 5; // This is just a best guess, make sure to measure before tuning
-      reverseSensorRight = true;
-      reverseSensorLeft = true;
-      reverseOutputLeft = false;
-      reverseOutputRight = true;
-      kPLow = 0.6;
-      kILow = 0.0007;
-      kDLow = 6;
-      kFLow = 0.2842;
-      kIZoneLow = 4096 * 50 / 600;
-      break;
+      case NOTBOT:
+        leftMaster = new TalonSRX(1);
+        leftFollower1 = new TalonSRX(2);
+        rightMaster = new TalonSRX(3);
+        rightFollower1 = new TalonSRX(4);
+        maxVelocityLow = 122.282131;
+        minVelocityLow = 5.14872;
+        encoderType = FeedbackDevice.QuadEncoder;
+        ticksPerRotation = 1440;
+        wheelDiameter = 5.9000000002; // 6
+        reverseSensorRight = false;
+        reverseSensorLeft = false;
+        reverseOutputLeft = false;
+        reverseOutputRight = true;
+        kPLow = 2;
+        kILow = 0;
+        kDLow = 40;
+        kFLow = 1.07;
+        kIZoneLow = 0;
+        break;
+      case ORIGINAL_ROBOT_2018:
+        leftMaster = new TalonSRX(12);
+        leftFollower1 = new TalonSRX(13);
+        rightMaster = new TalonSRX(2);
+        rightFollower1 = new TalonSRX(0);
+        leftGearSolenoid1 = 0;
+        leftGearSolenoid2 = 1;
+        leftGearPCM = 1;
+        rightGearSolenoid1 = 2;
+        rightGearSolenoid2 = 3;
+        rightGearPCM = 0;
+        maxVelocityLow = 106;
+        maxVelocityHigh = 230;
+        minVelocityLow = 3.25971;
+        minVelocityHigh = 13.038837;
+        dualGear = true;
+        encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
+        ticksPerRotation = 4096;
+        wheelDiameter = 4.25;
+        reverseSensorRight = false;
+        reverseSensorLeft = false;
+        reverseOutputLeft = true;
+        reverseOutputRight = false;
+        kPLow = 0.5;
+        kILow = 0.003;
+        kIZoneLow = 300;
+        kDLow = 30;
+        kFLow = 0.3145756458;
+        kPHigh = 0.8;
+        kIHigh = 0;
+        kDHigh = 10;
+        kFHigh = 0.1449829932;
+        break;
+      case ROBOT_2019:
+        leftMaster = new TalonSRX(12);
+        leftFollower1 = new VictorSPX(14);
+        leftFollower2 = new VictorSPX(13);
+        rightMaster = new TalonSRX(3);
+        rightFollower1 = new VictorSPX(2);
+        rightFollower2 = new VictorSPX(1);
+        ptoSolenoid1 = 3;
+        ptoSolenoid2 = 2;
+        ptoPCM = 1;
+        maxVelocityLow = 170.566392;
+        minVelocityLow = 8.8836662;
+        sixMotorDrive = true;
+        encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
+        ticksPerRotation = 4096;
+        wheelDiameter = 4.633; // Testing of DriveDistanceOnHeading suggests this may not be right
+        reverseSensorRight = true;
+        reverseSensorLeft = true;
+        reverseOutputLeft = true;
+        reverseOutputRight = false;
+        kPLow = 0.8;
+        kILow = 0;
+        kIZoneLow = 0;
+        kDLow = 30;
+        kFLow = 0.23; // Calculated 0.213125
+        hasPTO = true;
+        break;
+      case REBOT:
+        leftMaster = new TalonSRX(12);
+        leftFollower1 = new VictorSPX(13);
+        leftFollower2 = new VictorSPX(14);
+        rightMaster = new TalonSRX(1);
+        rightFollower1 = new VictorSPX(2);
+        rightFollower2 = new VictorSPX(3);
+        maxVelocityLow = 125.94;
+        minVelocityLow = 5.18;
+        sixMotorDrive = true;
+        encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
+        ticksPerRotation = 4096;
+        wheelDiameter = 5; // This is just a best guess, make sure to measure before tuning
+        reverseSensorRight = true;
+        reverseSensorLeft = true;
+        reverseOutputLeft = false;
+        reverseOutputRight = true;
+        kPLow = 0.6;
+        kILow = 0.0007;
+        kDLow = 6;
+        kFLow = 0.2842;
+        kIZoneLow = 4096 * 50 / 600;
+        break;
     }
     leftMaster.configFactoryDefault(configTimeoutInit);
     leftFollower1.configFactoryDefault(configTimeoutInit);
@@ -241,6 +241,16 @@ public class CTREDriveTrain extends DriveTrainBase {
   @Override
   public double getCurrent() {
     return (rightMaster.getStatorCurrent() + leftMaster.getStatorCurrent()) / 2;
+  }
+
+  @Override
+  public double getVoltageLeft() {
+    return leftMaster.getMotorOutputVoltage();
+  }
+
+  @Override
+  public double getVoltageRight() {
+    return rightMaster.getMotorOutputVoltage();
   }
 
   @Override

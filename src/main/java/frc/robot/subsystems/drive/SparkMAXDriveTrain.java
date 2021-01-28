@@ -187,6 +187,16 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   }
 
   @Override
+  public double getVoltageLeft() {
+    return leftMaster.getAppliedOutput();
+  }
+
+  @Override
+  public double getVoltageRight() {
+    return rightMaster.getAppliedOutput();
+  }
+
+  @Override
   protected void setPID(int slotIdx, double p, double i, double d, double f, int iZone) {
     leftPidController.setP(p, slotIdx);
     leftPidController.setI(i, slotIdx);

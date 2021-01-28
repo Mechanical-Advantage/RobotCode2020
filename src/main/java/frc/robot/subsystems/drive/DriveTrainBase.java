@@ -330,6 +330,20 @@ public abstract class DriveTrainBase extends SubsystemBase {
   public abstract double getCurrent();
 
   /**
+   * Get the current voltage for the left motors
+   * 
+   * @return current voltage
+   */
+  public abstract double getVoltageLeft();
+
+  /**
+   * Get the current voltage for the right motors
+   * 
+   * @return current voltage
+   */
+  public abstract double getVoltageRight();
+
+  /**
    * Sets the PID parameters for the current control mode, useful for tuning.
    * Calling this effects everything using the subsystem, use with care.
    * 
@@ -454,23 +468,23 @@ public abstract class DriveTrainBase extends SubsystemBase {
   public void switchGear(DriveGear gear) {
     if (dualGear && !shiftLockSwitchAccess.getAsBoolean()) {
       switch (gear) {
-      case HIGH:
-        leftGearSolenoid.set(Value.kForward);
-        rightGearSolenoid.set(Value.kForward);
-        setProfileSlot(1);
-        currentGear = DriveGear.HIGH;
-        SmartDashboard.putBoolean("High Gear", true);
-        break;
-      case LOW:
-        leftGearSolenoid.set(Value.kReverse);
-        rightGearSolenoid.set(Value.kReverse);
-        setProfileSlot(0);
-        currentGear = DriveGear.LOW;
-        SmartDashboard.putBoolean("High Gear", false);
-        break;
-      case UNSUPPORTED:
-      default:
-        break;
+        case HIGH:
+          leftGearSolenoid.set(Value.kForward);
+          rightGearSolenoid.set(Value.kForward);
+          setProfileSlot(1);
+          currentGear = DriveGear.HIGH;
+          SmartDashboard.putBoolean("High Gear", true);
+          break;
+        case LOW:
+          leftGearSolenoid.set(Value.kReverse);
+          rightGearSolenoid.set(Value.kReverse);
+          setProfileSlot(0);
+          currentGear = DriveGear.LOW;
+          SmartDashboard.putBoolean("High Gear", false);
+          break;
+        case UNSUPPORTED:
+        default:
+          break;
       }
     }
   }
@@ -536,12 +550,12 @@ public abstract class DriveTrainBase extends SubsystemBase {
 
     public DriveGear invert() {
       switch (this) {
-      case HIGH:
-        return LOW;
-      case LOW:
-        return HIGH;
-      default:
-        return UNSUPPORTED;
+        case HIGH:
+          return LOW;
+        case LOW:
+          return HIGH;
+        default:
+          return UNSUPPORTED;
       }
     }
   }
