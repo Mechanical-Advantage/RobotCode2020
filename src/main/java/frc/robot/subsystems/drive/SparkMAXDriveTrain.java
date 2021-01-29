@@ -110,6 +110,8 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
     leftFollower.burnFlash();
     rightMaster.burnFlash();
     rightFollower.burnFlash();
+    leftMaster.enableVoltageCompensation(12.0);
+    rightMaster.enableVoltageCompensation(12.0);
     setCANTimeout(configTimeoutRuntime);
   }
 
@@ -188,12 +190,12 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
 
   @Override
   public double getVoltageLeft() {
-    return leftMaster.getAppliedOutput();
+    return leftMaster.getAppliedOutput() * 12;
   }
 
   @Override
   public double getVoltageRight() {
-    return rightMaster.getAppliedOutput();
+    return rightMaster.getAppliedOutput() * 12;
   }
 
   @Override
