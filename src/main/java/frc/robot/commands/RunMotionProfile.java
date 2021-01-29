@@ -169,13 +169,20 @@ public class RunMotionProfile extends CommandBase {
         maxVelocity = 150;
         maxAcceleration = 50;
         break;
-      case ROBOT_2020:
       case ROBOT_2020_DRIVE:
         kS = 0.14;
         kV = 0.0758;
         kA = 0.0128;
         trackWidth = 24.890470780033485;
         maxVelocity = 120;
+        maxAcceleration = 50;
+        break;
+      case ROBOT_2020:
+        kS = 0.119;
+        kV = 0.081;
+        kA = 0.00958;
+        trackWidth = 25.737;
+        maxVelocity = 80;
         maxAcceleration = 50;
         break;
     }
