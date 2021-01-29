@@ -182,7 +182,7 @@ public class RunMotionProfile extends CommandBase {
         kV = 0.081;
         kA = 0.00958;
         trackWidth = 25.737;
-        maxVelocity = 80;
+        maxVelocity = 120;
         maxAcceleration = 50;
         break;
     }
