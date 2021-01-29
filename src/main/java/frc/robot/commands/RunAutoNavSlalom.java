@@ -18,13 +18,17 @@ import frc.robot.subsystems.RobotOdometry;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class RunGalacticSearchABlue extends SequentialCommandGroup {
+public class RunAutoNavSlalom extends SequentialCommandGroup {
 
   /** Creates a new RunGalacticSearchABlue. */
-  public RunGalacticSearchABlue(RobotOdometry odometry, DriveTrainBase driveTrain) {
+  public RunAutoNavSlalom(RobotOdometry odometry, DriveTrainBase driveTrain) {
     // Add your addCommands(new FooCommand(), new BarCommand());
-    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 35, new Rotation2d()))),
-        new RunMotionProfile(driveTrain, odometry, List.of(new Translation2d(180, 35), new Translation2d(215, 120)),
-            new Pose2d(330, 60, new Rotation2d()), 0, false, false, false));
+    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))),
+        new RunMotionProfile(driveTrain, odometry,
+            List.of(new Translation2d(75, 30), new Translation2d(105, 90), new Translation2d(255, 90),
+                new Translation2d(285, 30), new Translation2d(330, 40), new Translation2d(330, 80),
+                new Translation2d(285, 90), new Translation2d(255, 30), new Translation2d(105, 30),
+                new Translation2d(75, 90)),
+            new Pose2d(30, 90, Rotation2d.fromDegrees(-180)), 0, false, false, false));
   }
 }
