@@ -180,7 +180,7 @@ public class RobotContainer {
             pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
     autoChooser.addOption("Drive characterization", new DriveCharacterization(driveSubsystem, ahrs));
-    autoChooser.addOption("Flywheel characterization", new FlywheelCharacterization(shooterFlyWheel, ahrs));
+    autoChooser.addOption("Flywheel characterization", new FlywheelCharacterization(shooterFlyWheel));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 

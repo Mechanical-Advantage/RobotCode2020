@@ -15,25 +15,24 @@ import frc.robot.subsystems.ShooterFlyWheel;
 
 public class FlywheelCharacterization extends CommandBase {
   private final ShooterFlyWheel flywheel;
-  private final AHRS ahrs;
 
   NetworkTableEntry autoSpeedEntry = NetworkTableInstance.getDefault().getEntry("/robot/autospeed");
   NetworkTableEntry telemetryEntry = NetworkTableInstance.getDefault().getEntry("/robot/telemetry");
   NetworkTableEntry rotateEntry = NetworkTableInstance.getDefault().getEntry("/robot/rotate");
 
-  double[] outputArray = new double[10];
+  double[] outputArray = new double[6];
 
   /** Creates a new Characterization. */
-  public FlywheelCharacterization(ShooterFlyWheel flywheel, AHRS ahrs) {
+  public FlywheelCharacterization(ShooterFlyWheel flywheel) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(flywheel);
     this.flywheel = flywheel;
-    this.ahrs = ahrs;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    NetworkTableInstance.getDefault().setUpdateRate(0.01);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -42,17 +41,9 @@ public class FlywheelCharacterization extends CommandBase {
     // Get telemetry data
     outputArray[0] = Timer.getFPGATimestamp();
     outputArray[1] = RobotController.getBatteryVoltage();
-
     outputArray[3] = flywheel.getVoltage();
-    outputArray[4] = 0;
-
-    outputArray[5] = flywheel.getPosition();
-    outputArray[6] = 0;
-
-    outputArray[7] = flywheel.getSpeed();
-    outputArray[8] = 0;
-
-    outputArray[9] = ahrs.getAngle() * (Math.PI / 180);
+    outputArray[4] = flywheel.getPosition();
+    outputArray[5] = flywheel.getSpeed();
 
     // Run at commanded speed
     double autoSpeed = autoSpeedEntry.getDouble(0);

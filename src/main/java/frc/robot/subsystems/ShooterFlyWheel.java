@@ -97,7 +97,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     I.setDefault(0);
     D.setDefault(0);
     F.setDefault(0.00019068);
-    rampRate.setDefault(defaultRampRate); // Seconds to full power
+    // rampRate.setDefault(defaultRampRate); // Seconds to full power
     maxOutput.setDefault(1);
     minOutput.setDefault(-1);
 
@@ -177,7 +177,7 @@ public class ShooterFlyWheel extends SubsystemBase {
 
     double currentRampRate = SmartDashboard.getNumber("Shooter FlyWheel/ramp rate", defaultRampRate);
     if (lastRampRate != null && currentRampRate != lastRampRate) {
-      flywheelMaster.setOpenLoopRampRate(currentRampRate);
+      // flywheelMaster.setOpenLoopRampRate(currentRampRate);
       lastRampRate = currentRampRate;
     }
     if (Constants.tuningMode) {
