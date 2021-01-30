@@ -11,10 +11,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.subsystems.ShooterFlyWheel;
 
-public class Characterization extends CommandBase {
-  private final DriveTrainBase driveTrain;
+public class FlywheelCharacterization extends CommandBase {
+  private final ShooterFlyWheel flywheel;
   private final AHRS ahrs;
 
   NetworkTableEntry autoSpeedEntry = NetworkTableInstance.getDefault().getEntry("/robot/autospeed");
@@ -24,10 +24,10 @@ public class Characterization extends CommandBase {
   double[] outputArray = new double[10];
 
   /** Creates a new Characterization. */
-  public Characterization(DriveTrainBase driveTrain, AHRS ahrs) {
+  public FlywheelCharacterization(ShooterFlyWheel flywheel, AHRS ahrs) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(driveTrain);
-    this.driveTrain = driveTrain;
+    addRequirements(flywheel);
+    this.flywheel = flywheel;
     this.ahrs = ahrs;
   }
 
@@ -43,20 +43,20 @@ public class Characterization extends CommandBase {
     outputArray[0] = Timer.getFPGATimestamp();
     outputArray[1] = RobotController.getBatteryVoltage();
 
-    outputArray[3] = driveTrain.getVoltageLeft();
-    outputArray[4] = driveTrain.getVoltageRight();
+    outputArray[3] = flywheel.getVoltage();
+    outputArray[4] = 0;
 
-    outputArray[5] = driveTrain.getDistanceLeft();
-    outputArray[6] = driveTrain.getDistanceRight();
+    outputArray[5] = flywheel.getPosition();
+    outputArray[6] = 0;
 
-    outputArray[7] = driveTrain.getVelocityLeft();
-    outputArray[8] = driveTrain.getVelocityRight();
+    outputArray[7] = flywheel.getSpeed();
+    outputArray[8] = 0;
 
     outputArray[9] = ahrs.getAngle() * (Math.PI / 180);
 
     // Run at commanded speed
     double autoSpeed = autoSpeedEntry.getDouble(0);
-    driveTrain.drive((rotateEntry.getBoolean(false) ? -1 : 1) * autoSpeed, autoSpeed);
+    flywheel.run((rotateEntry.getBoolean(false) ? -1 : 1) * autoSpeed);
 
     // Send full data set
     outputArray[2] = autoSpeed;
@@ -66,7 +66,7 @@ public class Characterization extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    driveTrain.stop();
+    flywheel.stop();
   }
 
   // Returns true when the command should end.

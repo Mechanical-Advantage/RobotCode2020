@@ -25,10 +25,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.Characterization;
+import frc.robot.commands.DriveCharacterization;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.FeedUnstick;
+import frc.robot.commands.FlywheelCharacterization;
 import frc.robot.commands.IdleLimelightControl;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
@@ -178,7 +179,8 @@ public class RobotContainer {
         new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood,
             pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
-    autoChooser.addOption("Drive characterization", new Characterization(driveSubsystem, ahrs));
+    autoChooser.addOption("Drive characterization", new DriveCharacterization(driveSubsystem, ahrs));
+    autoChooser.addOption("Flywheel characterization", new FlywheelCharacterization(shooterFlyWheel, ahrs));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 

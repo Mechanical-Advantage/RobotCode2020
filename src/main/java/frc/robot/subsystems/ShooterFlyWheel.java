@@ -91,6 +91,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     flywheelFollower.setSmartCurrentLimit(currentLimit);
 
     flywheelMaster.setInverted(invertFlywheel);
+    flywheelMaster.enableVoltageCompensation(12.0);
 
     P.setDefault(0.0012);
     I.setDefault(0);
@@ -227,6 +228,20 @@ public class ShooterFlyWheel extends SubsystemBase {
     }
     flywheelMaster.set(power);
     updateRunningLEDs(power != 0);
+  }
+
+  public double getVoltage() {
+    if (flywheelMaster == null) {
+      return 0;
+    }
+    return flywheelMaster.getAppliedOutput() * 12;
+  }
+
+  public double getPosition() {
+    if (flywheelMaster == null) {
+      return 0;
+    }
+    return flywheelEncoder.getPosition() * MULTIPLIER;
   }
 
   public double getSpeed() {
