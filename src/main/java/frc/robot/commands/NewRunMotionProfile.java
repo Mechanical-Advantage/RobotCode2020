@@ -80,12 +80,15 @@ public class NewRunMotionProfile extends CommandBase {
 
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
       List<Pose2d> waypointPoses, double endVelocity, boolean reversed, boolean relative) {
-    // The other constructor's relative trajectory handling is unneccessary with a
-    // defined start point so always pass false and do the other neccessary logic
-    // here
-    this(driveTrain, odometry, waypointPoses.remove(0), initialVelocity, null, null, endVelocity, reversed, false);
-    this.waypointPoses = waypointPoses;
+    this.waypointPoses = new ArrayList<>(waypointPoses);
+    Pose2d initialPosition = this.waypointPoses.remove(0);
     useQuintic = true;
+
+    // Identical to constructor for fixed position & cubic
+    setup(driveTrain, odometry, null, null, endVelocity, reversed, false);
+    dynamicTrajectory = false;
+    relativeTrajectory = relative;
+    startGeneration(initialPosition, initialVelocity);
   }
 
   /**
@@ -112,7 +115,7 @@ public class NewRunMotionProfile extends CommandBase {
     // The other constructor's relative trajectory handling is unneccessary with a
     // defined start point so always pass false and do the other neccessary logic
     // here
-    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, false);
+    setup(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, false);
     dynamicTrajectory = false;
     relativeTrajectory = relative;
     startGeneration(initialPosition, initialVelocity);
@@ -132,9 +135,9 @@ public class NewRunMotionProfile extends CommandBase {
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Pose2d> waypointPoses,
       double endVelocity, boolean reversed, boolean relative) {
-    this(driveTrain, odometry, null, null, endVelocity, reversed, relative);
     this.waypointPoses = waypointPoses;
     useQuintic = true;
+    setup(driveTrain, odometry, null, null, endVelocity, reversed, relative);
   }
 
   /**
@@ -152,8 +155,28 @@ public class NewRunMotionProfile extends CommandBase {
    * @param relative           Whether the profile is a relative change to the
    *                           robot position as opposed to field coordinates
    */
-  @SuppressWarnings("incomplete-switch")
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
+      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
+    setup(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, relative);
+  }
+
+  /**
+   * Sets up a new RunMotionProfile that starts from the robot's current position,
+   * using a cubic spline.
+   * 
+   * @param driveTrain         The drive train
+   * @param odometry           The robot odometry
+   * @param intermediatePoints The points in between the start and end of the
+   *                           profile (translation only)
+   * @param endPosition        The end pose
+   * @param endVelocity        The target velocity at the end of the profile
+   * @param reversed           Whether the robot drives backwards during the
+   *                           profile
+   * @param relative           Whether the profile is a relative change to the
+   *                           robot position as opposed to field coordinates
+   */
+  @SuppressWarnings("incomplete-switch")
+  private void setup(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
     this.driveTrain = driveTrain;
     if (driveTrain != null) {
