@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frckit.tools.pathview.TrajectoryVisualizer;
 
 public class NewRunMotionProfile extends CommandBase {
 
@@ -155,7 +156,9 @@ public class NewRunMotionProfile extends CommandBase {
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
     this.driveTrain = driveTrain;
-    addRequirements(driveTrain);
+    if (driveTrain != null) {
+      addRequirements(driveTrain);
+    }
     this.odometry = odometry;
     dynamicTrajectory = true;
     switch (Constants.getRobot()) {
@@ -300,6 +303,62 @@ public class NewRunMotionProfile extends CommandBase {
     followerCommand.schedule();
     followerStarted = true;
     startTime = Timer.getFPGATimestamp();
+  }
+
+  /**
+   * Runs the trajectory visualizer on this command. This should not be called
+   * from robot code, but instead used only when testing on development machines.
+   * It can be used by putting a main method in the command file of the profile,
+   * and then running that main method from within VSCode - this ensures it is
+   * never called on the robot on accident.
+   *
+   * This version of the method should be used for profiles that have a starting
+   * position which is determined by the current position of the robot. Since
+   * there is no real robot in the visualization, a fake initial robot position
+   * must be provided
+   * 
+   * @param ppi                  The number of pixels which should represent one
+   *                             inch. 2.5 is a good starting value
+   * @param markers              A list of positions to draw "markers" (7 inch
+   *                             magenta circles) on.
+   * @param initialRobotPosition The starting position of the robot to test with
+   */
+  public void visualize(double ppi, List<Translation2d> markers, Pose2d initialRobotPosition) {
+    if (initialRobotPosition != null) {
+      startGeneration(initialRobotPosition, 0.0);
+    }
+    // Busy-wait for trajectory to finish generating
+    Trajectory t = null;
+    while (t == null) {
+      try {
+        Thread.sleep(10); // Blocking busy-wait
+      } catch (InterruptedException e) {
+        return; // We got interrupted (probably user hit stop), so just exit
+      }
+      t = generator.getTrajectory(); // Attempt to grab new path
+    }
+
+    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppi, t, trackWidth, markers);
+    viz.start();
+  }
+
+  /**
+   * Runs the trajectory visualizer on this command. This should not be called
+   * from robot code, but instead used only when testing on development machines.
+   * It can be used by putting a main method in the command file of the profile,
+   * and then running that main method from within VSCode - this ensures it is
+   * never called on the robot on accident.
+   *
+   * This version of the method should be used for profiles that have a defined
+   * starting position, i.e. not in dynamic mode.
+   * 
+   * @param ppi     The number of pixels which should represent one inch. 2.5 is a
+   *                good starting value
+   * @param markers A list of positions to draw "markers" (7 inch magenta circles)
+   *                on.
+   */
+  public void visualize(double ppi, List<Translation2d> markers) {
+    visualize(ppi, markers, null);
   }
 
   private static class MPGenerator extends Thread {

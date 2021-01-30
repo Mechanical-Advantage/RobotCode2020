@@ -31,7 +31,7 @@ public final class Constants {
         return robot;
     }
 
-    static void setRobot(RobotType robot) {
+    public static void setRobot(RobotType robot) {
         if (Constants.robot == null) {
             Constants.robot = robot;
         }
