@@ -98,9 +98,9 @@ public class ShooterFlyWheel extends SubsystemBase {
 
     flywheelMaster.setInverted(invertFlywheel);
 
-    P.setDefault(0.0012);
+    P.setDefault(0.0005);
     I.setDefault(0);
-    D.setDefault(0);
+    D.setDefault(0.0015);
     openLoopRampRate.setDefault(defaultOpenLoopRampRate); // Seconds to full power
     maxOutput.setDefault(1);
     minOutput.setDefault(-1);
