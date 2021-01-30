@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.Constants;
+import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.RobotOdometry;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -20,12 +22,20 @@ import frc.robot.subsystems.RobotOdometry;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class RunGalacticSearchARed extends SequentialCommandGroup {
 
+  NewRunMotionProfile mp;
+
   /** Creates a new RunGalacticSearchABlue. */
   public RunGalacticSearchARed(RobotOdometry odometry, DriveTrainBase driveTrain) {
+    mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(30, 120, new Rotation2d()), 0,
+        List.of(new Translation2d(90, 90), new Translation2d(150, 60), new Translation2d(180, 150)),
+        new Pose2d(330, 150, new Rotation2d()), 0, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
-    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 120, new Rotation2d()))),
-        new RunMotionProfile(driveTrain, odometry, new Pose2d(30, 120, new Rotation2d()), 0,
-            List.of(new Translation2d(90, 90), new Translation2d(150, 60), new Translation2d(180, 150)),
-            new Pose2d(330, 150, new Rotation2d()), 0, false, false, false));
+    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 120, new Rotation2d()))), mp);
+  }
+
+  public static void main(String[] args) {
+    Constants.setRobot(RobotType.ROBOT_2020);
+    RunGalacticSearchARed cmd = new RunGalacticSearchARed(null, null);
+    cmd.mp.visualize(2.0, List.of());
   }
 }
