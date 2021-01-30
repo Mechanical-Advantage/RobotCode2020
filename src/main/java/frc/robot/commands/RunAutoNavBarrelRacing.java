@@ -35,7 +35,7 @@ public class RunAutoNavBarrelRacing extends SequentialCommandGroup {
             new Pose2d(150.0, 90.0, Rotation2d.fromDegrees(180)), new Pose2d(30.0, 90.0, Rotation2d.fromDegrees(180))),
         0.0, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
-    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))), mp);
+    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))), mp);
   }
 
   public static void main(String[] args) {
