@@ -34,6 +34,7 @@ import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
+import frc.robot.commands.RunAutoNavBarrelRacing;
 import frc.robot.commands.RunAutoNavBounce;
 import frc.robot.commands.RunAutoNavSlalom;
 import frc.robot.commands.RunClimber;
@@ -187,6 +188,7 @@ public class RobotContainer {
     autoChooser.addOption("Galactic Search (A/Red)", new RunGalacticSearchARed(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (B/Blue)", new RunGalacticSearchBBlue(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (B/Red)", new RunGalacticSearchBRed(odometry, driveSubsystem));
+    autoChooser.addOption("AutoNav (Barrel Racing)", new RunAutoNavBarrelRacing(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Slalom)", new RunAutoNavSlalom(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Bounce)", new RunAutoNavBounce(odometry, driveSubsystem));
     SmartDashboard.putData("Auto Mode", autoChooser);
