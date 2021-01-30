@@ -24,7 +24,7 @@ public class RunGalacticSearchARed extends SequentialCommandGroup {
 
   NewRunMotionProfile mp;
 
-  /** Creates a new RunGalacticSearchABlue. */
+  /** Creates a new RunGalacticSearchARed. */
   public RunGalacticSearchARed(RobotOdometry odometry, DriveTrainBase driveTrain) {
     mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(30, 120, new Rotation2d()), 0,
         List.of(new Translation2d(90, 90), new Translation2d(150, 60), new Translation2d(180, 150)),
@@ -36,6 +36,6 @@ public class RunGalacticSearchARed extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunGalacticSearchARed cmd = new RunGalacticSearchARed(null, null);
-    cmd.mp.visualize(2.0, List.of());
+    cmd.mp.visualize(2.0, List.of(new Translation2d(90, 90), new Translation2d(150, 60), new Translation2d(180, 150)));
   }
 }
