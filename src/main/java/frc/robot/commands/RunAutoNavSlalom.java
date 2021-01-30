@@ -5,7 +5,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
 
 import java.util.List;
 
@@ -24,11 +23,15 @@ public class RunAutoNavSlalom extends SequentialCommandGroup {
   public RunAutoNavSlalom(RobotOdometry odometry, DriveTrainBase driveTrain) {
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))),
-        new RunMotionProfile(driveTrain, odometry,
-            List.of(new Translation2d(75, 30), new Translation2d(105, 90), new Translation2d(255, 90),
-                new Translation2d(285, 30), new Translation2d(330, 40), new Translation2d(330, 80),
-                new Translation2d(285, 90), new Translation2d(255, 30), new Translation2d(105, 30),
-                new Translation2d(75, 90)),
-            new Pose2d(30, 90, Rotation2d.fromDegrees(-180)), 0, false, false, false));
+        new NewRunMotionProfile(driveTrain, odometry, 0.0,
+            List.of(new Pose2d(30.0, 30.0, new Rotation2d()), new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(45.0)),
+                new Pose2d(180.0, 90.0, new Rotation2d()), new Pose2d(270.0, 60.0, Rotation2d.fromDegrees(-45.0)),
+                new Pose2d(300.0, 30.0, new Rotation2d()), new Pose2d(330.0, 60.0, Rotation2d.fromDegrees(90.0)),
+                new Pose2d(300.0, 90.0, Rotation2d.fromDegrees(180.0)),
+                new Pose2d(270.0, 60.0, Rotation2d.fromDegrees(-90.0 - 45.0)),
+                new Pose2d(180.0, 30.0, Rotation2d.fromDegrees(-180.0)),
+                new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(90.0 + 45.0)),
+                new Pose2d(30.0, 90.0, Rotation2d.fromDegrees(180.0))),
+            0.0, false, false));
   }
 }
