@@ -28,7 +28,7 @@ public class LimelightOdometry extends CommandBase {
   // adjust the crosshair Y until the crosshair lines up with the object
   // For our Limelight, set crosshair Y to -0.13 to make 0 degrees be directly in
   // front of the camera
-  private static final double cameraVertAngle = 29; // 0 = straight forward, positive=up
+  private static final double cameraVertAngle = 30.1; // 0 = straight forward, positive=up
   private static final double cameraHorizAngle = 0; // positive = right
   private static final double cameraHorizOffset = 0; // positive = right
   private static final int odometryPipeline = 1; // Data will be ignored for other pipelines
