@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
@@ -29,7 +30,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.drive.DriveTrainBase;
 
-public class RunMotionProfile extends CommandBase {
+public class NewRunMotionProfile extends CommandBase {
 
   private static final double kRamseteB = 0.0025; // 0.05 seems to be equivalent to the recommendation for meters
   private static final double kRamseteZeta = 0.7;
@@ -41,6 +42,7 @@ public class RunMotionProfile extends CommandBase {
   private double trackWidth;
   private double maxVelocity; // in/s
   private double maxAcceleration; // in/s^2
+  private double maxCentripetalAcceleration; // in/s^2
 
   private DriveTrainBase driveTrain;
   private RobotOdometry odometry;
@@ -51,16 +53,43 @@ public class RunMotionProfile extends CommandBase {
   private Trajectory baseTrajectory; // Trajectory before running relativeTo
   private double startTime;
   private MPGenerator generator;
-  private List<Translation2d> intermediatePoints;
+  private List<Pose2d> waypointPoses; // Does not include initial position
+  private List<Translation2d> intermediatePointsTranslations;
   private Pose2d endPosition;
+  private boolean useQuintic = false;
   private TrajectoryConfig config;
   private boolean trajectoryUpdated;
   private boolean followerStarted;
   private RamseteCommand followerCommand;
 
   /**
-   * Creates a new RunMotionProfile that starts from a fixed position, using the
-   * intuitive coorindate system.
+   * Creates a new RunMotionProfile that starts from a fixed position, using a
+   * quintic spline
+   * 
+   * @param driveTrain      The drive train
+   * @param odometry        The robot odometry
+   * @param initialPosition The starting pose for the profile
+   * @param initialVelocity The velocity at the beginning of the profile
+   * @param waypointPoses   The poses after initial position
+   * @param endVelocity     The target velocity at the end of the profile
+   * @param reversed        Whether the robot drives backwards during theprofile
+   * @param relative        Whether the profile is a relative change to the robot
+   *                        position as opposed to field coordinates
+   */
+
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
+      List<Pose2d> waypointPoses, double endVelocity, boolean reversed, boolean relative) {
+    // The other constructor's relative trajectory handling is unneccessary with a
+    // defined start point so always pass false and do the other neccessary logic
+    // here
+    this(driveTrain, odometry, waypointPoses.remove(0), initialVelocity, null, null, endVelocity, reversed, false);
+    this.waypointPoses = waypointPoses;
+    useQuintic = true;
+  }
+
+  /**
+   * Creates a new RunMotionProfile that starts from a fixed position, using a
+   * cubic spline
    * 
    * @param driveTrain         The drive train
    * @param odometry           The robot odometry
@@ -76,70 +105,40 @@ public class RunMotionProfile extends CommandBase {
    *                           robot position as opposed to field coordinates
    * 
    */
-  public RunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
       double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
       boolean reversed, boolean relative) {
     // The other constructor's relative trajectory handling is unneccessary with a
     // defined start point so always pass false and do the other neccessary logic
     // here
-    this(driveTrain, odometry, initialPosition, initialVelocity, intermediatePoints, endPosition, endVelocity, reversed,
-        relative, true);
-  }
-
-  /**
-   * Creates a new RunMotionProfile that starts from a fixed position, with an
-   * option to use the WPILib coorindate system.
-   * 
-   * @param driveTrain         The drive train
-   * @param odometry           The robot odometry
-   * @param initialPosition    The starting pose for the profile
-   * @param initialVelocity    The velocity at the beginning of the profile
-   * @param intermediatePoints The points in between the start and end of the
-   *                           profile (translation only)
-   * @param endPosition        The end pose
-   * @param endVelocity        The target velocity at the end of the profile
-   * @param reversed           Whether the robot drives backwards during the
-   *                           profile
-   * @param relative           Whether the profile is a relative change to the
-   *                           robot position as opposed to field coordinates
-   * @param useIntuitive       Whether the pose inputs are in the intuitive system
-   * 
-   */
-  public RunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
-      double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
-      boolean reversed, boolean relative, boolean useIntuitive) {
-    // The other constructor's relative trajectory handling is unneccessary with a
-    // defined start point so always pass false and do the other neccessary logic
-    // here
-    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, false, useIntuitive);
+    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, false);
     dynamicTrajectory = false;
     relativeTrajectory = relative;
-    startGeneration(useIntuitive ? convertPose(initialPosition) : initialPosition, initialVelocity);
+    startGeneration(initialPosition, initialVelocity);
   }
 
   /**
    * Creates a new RunMotionProfile that starts from the robot's current position,
-   * using the intuitive coorindate system.
+   * using a quintic spline
    * 
-   * @param driveTrain         The drive train
-   * @param odometry           The robot odometry
-   * @param intermediatePoints The points in between the start and end of the
-   *                           profile (translation only)
-   * @param endPosition        The end pose
-   * @param endVelocity        The target velocity at the end of the profile
-   * @param reversed           Whether the robot drives backwards during the
-   *                           profile
-   * @param relative           Whether the profile is a relative change to the
-   *                           robot position as opposed to field coordinates
+   * @param driveTrain    The drive train
+   * @param odometry      The robot odometry
+   * @param waypointPoses The poses after initial position
+   * @param endVelocity   The target velocity at the end of the profile
+   * @param reversed      Whether the robot drives backwards during theprofile
+   * @param relative      Whether the profile is a relative change to the robot
+   *                      position as opposed to field coordinates
    */
-  public RunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
-      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
-    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, relative, true);
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Pose2d> waypointPoses,
+      double endVelocity, boolean reversed, boolean relative) {
+    this(driveTrain, odometry, null, null, endVelocity, reversed, relative);
+    this.waypointPoses = waypointPoses;
+    useQuintic = true;
   }
 
   /**
    * Creates a new RunMotionProfile that starts from the robot's current position,
-   * with an option to use the WPILib coorindate system.
+   * using a cubic spline
    * 
    * @param driveTrain         The drive train
    * @param odometry           The robot odometry
@@ -151,11 +150,10 @@ public class RunMotionProfile extends CommandBase {
    *                           profile
    * @param relative           Whether the profile is a relative change to the
    *                           robot position as opposed to field coordinates
-   * @param useIntuitive       Whether the pose inputs are in the intuitive system
    */
   @SuppressWarnings("incomplete-switch")
-  public RunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
-      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative, boolean useIntuitive) {
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
+      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
     this.driveTrain = driveTrain;
     addRequirements(driveTrain);
     this.odometry = odometry;
@@ -168,6 +166,7 @@ public class RunMotionProfile extends CommandBase {
         trackWidth = 27.5932064868814;
         maxVelocity = 150;
         maxAcceleration = 50;
+        maxCentripetalAcceleration = 200;
         break;
       case ROBOT_2020_DRIVE:
         kS = 0.14;
@@ -176,6 +175,7 @@ public class RunMotionProfile extends CommandBase {
         trackWidth = 24.890470780033485;
         maxVelocity = 120;
         maxAcceleration = 50;
+        maxCentripetalAcceleration = 200;
         break;
       case ROBOT_2020:
         kS = 0.119;
@@ -184,25 +184,19 @@ public class RunMotionProfile extends CommandBase {
         trackWidth = 25.737;
         maxVelocity = 120;
         maxAcceleration = 50;
+        maxCentripetalAcceleration = 200;
         break;
     }
     driveKinematics = new DifferentialDriveKinematics(trackWidth);
     DifferentialDriveVoltageConstraint voltageConstraint = new DifferentialDriveVoltageConstraint(
         new SimpleMotorFeedforward(kS, kV, kA), driveKinematics, maxVoltage);
-    // Convert from intuitive to WPILib
-    if (useIntuitive) {
-      try {
-        convertTranslationList(intermediatePoints);
-      } catch (UnsupportedOperationException e) {
-        // Make the list modifiable and try again
-        intermediatePoints = new ArrayList<Translation2d>(intermediatePoints);
-        convertTranslationList(intermediatePoints);
-      }
-    }
-    this.intermediatePoints = intermediatePoints;
-    this.endPosition = useIntuitive ? convertPose(endPosition) : endPosition;
+    CentripetalAccelerationConstraint centripetalAccelerationConstraint = new CentripetalAccelerationConstraint(
+        maxCentripetalAcceleration);
+    this.intermediatePointsTranslations = intermediatePoints;
+    this.endPosition = endPosition;
     config = new TrajectoryConfig(maxVelocity, maxAcceleration).setKinematics(driveKinematics)
-        .addConstraint(voltageConstraint).setEndVelocity(endVelocity).setReversed(reversed);
+        .addConstraint(voltageConstraint).addConstraint(centripetalAccelerationConstraint).setEndVelocity(endVelocity)
+        .setReversed(reversed);
     if (relative) {
       relativeTrajectory = true;
       dynamicTrajectory = false;
@@ -283,7 +277,14 @@ public class RunMotionProfile extends CommandBase {
     trajectory = null;
     followerCommand = null; // The old command can't be reused if the profile is changed.
     config.setStartVelocity(initialVelocity);
-    generator = new MPGenerator(initialPosition, intermediatePoints, endPosition, config);
+    if (useQuintic) {
+      List<Pose2d> fullWaypointPoses = new ArrayList<>();
+      fullWaypointPoses.add(initialPosition);
+      fullWaypointPoses.addAll(waypointPoses);
+      generator = new MPGenerator(fullWaypointPoses, config);
+    } else {
+      generator = new MPGenerator(initialPosition, intermediatePointsTranslations, endPosition, config);
+    }
     generator.start();
     trajectoryUpdated = true;
   }
@@ -301,46 +302,39 @@ public class RunMotionProfile extends CommandBase {
     startTime = Timer.getFPGATimestamp();
   }
 
-  /**
-   * Converts a pose from Y-positive=forward, X-positive=right (intuitive) to
-   * X-positive=forward, Y-positive=left (WPILib) or vise versa
-   * 
-   * @param input The input pose
-   * @return The transformed pose
-   */
-  private Pose2d convertPose(Pose2d input) {
-    return new Pose2d(new Translation2d(input.getTranslation().getY(), input.getTranslation().getX() * -1),
-        input.getRotation().times(-1));
-  }
-
-  /**
-   * Converts a list of Translation2d from intuitive to WPILib in place
-   * 
-   * @param input The list to modify
-   */
-  private void convertTranslationList(List<Translation2d> input) {
-    input.replaceAll(point -> point.rotateBy(Rotation2d.fromDegrees(90)));
-  }
-
   private static class MPGenerator extends Thread {
 
     private Pose2d initialPosition;
-    private List<Translation2d> intermediatePoints;
+    private List<Translation2d> intermediatePointsTranslations;
+    private List<Pose2d> waypointPoses; // Includes initial position
+    private boolean useQuintic;
     private Pose2d endPosition;
     private TrajectoryConfig config;
     private volatile Trajectory trajectory;
 
+    public MPGenerator(List<Pose2d> waypointPoses, TrajectoryConfig config) {
+      this.waypointPoses = waypointPoses;
+      this.config = config;
+      useQuintic = true;
+    }
+
     public MPGenerator(Pose2d initialPosition, List<Translation2d> intermediatePoints, Pose2d endPosition,
         TrajectoryConfig config) {
-      this.intermediatePoints = intermediatePoints;
+      this.intermediatePointsTranslations = intermediatePoints;
       this.initialPosition = initialPosition;
       this.endPosition = endPosition;
       this.config = config;
+      useQuintic = false;
     }
 
     @Override
     public void run() {
-      trajectory = TrajectoryGenerator.generateTrajectory(initialPosition, intermediatePoints, endPosition, config);
+      if (useQuintic) {
+        trajectory = TrajectoryGenerator.generateTrajectory(waypointPoses, config);
+      } else {
+        trajectory = TrajectoryGenerator.generateTrajectory(initialPosition, intermediatePointsTranslations,
+            endPosition, config);
+      }
     }
 
     @Override
