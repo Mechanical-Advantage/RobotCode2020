@@ -26,9 +26,10 @@ public class RunGalacticSearchARed extends SequentialCommandGroup {
 
   /** Creates a new RunGalacticSearchARed. */
   public RunGalacticSearchARed(RobotOdometry odometry, DriveTrainBase driveTrain) {
-    mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(30, 120, new Rotation2d()), 0,
+    // new Pose2d(30, 90, Rotation2d.fromDegrees(10)) <- center start
+    mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(30, 120, Rotation2d.fromDegrees(-25)), 0,
         List.of(new Translation2d(90, 90), new Translation2d(150, 60), new Translation2d(180, 150)),
-        new Pose2d(330, 150, new Rotation2d()), 0, false, false);
+        new Pose2d(330, 150, new Rotation2d()), 100, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 120, new Rotation2d()))), mp);
   }

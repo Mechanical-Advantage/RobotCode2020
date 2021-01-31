@@ -26,9 +26,10 @@ public class RunGalacticSearchABlue extends SequentialCommandGroup {
 
   /** Creates a new RunGalacticSearchABlue. */
   public RunGalacticSearchABlue(RobotOdometry odometry, DriveTrainBase driveTrain) {
-    mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(30, 35, new Rotation2d()), 0,
-        List.of(new Translation2d(180, 35), new Translation2d(215, 120)), new Pose2d(330, 60, new Rotation2d()), 0,
-        false, false);
+    // new Pose2d(30, 90, Rotation2d.fromDegrees(-35)) <- center start
+    mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(30, 30, new Rotation2d()), 0,
+        List.of(new Translation2d(180, 30), new Translation2d(210, 120)),
+        new Pose2d(330, 60, Rotation2d.fromDegrees(-30)), 100, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 35, new Rotation2d()))), mp);
   }
