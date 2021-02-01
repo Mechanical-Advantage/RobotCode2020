@@ -384,6 +384,58 @@ public class NewRunMotionProfile extends CommandBase {
     visualize(ppi, markers, null);
   }
 
+  /**
+   * Calculates a series of points following the circumference of a circle, to be
+   * used as waypoints for a quintic spline
+   * 
+   * @param center             The center position of the circle
+   * @param radius             The radius of the circle
+   * @param startingRotation   The rotation relative to the center at which to
+   *                           start the path (NOT the starting rotation of the
+   *                           robot)
+   * @param endingRotation     The rotation relative to the center at which to end
+   *                           the path (NOT the ending rotation of the robot)
+   * @param clockwise          Whether to move clockwise or countercloswise from
+   *                           the start to end
+   * @param separationDistance The distance along the circumference between
+   *                           points, must be quite small to create a smooth
+   *                           curve
+   * @return The calculated list of poses following the circumference
+   */
+  public static List<Pose2d> calcCircle(Translation2d center, double radius, Rotation2d startingRotation,
+      Rotation2d endingRotation, boolean clockwise, double separationDistance) {
+    Rotation2d separationAngle = Rotation2d.fromDegrees((separationDistance / (radius * 2 * Math.PI)) * 360);
+    List<Pose2d> outputPoses = new ArrayList<Pose2d>();
+    Rotation2d currentRotation = startingRotation;
+    boolean lastLeftOfEnd = currentRotation.minus(endingRotation).getDegrees() > 0;
+
+    while (true) {
+      // Calculate new pose for current rotation
+      Transform2d transform = new Transform2d(new Translation2d(radius, 0),
+          Rotation2d.fromDegrees(clockwise ? -90 : 90));
+      outputPoses.add(new Pose2d(center, currentRotation).transformBy(transform));
+      if (clockwise) {
+        currentRotation = currentRotation.minus(separationAngle);
+      } else {
+        currentRotation = currentRotation.plus(separationAngle);
+      }
+
+      // Determine if path is complete
+      boolean leftOfEnd = currentRotation.minus(endingRotation).getDegrees() > 0;
+      if (clockwise) {
+        if (!leftOfEnd && lastLeftOfEnd) {
+          break;
+        }
+      } else {
+        if (leftOfEnd && !lastLeftOfEnd) {
+          break;
+        }
+      }
+      lastLeftOfEnd = leftOfEnd;
+    }
+    return outputPoses;
+  }
+
   private static class MPGenerator extends Thread {
 
     private Pose2d initialPosition;
