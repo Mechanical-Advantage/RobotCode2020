@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -26,14 +27,17 @@ public class RunAutoNavBarrelRacing extends SequentialCommandGroup {
 
   /** Creates a new RunAutoNavBarrelRacing. */
   public RunAutoNavBarrelRacing(RobotOdometry odometry, DriveTrainBase driveTrain) {
-    mp = new NewRunMotionProfile(driveTrain, odometry, 0.0,
-        List.of(new Pose2d(30.0, 90.0, new Rotation2d()), new Pose2d(180.0, 60.0, Rotation2d.fromDegrees(-90)),
-            new Pose2d(150.0, 30.0, Rotation2d.fromDegrees(180)), new Pose2d(120.0, 60.0, Rotation2d.fromDegrees(90)),
-            new Pose2d(270.0, 120.0, Rotation2d.fromDegrees(90)), new Pose2d(240.0, 150.0, Rotation2d.fromDegrees(180)),
-            new Pose2d(210.0, 120.0, Rotation2d.fromDegrees(-90)), new Pose2d(300.0, 30.0, Rotation2d.fromDegrees(0)),
-            new Pose2d(330.0, 60.0, Rotation2d.fromDegrees(90)), new Pose2d(300.0, 90.0, Rotation2d.fromDegrees(180)),
-            new Pose2d(150.0, 90.0, Rotation2d.fromDegrees(180)), new Pose2d(30.0, 90.0, Rotation2d.fromDegrees(180))),
-        0.0, false, false);
+    List<Pose2d> intermediatePoints = new ArrayList<Pose2d>();
+    intermediatePoints.add(new Pose2d(30.0, 90.0, new Rotation2d()));
+    intermediatePoints.addAll(NewRunMotionProfile.calcCircle(new Translation2d(150, 60), 30, Rotation2d.fromDegrees(90),
+        Rotation2d.fromDegrees(90), true, 0.05));
+    intermediatePoints.addAll(NewRunMotionProfile.calcCircle(new Translation2d(240, 120), 30,
+        Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(180), false, 0.05));
+    intermediatePoints.addAll(NewRunMotionProfile.calcCircle(new Translation2d(300, 60), 30,
+        Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90), false, 0.05));
+    intermediatePoints.addAll(List.of(new Pose2d(180.0, 90.0, Rotation2d.fromDegrees(180)),
+        new Pose2d(30.0, 90.0, Rotation2d.fromDegrees(180))));
+    mp = new NewRunMotionProfile(driveTrain, odometry, 0.0, intermediatePoints, 0.0, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))), mp);
   }
