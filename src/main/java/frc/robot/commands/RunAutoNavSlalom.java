@@ -30,7 +30,7 @@ public class RunAutoNavSlalom extends SequentialCommandGroup {
     mp = new NewRunMotionProfile(driveTrain, odometry, 0.0,
         List.of(new Pose2d(30.0, 30.0, new Rotation2d()), new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(45.0)),
             new Pose2d(180.0, 90.0, new Rotation2d()),
-            new CirclePath(new Translation2d(300, 60), 20, Rotation2d.fromDegrees(-160), Rotation2d.fromDegrees(160),
+            new CirclePath(new Translation2d(300, 60), 30, Rotation2d.fromDegrees(-160), Rotation2d.fromDegrees(160),
                 false),
             new Pose2d(180.0, 30.0, Rotation2d.fromDegrees(-180.0)),
             new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(90.0 + 45.0)),
