@@ -226,8 +226,12 @@ public class ShooterFlyWheel extends SubsystemBase {
     if (flywheelMaster == null) {
       return;
     }
+    if (openLoopControl) {
+      closedLoopVelocityProfiler.setSetpointGoal(rpm, getSpeed());
+    } else {
+      closedLoopVelocityProfiler.setSetpointGoal(rpm);
+    }
     openLoopControl = false;
-    closedLoopVelocityProfiler.setSetpointGoal(rpm);
     updateRunningLEDs(rpm != 0);
   }
 

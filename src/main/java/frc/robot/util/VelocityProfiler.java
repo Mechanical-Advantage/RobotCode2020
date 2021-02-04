@@ -21,7 +21,7 @@ public class VelocityProfiler {
   }
 
   /**
-   * Sets the target setpoint to ramp to
+   * Sets the target setpoint
    * 
    * @param setpoint Target setpoint
    */
@@ -30,7 +30,18 @@ public class VelocityProfiler {
   }
 
   /**
-   * Resets target setpoint and current
+   * Sets the target setpoint, starting from the current speed
+   * 
+   * @param setpoint     Target setpoint
+   * @param currentSpeed Current speed, to be used as the starting setpoint
+   */
+  public void setSetpointGoal(double setpoint, double currentSpeed) {
+    goalSetpoint = setpoint;
+    currentSetpoint = currentSpeed;
+  }
+
+  /**
+   * Resets target setpoint and current setpoint
    */
   public void reset() {
     currentSetpoint = 0;
