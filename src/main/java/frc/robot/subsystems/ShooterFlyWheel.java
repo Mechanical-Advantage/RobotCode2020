@@ -50,7 +50,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   private boolean openLoopControl = true;
 
   private Double lastOpenLoopRampRate = null; // Force this to be updated once
-  private VelocityProfiler closedLoopVelocityProfiler = new VelocityProfiler(1600);
+  private VelocityProfiler closedLoopVelocityProfiler = new VelocityProfiler(3000);
   private OILEDState lastShooterLEDState = OILEDState.OFF;
 
   private TunableNumber P = new TunableNumber("Shooter FlyWheel PID/P");
