@@ -210,7 +210,7 @@ public class NewRunMotionProfile extends CommandBase {
         trackWidth = 25.934;
         maxVelocity = 130;
         maxAcceleration = 130;
-        maxCentripetalAcceleration = 30;
+        maxCentripetalAcceleration = 180;
         break;
     }
     driveKinematics = new DifferentialDriveKinematics(trackWidth);
