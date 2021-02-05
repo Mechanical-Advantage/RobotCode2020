@@ -204,13 +204,13 @@ public class NewRunMotionProfile extends CommandBase {
         maxCentripetalAcceleration = 200;
         break;
       case ROBOT_2020:
-        kS = 0.119;
-        kV = 0.081;
-        kA = 0.00958;
-        trackWidth = 25.737;
+        kS = .124;
+        kV = .0722;
+        kA = .00475;
+        trackWidth = 25.934;
         maxVelocity = 130;
         maxAcceleration = 130;
-        maxCentripetalAcceleration = 120;
+        maxCentripetalAcceleration = 30;
         break;
     }
     driveKinematics = new DifferentialDriveKinematics(trackWidth);
