@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.EllipticalRegionConstraint;
@@ -58,6 +59,7 @@ public class NewRunMotionProfile extends CommandBase {
   private MPGenerator generator;
   private List<Pose2d> waypointPoses; // Does not include initial position
   private List<EllipticalRegionConstraint> circleConstraints = new ArrayList<>();
+  private List<CirclePath> circlePaths = new ArrayList<>();
   private List<Translation2d> intermediatePointsTranslations;
   private Pose2d endPosition;
   private boolean useQuintic = false;
@@ -253,7 +255,7 @@ public class NewRunMotionProfile extends CommandBase {
   public void execute() {
     if (trajectory == null) {
       // This will just set trajectory to null again if not generated yet
-      trajectory = generator.getTrajectory();
+      trajectory = adjustCircleTrajectories(generator.getTrajectory());
       baseTrajectory = trajectory;
     }
     if (trajectory != null && !followerStarted) {
@@ -372,7 +374,7 @@ public class NewRunMotionProfile extends CommandBase {
       }
       t = generator.getTrajectory(); // Attempt to grab new path
     }
-
+    t = adjustCircleTrajectories(t);
     TrajectoryVisualizer viz = new TrajectoryVisualizer(ppi, t, trackWidth, markers);
     viz.start();
   }
@@ -398,7 +400,7 @@ public class NewRunMotionProfile extends CommandBase {
 
   /**
    * Processes a list of Pose2d and CirclePath objects into only Pose2d objects,
-   * including saving elliptical velocity constraints
+   * including saving elliptical velocity constraints & circle paths
    */
   public List<Pose2d> processWaypointData(List<Object> waypointData) {
     List<Pose2d> outputPoses = new ArrayList<>();
@@ -409,9 +411,24 @@ public class NewRunMotionProfile extends CommandBase {
         CirclePath circle = (CirclePath) waypointData.get(i);
         outputPoses.addAll(circle.calcPoses());
         circleConstraints.add(circle.getVelocityConstraint(maxCentripetalAcceleration));
+        circlePaths.add(circle);
       }
     }
     return outputPoses;
+  }
+
+  /**
+   * Processes a trajectory to fix curvature of circular sections
+   * 
+   * @param trajectory The original trajectory
+   * @return The new trajectory
+   */
+  public Trajectory adjustCircleTrajectories(Trajectory trajectory) {
+    Trajectory newTrajectory = trajectory;
+    for (var i = 0; i < circlePaths.size(); i++) {
+      newTrajectory = circlePaths.get(i).adjustTrajectory(newTrajectory);
+    }
+    return newTrajectory;
   }
 
   /**
@@ -496,6 +513,20 @@ public class NewRunMotionProfile extends CommandBase {
       double maxVelocity = Math.sqrt(maxCentripetalAcceleration * radius);
       return new EllipticalRegionConstraint(center, radius * 2, radius * 2, new Rotation2d(),
           new MaxVelocityConstraint(maxVelocity));
+    }
+
+    /**
+     * Processes a trajectory to fix curvature of the circular section
+     */
+    public Trajectory adjustTrajectory(Trajectory trajectory) {
+      List<State> states = trajectory.getStates();
+      for (var i = 0; i < states.size(); i++) {
+        State currentState = states.get(i);
+        if (Math.abs(currentState.poseMeters.getTranslation().getDistance(center) - radius) < 0.01) {
+          currentState.curvatureRadPerMeter = (1 / radius) * (clockwise ? -1 : 1);
+        }
+      }
+      return new Trajectory(states);
     }
   }
 
