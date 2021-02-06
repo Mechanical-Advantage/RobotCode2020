@@ -39,6 +39,7 @@ import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
+import frc.robot.commands.RunShooterAtDistance;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.SetLEDOverride;
@@ -382,9 +383,13 @@ public class RobotContainer {
 
     intake.updateLEDs();
 
-    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
-    operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
-    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
+    RunShooterFlyWheel runShooterSimple = new RunShooterFlyWheel(shooterFlyWheel);
+    RunShooterAtDistance runShooterAuto = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry,
+        pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+        (position) -> operatorOI.setHoodPosition(position));
+    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch()).whenActive(runShooterSimple);
+    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch().negate()).whenActive(runShooterAuto);
+    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooterSimple).cancelWhenActive(runShooterAuto);
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
