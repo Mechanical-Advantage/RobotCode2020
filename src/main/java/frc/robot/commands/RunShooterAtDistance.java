@@ -84,7 +84,8 @@ public class RunShooterAtDistance extends CommandBase {
   }
 
   private void update(Translation2d position) {
-    double distance = position.getDistance(new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist));
+    double distance = position
+        .getDistance(new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1));
 
     // Determine zone
     HoodPosition bestPosition;
