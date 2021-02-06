@@ -37,6 +37,12 @@ deploy {
     }
 }
 
+repositories {
+    maven {
+        url "http://maven.came20.net/artifactory/devel"
+    }
+}
+
 // Set this to true to enable desktop support.
 def includeDesktopSupport = false
 
@@ -57,6 +63,9 @@ dependencies {
     // Enable simulation gui support. Must check the box in vscode to enable support
     // upon debugging
     simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
+
+    implementation 'gov.nist.math:jama:1.0.3'
+    implementation "frckit.lib:pvision:0.0.22"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
