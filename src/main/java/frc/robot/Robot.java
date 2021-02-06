@@ -97,7 +97,6 @@ public class Robot extends TimedRobot {
     robotContainer.updateOIType();
     robotContainer.brakeDuringNeutral();
     robotContainer.setInitialPosition();
-    robotContainer.enableLimelightXCorrection(false);
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -124,7 +123,6 @@ public class Robot extends TimedRobot {
     }
     robotContainer.brakeDuringNeutral();
     robotContainer.updateOIType();
-    robotContainer.enableLimelightXCorrection(true);
   }
 
   /**
