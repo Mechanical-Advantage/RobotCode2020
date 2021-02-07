@@ -25,8 +25,7 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
-import edu.wpi.first.wpilibj.trajectory.constraint.EllipticalRegionConstraint;
-import edu.wpi.first.wpilibj.trajectory.constraint.MaxVelocityConstraint;
+import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants;
@@ -58,7 +57,6 @@ public class NewRunMotionProfile extends CommandBase {
   private double startTime;
   private MPGenerator generator;
   private List<Pose2d> waypointPoses; // Does not include initial position
-  private List<EllipticalRegionConstraint> circleConstraints = new ArrayList<>();
   private List<CirclePath> circlePaths = new ArrayList<>();
   private List<Translation2d> intermediatePointsTranslations;
   private Pose2d endPosition;
@@ -236,7 +234,10 @@ public class NewRunMotionProfile extends CommandBase {
     this.endPosition = endPosition;
     config = new TrajectoryConfig(maxVelocity, maxAcceleration).setKinematics(driveKinematics)
         .addConstraint(voltageConstraint).addConstraint(centripetalAccelerationConstraint).setEndVelocity(endVelocity)
-        .setReversed(reversed).addConstraints(circleConstraints);
+        .setReversed(reversed);
+    for (int i = 0; i < circlePaths.size(); i++) {
+      config.addConstraint(circlePaths.get(i).getConstraint(maxCentripetalAcceleration));
+    }
     if (relative) {
       relativeTrajectory = true;
       dynamicTrajectory = false;
@@ -400,7 +401,7 @@ public class NewRunMotionProfile extends CommandBase {
 
   /**
    * Processes a list of Pose2d and CirclePath objects into only Pose2d objects,
-   * including saving elliptical velocity constraints & circle paths
+   * including saving circle path objects
    */
   public List<Pose2d> processWaypointData(List<Object> waypointData) {
     List<Pose2d> outputPoses = new ArrayList<>();
@@ -410,7 +411,6 @@ public class NewRunMotionProfile extends CommandBase {
       } else if (waypointData.get(i).getClass() == CirclePath.class) {
         CirclePath circle = (CirclePath) waypointData.get(i);
         outputPoses.addAll(circle.calcPoses());
-        circleConstraints.add(circle.getVelocityConstraint(maxCentripetalAcceleration));
         circlePaths.add(circle);
       }
     }
@@ -503,16 +503,12 @@ public class NewRunMotionProfile extends CommandBase {
     }
 
     /**
-     * Generates a velocity constraint for the defined path, given a max centripetal
+     * Return a velocity constraint for the path, given a maximum centripetal
      * acceleration
-     * 
-     * @param maxCentripetalAcceleration The maximum centripetal acceleration for
-     *                                   the current robot
      */
-    public EllipticalRegionConstraint getVelocityConstraint(double maxCentripetalAcceleration) {
-      double maxVelocity = Math.sqrt(maxCentripetalAcceleration * radius);
-      return new EllipticalRegionConstraint(center, radius * 2, radius * 2, new Rotation2d(),
-          new MaxVelocityConstraint(maxVelocity));
+    public CirclePathConstraint getConstraint(double maxCentripetalAcceleration) {
+      return new CirclePathConstraint(center, radius, startingRotation, endingRotation, clockwise,
+          maxCentripetalAcceleration);
     }
 
     /**
@@ -522,11 +518,84 @@ public class NewRunMotionProfile extends CommandBase {
       List<State> states = trajectory.getStates();
       for (var i = 0; i < states.size(); i++) {
         State currentState = states.get(i);
-        if (Math.abs(currentState.poseMeters.getTranslation().getDistance(center) - radius) < 0.01) {
+        if (partOfCircle(currentState.poseMeters, center, radius, startingRotation, endingRotation, clockwise)) {
           currentState.curvatureRadPerMeter = (1 / radius) * (clockwise ? -1 : 1);
         }
       }
       return new Trajectory(states);
+    }
+
+    /**
+     * Checks if the provided position falls within the circular path
+     */
+    public static boolean partOfCircle(Pose2d testPosition, Translation2d center, double radius,
+        Rotation2d startingRotation, Rotation2d endingRotation, boolean clockwise) {
+      if (Math.abs(testPosition.getTranslation().getDistance(center) - radius) < 0.01) {
+        Translation2d centerToCurrent = testPosition.getTranslation().minus(center);
+        Rotation2d rotationFromCenter = new Rotation2d(Math.atan2(centerToCurrent.getY(), centerToCurrent.getX()));
+        double relativeCurrentDegrees = rotationFromCenter.minus(startingRotation).getDegrees();
+        double relativeEndingDegrees = endingRotation.minus(startingRotation).getDegrees();
+        if (clockwise) {
+          if (relativeCurrentDegrees > 0) {
+            relativeCurrentDegrees -= 360;
+          }
+          if (relativeEndingDegrees > 0) {
+            relativeEndingDegrees -= 360;
+          }
+          if (relativeCurrentDegrees > relativeEndingDegrees) {
+            return true;
+          }
+        } else {
+          if (relativeCurrentDegrees < 0) {
+            relativeCurrentDegrees += 360;
+          }
+          if (relativeEndingDegrees < 0) {
+            relativeEndingDegrees += 360;
+          }
+          if (relativeCurrentDegrees < relativeEndingDegrees) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Limits velocity based on max centripetal acceleration for circle path
+   */
+  private static class CirclePathConstraint implements TrajectoryConstraint {
+    private final Translation2d center;
+    private final double radius;
+    private final Rotation2d startingRotation;
+    private final Rotation2d endingRotation;
+    private final boolean clockwise;
+    private final double maxCentripetalAcceleration;
+
+    public CirclePathConstraint(Translation2d center, double radius, Rotation2d startingRotation,
+        Rotation2d endingRotation, boolean clockwise, double maxCentripetalAcceleration) {
+      this.center = center;
+      this.radius = radius;
+      this.startingRotation = startingRotation;
+      this.endingRotation = endingRotation;
+      this.clockwise = clockwise;
+      this.maxCentripetalAcceleration = maxCentripetalAcceleration;
+    }
+
+    @Override
+    public double getMaxVelocityMetersPerSecond(Pose2d poseMeters, double curvatureRadPerMeter,
+        double velocityMetersPerSecond) {
+      if (CirclePath.partOfCircle(poseMeters, center, radius, startingRotation, endingRotation, clockwise)) {
+        return Math.sqrt(maxCentripetalAcceleration * radius);
+      } else {
+        return Double.MAX_VALUE;
+      }
+    }
+
+    @Override
+    public MinMax getMinMaxAccelerationMetersPerSecondSq(Pose2d poseMeters, double curvatureRadPerMeter,
+        double velocityMetersPerSecond) {
+      return new MinMax(-Double.MAX_VALUE, Double.MAX_VALUE);
     }
   }
 
