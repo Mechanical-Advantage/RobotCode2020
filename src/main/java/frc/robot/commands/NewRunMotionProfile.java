@@ -236,7 +236,8 @@ public class NewRunMotionProfile extends CommandBase {
         .addConstraint(voltageConstraint).addConstraint(centripetalAccelerationConstraint).setEndVelocity(endVelocity)
         .setReversed(reversed);
     for (int i = 0; i < circlePaths.size(); i++) {
-      config.addConstraint(circlePaths.get(i).getConstraint(maxCentripetalAcceleration));
+      config.addConstraint(circlePaths.get(i).getConstraint(driveKinematics, maxVelocity,
+          List.of(voltageConstraint, centripetalAccelerationConstraint)));
     }
     if (relative) {
       relativeTrajectory = true;
@@ -438,11 +439,11 @@ public class NewRunMotionProfile extends CommandBase {
     private static final double separationDistance = 0.1; // Distance between points (must be quite small to ensure
                                                           // continuous curve)
 
-    private final Translation2d center;
-    private final double radius;
-    private final Rotation2d startingRotation;
-    private final Rotation2d endingRotation;
-    private final boolean clockwise;
+    public final Translation2d center;
+    public final double radius;
+    public final Rotation2d startingRotation;
+    public final Rotation2d endingRotation;
+    public final boolean clockwise;
 
     /**
      * Creates a circular path with the given properties
@@ -503,12 +504,12 @@ public class NewRunMotionProfile extends CommandBase {
     }
 
     /**
-     * Return a velocity constraint for the path, given a maximum centripetal
-     * acceleration
+     * Return a trajectory constraint for the path, given drive kinematics and other
+     * constraints
      */
-    public CirclePathConstraint getConstraint(double maxCentripetalAcceleration) {
-      return new CirclePathConstraint(center, radius, startingRotation, endingRotation, clockwise,
-          maxCentripetalAcceleration);
+    public CirclePathConstraint getConstraint(DifferentialDriveKinematics driveKinematics, double maxVelocity,
+        List<TrajectoryConstraint> constraints) {
+      return new CirclePathConstraint(this, driveKinematics, maxVelocity, constraints);
     }
 
     /**
@@ -518,18 +519,26 @@ public class NewRunMotionProfile extends CommandBase {
       List<State> states = trajectory.getStates();
       for (var i = 0; i < states.size(); i++) {
         State currentState = states.get(i);
-        if (partOfCircle(currentState.poseMeters, center, radius, startingRotation, endingRotation, clockwise)) {
-          currentState.curvatureRadPerMeter = (1 / radius) * (clockwise ? -1 : 1);
+        if (partOfCircle(currentState.poseMeters)) {
+          currentState.curvatureRadPerMeter = getCurvature();
         }
       }
       return new Trajectory(states);
     }
 
     /**
+     * Calculates the curvature of the circular path
+     * 
+     * @return Curvature in radians per unit along the circumference
+     */
+    public double getCurvature() {
+      return (1 / radius) * (clockwise ? -1 : 1);
+    }
+
+    /**
      * Checks if the provided position falls within the circular path
      */
-    public static boolean partOfCircle(Pose2d testPosition, Translation2d center, double radius,
-        Rotation2d startingRotation, Rotation2d endingRotation, boolean clockwise) {
+    public boolean partOfCircle(Pose2d testPosition) {
       if (Math.abs(testPosition.getTranslation().getDistance(center) - radius) < 0.01) {
         Translation2d centerToCurrent = testPosition.getTranslation().minus(center);
         Rotation2d rotationFromCenter = new Rotation2d(Math.atan2(centerToCurrent.getY(), centerToCurrent.getX()));
@@ -562,39 +571,75 @@ public class NewRunMotionProfile extends CommandBase {
   }
 
   /**
-   * Limits velocity based on max centripetal acceleration for circle path
+   * Limits velocity and acceleration based on drive kinematics and other
+   * constraints for a circle path. The purpose of this constraint is to pass
+   * through data (with corrected curvature) to standard constraints.
    */
   private static class CirclePathConstraint implements TrajectoryConstraint {
-    private final Translation2d center;
-    private final double radius;
-    private final Rotation2d startingRotation;
-    private final Rotation2d endingRotation;
-    private final boolean clockwise;
-    private final double maxCentripetalAcceleration;
+    private final CirclePath circlePath;
+    private final double calculatedMaxVelocity; // The calculated maximum velocity for the robot which doesn't exceed
+                                                // the maximum velocity for the outer wheel
+    private final List<TrajectoryConstraint> constraints;
 
-    public CirclePathConstraint(Translation2d center, double radius, Rotation2d startingRotation,
-        Rotation2d endingRotation, boolean clockwise, double maxCentripetalAcceleration) {
-      this.center = center;
-      this.radius = radius;
-      this.startingRotation = startingRotation;
-      this.endingRotation = endingRotation;
-      this.clockwise = clockwise;
-      this.maxCentripetalAcceleration = maxCentripetalAcceleration;
+    public CirclePathConstraint(CirclePath circlePath, DifferentialDriveKinematics driveKinematics, double maxVelocity,
+        List<TrajectoryConstraint> constraints) {
+      this.circlePath = circlePath;
+      this.constraints = constraints;
+
+      // Calculate maximum velocity using drive kinematics
+      Rotation2d circleLengthRotation;
+      if (circlePath.clockwise) {
+        circleLengthRotation = circlePath.startingRotation.minus(circlePath.endingRotation);
+      } else {
+        circleLengthRotation = circlePath.endingRotation.minus(circlePath.startingRotation);
+      }
+
+      double circleLengthDegrees = circleLengthRotation.getDegrees();
+      if (circleLengthDegrees < 0) {
+        circleLengthDegrees += 360;
+      }
+
+      double circleLengthInchesOuter = (circleLengthDegrees / 360)
+          * ((circlePath.radius + (driveKinematics.trackWidthMeters / 2)) * 2 * Math.PI);
+      double maxDuration = circleLengthInchesOuter / maxVelocity;
+
+      double circleLengthInchesCenter = (circleLengthDegrees / 360) * (circlePath.radius * 2 * Math.PI);
+      calculatedMaxVelocity = circleLengthInchesCenter / maxDuration;
     }
 
     @Override
     public double getMaxVelocityMetersPerSecond(Pose2d poseMeters, double curvatureRadPerMeter,
         double velocityMetersPerSecond) {
-      if (CirclePath.partOfCircle(poseMeters, center, radius, startingRotation, endingRotation, clockwise)) {
-        return Math.sqrt(maxCentripetalAcceleration * radius);
-      } else {
-        return Double.MAX_VALUE;
+      if (circlePath.partOfCircle(poseMeters)) {
+        double result = calculatedMaxVelocity;
+        for (var i = 0; i < constraints.size(); i++) {
+          double constraintResult = constraints.get(i).getMaxVelocityMetersPerSecond(poseMeters,
+              circlePath.getCurvature(), velocityMetersPerSecond);
+          result = constraintResult < result ? constraintResult : result;
+        }
+        return result;
       }
+      return Double.MAX_VALUE;
     }
 
     @Override
     public MinMax getMinMaxAccelerationMetersPerSecondSq(Pose2d poseMeters, double curvatureRadPerMeter,
         double velocityMetersPerSecond) {
+      if (circlePath.partOfCircle(poseMeters)) {
+        double minResult = -Double.MAX_VALUE;
+        double maxResult = Double.MAX_VALUE;
+        for (var i = 0; i < constraints.size(); i++) {
+          MinMax constraintResult = constraints.get(i).getMinMaxAccelerationMetersPerSecondSq(poseMeters,
+              circlePath.getCurvature(), velocityMetersPerSecond);
+          minResult = constraintResult.minAccelerationMetersPerSecondSq > minResult
+              ? constraintResult.minAccelerationMetersPerSecondSq
+              : minResult;
+          maxResult = constraintResult.maxAccelerationMetersPerSecondSq < maxResult
+              ? constraintResult.maxAccelerationMetersPerSecondSq
+              : maxResult;
+        }
+        return new MinMax(minResult, maxResult);
+      }
       return new MinMax(-Double.MAX_VALUE, Double.MAX_VALUE);
     }
   }
