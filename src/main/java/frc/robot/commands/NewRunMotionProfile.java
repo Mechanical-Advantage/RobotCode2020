@@ -462,8 +462,15 @@ public class NewRunMotionProfile extends CommandBase {
       this.center = center;
       this.radius = radius;
       this.startingRotation = startingRotation;
-      this.endingRotation = endingRotation;
       this.clockwise = clockwise;
+
+      // Adjust ending rotation if full circle (simplifies other logic)
+      if (startingRotation.getDegrees() == endingRotation.getDegrees()) {
+        this.endingRotation = endingRotation.plus(Rotation2d.fromDegrees(clockwise ? 0.000001 : -0.000001));
+      } else {
+        this.endingRotation = endingRotation;
+      }
+
     }
 
     /**
@@ -519,7 +526,7 @@ public class NewRunMotionProfile extends CommandBase {
       List<State> states = trajectory.getStates();
       for (var i = 0; i < states.size(); i++) {
         State currentState = states.get(i);
-        if (partOfCircle(currentState.poseMeters)) {
+        if (contains(currentState.poseMeters)) {
           currentState.curvatureRadPerMeter = getCurvature();
         }
       }
@@ -538,31 +545,35 @@ public class NewRunMotionProfile extends CommandBase {
     /**
      * Checks if the provided position falls within the circular path
      */
-    public boolean partOfCircle(Pose2d testPosition) {
-      if (Math.abs(testPosition.getTranslation().getDistance(center) - radius) < 0.01) {
+    public boolean contains(Pose2d testPosition) {
+      if (Math.abs(testPosition.getTranslation().getDistance(center) - radius) <= 0.02) {
         Translation2d centerToCurrent = testPosition.getTranslation().minus(center);
         Rotation2d rotationFromCenter = new Rotation2d(Math.atan2(centerToCurrent.getY(), centerToCurrent.getX()));
-        double relativeCurrentDegrees = rotationFromCenter.minus(startingRotation).getDegrees();
-        double relativeEndingDegrees = endingRotation.minus(startingRotation).getDegrees();
-        if (clockwise) {
-          if (relativeCurrentDegrees > 0) {
-            relativeCurrentDegrees -= 360;
-          }
-          if (relativeEndingDegrees > 0) {
-            relativeEndingDegrees -= 360;
-          }
-          if (relativeCurrentDegrees > relativeEndingDegrees) {
-            return true;
-          }
-        } else {
-          if (relativeCurrentDegrees < 0) {
-            relativeCurrentDegrees += 360;
-          }
-          if (relativeEndingDegrees < 0) {
-            relativeEndingDegrees += 360;
-          }
-          if (relativeCurrentDegrees < relativeEndingDegrees) {
-            return true;
+
+        Rotation2d expectedRotation = rotationFromCenter.plus(Rotation2d.fromDegrees(clockwise ? -90 : 90));
+        if (Math.abs(testPosition.getRotation().minus(expectedRotation).getDegrees()) < 0.02) {
+          double relativeCurrentDegrees = rotationFromCenter.minus(startingRotation).getDegrees();
+          double relativeEndingDegrees = endingRotation.minus(startingRotation).getDegrees();
+          if (clockwise) {
+            if (relativeCurrentDegrees > 0) {
+              relativeCurrentDegrees -= 360;
+            }
+            if (relativeEndingDegrees > 0) {
+              relativeEndingDegrees -= 360;
+            }
+            if (relativeCurrentDegrees > relativeEndingDegrees) {
+              return true;
+            }
+          } else {
+            if (relativeCurrentDegrees < 0) {
+              relativeCurrentDegrees += 360;
+            }
+            if (relativeEndingDegrees < 0) {
+              relativeEndingDegrees += 360;
+            }
+            if (relativeCurrentDegrees < relativeEndingDegrees) {
+              return true;
+            }
           }
         }
       }
@@ -610,7 +621,7 @@ public class NewRunMotionProfile extends CommandBase {
     @Override
     public double getMaxVelocityMetersPerSecond(Pose2d poseMeters, double curvatureRadPerMeter,
         double velocityMetersPerSecond) {
-      if (circlePath.partOfCircle(poseMeters)) {
+      if (circlePath.contains(poseMeters)) {
         double result = calculatedMaxVelocity;
         for (var i = 0; i < constraints.size(); i++) {
           double constraintResult = constraints.get(i).getMaxVelocityMetersPerSecond(poseMeters,
@@ -625,7 +636,7 @@ public class NewRunMotionProfile extends CommandBase {
     @Override
     public MinMax getMinMaxAccelerationMetersPerSecondSq(Pose2d poseMeters, double curvatureRadPerMeter,
         double velocityMetersPerSecond) {
-      if (circlePath.partOfCircle(poseMeters)) {
+      if (circlePath.contains(poseMeters)) {
         double minResult = -Double.MAX_VALUE;
         double maxResult = Double.MAX_VALUE;
         for (var i = 0; i < constraints.size(); i++) {
