@@ -23,29 +23,28 @@ import frc.robot.subsystems.RobotOdometry;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class RunAutoNavBarrelRacing extends SequentialCommandGroup {
 
-  NewRunMotionProfile mp;
+    NewRunMotionProfile mp;
 
-  /** Creates a new RunAutoNavBarrelRacing. */
-  public RunAutoNavBarrelRacing(RobotOdometry odometry, DriveTrainBase driveTrain) {
-    mp = new NewRunMotionProfile(driveTrain, odometry, 0.0,
-        List.of(new Pose2d(30.0, 90.0, new Rotation2d()),
-            new CirclePath(new Translation2d(150, 60), 30, new Rotation2d(), Rotation2d.fromDegrees(-180), true),
-            new CirclePath(new Translation2d(240, 120), 30, new Rotation2d(), Rotation2d.fromDegrees(180), false),
-            new CirclePath(new Translation2d(300, 60), 30, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90),
-                false),
-            new Pose2d(240.0, 90, Rotation2d.fromDegrees(180)), new Pose2d(150.0, 90, Rotation2d.fromDegrees(180)),
-            new Pose2d(30.0, 90.0, Rotation2d.fromDegrees(180))),
-        0.0, false, false);
-    // Add your addCommands(new FooCommand(), new BarCommand());
-    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))), mp);
-  }
+    /** Creates a new RunAutoNavBarrelRacing. */
+    public RunAutoNavBarrelRacing(RobotOdometry odometry, DriveTrainBase driveTrain) {
+        mp = new NewRunMotionProfile(driveTrain, odometry, 0.0, List.of(new Pose2d(30.0, 90.0, new Rotation2d()),
+                new CirclePath(new Translation2d(150, 60), 30, new Rotation2d(), Rotation2d.fromDegrees(-180), true),
+                new CirclePath(new Translation2d(240, 120), 30, new Rotation2d(), Rotation2d.fromDegrees(180), false),
+                new CirclePath(new Translation2d(300, 60), 30, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90),
+                        false),
+                new Pose2d(240.0, 90, Rotation2d.fromDegrees(180)), new Pose2d(150.0, 90, Rotation2d.fromDegrees(180)),
+                new Pose2d(30.0, 90.0, Rotation2d.fromDegrees(180))), 0.0, false, false);
+        // Add your addCommands(new FooCommand(), new BarCommand());
+        addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))), mp,
+                new InstantCommand(() -> driveTrain.stop()));
+    }
 
-  public static void main(String[] args) {
-    Constants.setRobot(RobotType.ROBOT_2020);
-    RunAutoNavBarrelRacing cmd = new RunAutoNavBarrelRacing(null, null);
-    cmd.mp.visualize(2.0,
-        List.of(new Translation2d(30, 120), new Translation2d(60, 120), new Translation2d(30, 60),
-            new Translation2d(60, 60), new Translation2d(150, 60), new Translation2d(240, 120),
-            new Translation2d(300, 60)));
-  }
+    public static void main(String[] args) {
+        Constants.setRobot(RobotType.ROBOT_2020);
+        RunAutoNavBarrelRacing cmd = new RunAutoNavBarrelRacing(null, null);
+        cmd.mp.visualize(2.0,
+                List.of(new Translation2d(30, 120), new Translation2d(60, 120), new Translation2d(30, 60),
+                        new Translation2d(60, 60), new Translation2d(150, 60), new Translation2d(240, 120),
+                        new Translation2d(300, 60)));
+    }
 }
