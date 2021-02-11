@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.commands.NewRunMotionProfile.CirclePath;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.RobotOdometry;
@@ -28,14 +29,12 @@ public class RunAutoNavSlalom extends SequentialCommandGroup {
   public RunAutoNavSlalom(RobotOdometry odometry, DriveTrainBase driveTrain) {
     mp = new NewRunMotionProfile(driveTrain, odometry, 0.0,
         List.of(new Pose2d(30.0, 30.0, new Rotation2d()), new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(45.0)),
-            new Pose2d(180.0, 90.0, new Rotation2d()), new Pose2d(270.0, 60.0, Rotation2d.fromDegrees(-55.0)),
-            new Pose2d(310.0, 35.0, Rotation2d.fromDegrees(15)),
-            // new Pose2d(325.0, 60.0, Rotation2d.fromDegrees(90.0)),
-            new Pose2d(310.0, 85.0, Rotation2d.fromDegrees(165.0)),
-            new Pose2d(270.0, 60.0, Rotation2d.fromDegrees(-90.0 - 35.0)),
-            new Pose2d(180.0, 25.0, Rotation2d.fromDegrees(-180.0)),
+            new Pose2d(180.0, 90.0, new Rotation2d()),
+            new CirclePath(new Translation2d(300, 60), 30, Rotation2d.fromDegrees(-160), Rotation2d.fromDegrees(160),
+                false),
+            new Pose2d(180.0, 30.0, Rotation2d.fromDegrees(-180.0)),
             new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(90.0 + 45.0)),
-            new Pose2d(80.0, 70.0, Rotation2d.fromDegrees(90.0 + 45.0))),
+            new Pose2d(60.0, 90.0, Rotation2d.fromDegrees(90.0 + 45.0))),
         130.0, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))), mp,
