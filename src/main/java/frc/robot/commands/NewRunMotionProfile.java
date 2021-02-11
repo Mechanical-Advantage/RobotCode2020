@@ -270,7 +270,10 @@ public class NewRunMotionProfile extends CommandBase {
   public void execute() {
     if (trajectory == null) {
       // This will just set trajectory to null again if not generated yet
-      trajectory = adjustCircleTrajectories(generator.getTrajectory());
+      trajectory = generator.getTrajectory();
+      if (trajectory != null) {
+        trajectory = adjustCircleTrajectories(trajectory);
+      }
       baseTrajectory = trajectory;
     }
     if (trajectory != null && !followerStarted) {
