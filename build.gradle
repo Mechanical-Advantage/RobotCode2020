@@ -64,9 +64,9 @@ dependencies {
     // upon debugging
     simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
 
-    implementation "frckit.tools:pathview:0.0.23"
-    implementation "frckit.lib:util:0.0.23"
-    implementation "frckit.lib:dynamics:0.0.23"
+    implementation "frckit.tools:pathview:0.0.24"
+    implementation "frckit.lib:util:0.0.24"
+    implementation "frckit.lib:dynamics:0.0.24"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')

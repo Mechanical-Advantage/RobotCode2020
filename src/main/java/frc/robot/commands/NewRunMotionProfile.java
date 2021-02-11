@@ -26,12 +26,17 @@ import edu.wpi.first.wpilibj.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.trajectory.constraint.CentripetalAccelerationConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frckit.physics.drivetrain.DifferentialDrivetrainDynamics;
+import frckit.physics.drivetrain.DifferentialWheelCommand;
+import frckit.physics.drivetrain.DynamicRamseteFollower;
 import frckit.tools.pathview.TrajectoryVisualizer;
+import frckit.util.GeomUtil;
 
 public class NewRunMotionProfile extends CommandBase {
 
@@ -39,6 +44,9 @@ public class NewRunMotionProfile extends CommandBase {
   private static final double kRamseteZeta = 0.7;
   private static final double maxVoltage = 10; // WPILib docs suggest less than 12 because of voltage drop
 
+  private double mass; // Kg
+  private double moi; // Kg * m^2
+  private double angularDrag; // ?
   private double kS; // Volts
   private double kV; // Volt seconds per inch
   private double kA; // Volt seconds squared per inch
@@ -54,7 +62,6 @@ public class NewRunMotionProfile extends CommandBase {
   private DifferentialDriveKinematics driveKinematics;
   private Trajectory trajectory;
   private Trajectory baseTrajectory; // Trajectory before running relativeTo
-  private double startTime;
   private MPGenerator generator;
   private List<Pose2d> waypointPoses; // Does not include initial position
   private List<CirclePath> circlePaths = new ArrayList<>();
@@ -64,7 +71,8 @@ public class NewRunMotionProfile extends CommandBase {
   private TrajectoryConfig config;
   private boolean trajectoryUpdated;
   private boolean followerStarted;
-  private RamseteCommand followerCommand;
+  private DifferentialDrivetrainDynamics driveModel;
+  private DynamicRamseteFollower follower;
 
   /**
    * Creates a new RunMotionProfile that starts from a fixed position, using a
@@ -198,6 +206,8 @@ public class NewRunMotionProfile extends CommandBase {
         maxVelocity = 130;
         maxAcceleration = 130;
         maxCentripetalAcceleration = 120;
+        mass = 50.0; // TODO
+        moi = 4.0;
         break;
     }
   }
@@ -222,6 +232,9 @@ public class NewRunMotionProfile extends CommandBase {
     this.driveTrain = driveTrain;
     if (driveTrain != null) {
       addRequirements(driveTrain);
+      driveModel = DifferentialDrivetrainDynamics.fromHybridCharacterization(mass, moi, angularDrag,
+          Units.inchesToMeters(driveTrain.getWheelDiameter() / 2.0), Units.inchesToMeters(trackWidth / 2.0), kS, kV,
+          driveTrain.getTorquePerVolt(), kS, kV, driveTrain.getTorquePerVolt());
     }
     this.odometry = odometry;
     dynamicTrajectory = true;
@@ -265,32 +278,35 @@ public class NewRunMotionProfile extends CommandBase {
         Transform2d transform = odometry.getCurrentPose().minus(baseTrajectory.getInitialPose());
         // For this use case, transformBy is correct, not relativeTo
         trajectory = baseTrajectory.transformBy(transform);
-        followerCommand = null;
       }
-      startProfile();
+      follower = new DynamicRamseteFollower(trajectory, driveModel, true);
+      followerStarted = true;
+    }
+
+    if (followerStarted) {
+      DifferentialWheelCommand command = follower.update(Timer.getFPGATimestamp(), odometry.getCurrentPose());
+      driveTrain.driveInchesPerSecWithFF(command.getLeftLinearVelocity(driveTrain.getWheelDiameter() / 2.0),
+          command.getRightLinearVelocity(driveTrain.getWheelDiameter() / 2.0), command.getLeftVoltage(),
+          command.getRightVoltage());
     }
 
     if (Constants.tuningMode && followerStarted) {
       Pose2d pose = odometry.getCurrentPose();
-      Pose2d currentPose = trajectory.sample(Timer.getFPGATimestamp() - startTime).poseMeters;
-      Translation2d currentTranslation = currentPose.getTranslation();
-      SmartDashboard.putNumber("MP/PosError", pose.getTranslation().getDistance(currentTranslation));
-      SmartDashboard.putNumber("MP/PoseXError", pose.getTranslation().getX() - currentTranslation.getX());
-      SmartDashboard.putNumber("MP/PoseYError", pose.getTranslation().getY() - currentTranslation.getY());
-      SmartDashboard.putNumber("MP/AngleError", pose.getRotation().minus(currentPose.getRotation()).getDegrees());
+      Pose2d error = GeomUtil.metersToInches(follower.getError());
+      SmartDashboard.putNumber("MP/PosError", error.getTranslation().getNorm());
+      SmartDashboard.putNumber("MP/PoseXError", error.getTranslation().getX());
+      SmartDashboard.putNumber("MP/PoseYError", error.getTranslation().getY());
+      SmartDashboard.putNumber("MP/AngleError", error.getRotation().getDegrees());
     }
   }
 
   @Override
   public boolean isFinished() {
-    return followerStarted && followerCommand.isFinished();
+    return followerStarted && follower.isDone();
   }
 
   @Override
   public void end(boolean interrupted) {
-    if (followerStarted) {
-      followerCommand.cancel();
-    }
     if (dynamicTrajectory) {
       trajectoryUpdated = false;
     }
@@ -317,7 +333,6 @@ public class NewRunMotionProfile extends CommandBase {
    */
   private void startGeneration(Pose2d initialPosition, double initialVelocity) {
     trajectory = null;
-    followerCommand = null; // The old command can't be reused if the profile is changed.
     config.setStartVelocity(initialVelocity);
     if (useQuintic) {
       List<Pose2d> fullWaypointPoses = new ArrayList<>();
@@ -329,19 +344,6 @@ public class NewRunMotionProfile extends CommandBase {
     }
     generator.start();
     trajectoryUpdated = true;
-  }
-
-  /**
-   * Start the profile follower command.
-   */
-  private void startProfile() {
-    if (followerCommand == null) {
-      followerCommand = new RamseteCommand(trajectory, odometry::getCurrentPose,
-          new RamseteController(kRamseteB, kRamseteZeta), driveKinematics, driveTrain::driveInchesPerSec);
-    }
-    followerCommand.schedule();
-    followerStarted = true;
-    startTime = Timer.getFPGATimestamp();
   }
 
   /**

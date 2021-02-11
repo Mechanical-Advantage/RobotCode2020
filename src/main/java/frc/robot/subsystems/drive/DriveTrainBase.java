@@ -29,7 +29,9 @@ public abstract class DriveTrainBase extends SubsystemBase {
   protected double maxVelocityHigh;
   protected double minVelocityLow;
   protected double minVelocityHigh;
-  protected double torquePerVolt = Double.POSITIVE_INFINITY; //N*m / V.  The default of infinity ensures if it is not set, inverse dynamics will not give us an infinite voltage
+  protected double torquePerVolt = Double.POSITIVE_INFINITY; // N*m / V. The default of infinity ensures if it is not
+                                                             // set, inverse dynamics will not give us an infinite
+                                                             // voltage
   protected int leftGearPCM;
   protected int leftGearSolenoid1;
   protected int leftGearSolenoid2;
@@ -68,10 +70,11 @@ public abstract class DriveTrainBase extends SubsystemBase {
     this.shiftLockSwitchAccess = shiftLockSwitchAccess;
   }
 
-  //Some getters for commonly used constants
+  // Some getters for commonly used constants
 
   /**
    * Should return the diameter of the wheels in inches
+   * 
    * @return The wheel diameter of the wheels in inches
    */
   public double getWheelDiameter() {
@@ -79,7 +82,9 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Returns the theoretical torque per volt of a side of the drivetrain.  This is useful for modelling the drive motors
+   * Returns the theoretical torque per volt of a side of the drivetrain. This is
+   * useful for modelling the drive motors
+   * 
    * @return The torque, in Newton-meters per volt, of one side of the drivetrain.
    */
   public double getTorquePerVolt() {
@@ -87,8 +92,10 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Should return the gear reduction of the drive gearboxes such that when the velocity of the motor is divided by it,
-   * the velocity of the gearbox output is produced.
+   * Should return the gear reduction of the drive gearboxes such that when the
+   * velocity of the motor is divided by it, the velocity of the gearbox output is
+   * produced.
+   * 
    * @return The gear reduction of the drive gearboxes
    */
   public abstract double getGearReduction();
@@ -153,6 +160,33 @@ public abstract class DriveTrainBase extends SubsystemBase {
       } else {
         driveClosedLoopLowLevel((calcActualVelocity(left, false) / (wheelDiameter * Math.PI)),
             (calcActualVelocity(right, false) / (wheelDiameter * Math.PI)));
+      }
+    }
+  }
+
+  /**
+   * Drives the robot with speed specified as inches per second, including FF
+   * volts (does not work in open loop)
+   * 
+   * TODO this is not very well matching the existing API, fix sometime
+   * 
+   * @param left       Left inches per second
+   * @param right      Right inches per second
+   * @param leftVolts  Left FF volts
+   * @param rightVolts Right FF volts
+   */
+  public void driveInchesPerSecWithFF(double left, double right, double leftVolts, double rightVolts) {
+    if (currentControlMode == DriveControlMode.STANDARD_DRIVE) {
+      if (driveDisableSwitchAccess.getAsBoolean()) {
+        left = 0;
+        right = 0;
+      }
+
+      if (openLoopSwitchAccess.getAsBoolean()) {
+        driveOpenLoopLowLevel(0.0, 0.0);
+      } else {
+        driveClosedLoopWithFFLowLevel(left / (wheelDiameter * Math.PI), (right / (wheelDiameter * Math.PI)), leftVolts,
+            rightVolts);
       }
     }
   }
@@ -266,6 +300,8 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * @param right The right velocity (rotations per second)
    */
   protected abstract void driveClosedLoopLowLevel(double left, double right);
+
+  protected abstract void driveClosedLoopWithFFLowLevel(double left, double right, double leftVolts, double rightVolts);
 
   /**
    * Enables or disables brake mode (shorting motor terminals to create braking
@@ -480,23 +516,23 @@ public abstract class DriveTrainBase extends SubsystemBase {
   public void switchGear(DriveGear gear) {
     if (dualGear && !shiftLockSwitchAccess.getAsBoolean()) {
       switch (gear) {
-      case HIGH:
-        leftGearSolenoid.set(Value.kForward);
-        rightGearSolenoid.set(Value.kForward);
-        setProfileSlot(1);
-        currentGear = DriveGear.HIGH;
-        SmartDashboard.putBoolean("High Gear", true);
-        break;
-      case LOW:
-        leftGearSolenoid.set(Value.kReverse);
-        rightGearSolenoid.set(Value.kReverse);
-        setProfileSlot(0);
-        currentGear = DriveGear.LOW;
-        SmartDashboard.putBoolean("High Gear", false);
-        break;
-      case UNSUPPORTED:
-      default:
-        break;
+        case HIGH:
+          leftGearSolenoid.set(Value.kForward);
+          rightGearSolenoid.set(Value.kForward);
+          setProfileSlot(1);
+          currentGear = DriveGear.HIGH;
+          SmartDashboard.putBoolean("High Gear", true);
+          break;
+        case LOW:
+          leftGearSolenoid.set(Value.kReverse);
+          rightGearSolenoid.set(Value.kReverse);
+          setProfileSlot(0);
+          currentGear = DriveGear.LOW;
+          SmartDashboard.putBoolean("High Gear", false);
+          break;
+        case UNSUPPORTED:
+        default:
+          break;
       }
     }
   }
@@ -562,12 +598,12 @@ public abstract class DriveTrainBase extends SubsystemBase {
 
     public DriveGear invert() {
       switch (this) {
-      case HIGH:
-        return LOW;
-      case LOW:
-        return HIGH;
-      default:
-        return UNSUPPORTED;
+        case HIGH:
+          return LOW;
+        case LOW:
+          return HIGH;
+        default:
+          return UNSUPPORTED;
       }
     }
   }

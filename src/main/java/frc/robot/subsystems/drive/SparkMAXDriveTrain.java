@@ -68,7 +68,9 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         reverseOutputLeft = true;
         reverseOutputRight = false;
         afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
-        torquePerVolt = (2.6 / 12.0) * 2 * afterEncoderReduction; //NEO torque per volt = (2.6 N*m / 12 V), times 2 NEOs in each gearbox, times gear ratio gives torque at wheel.
+        torquePerVolt = (2.6 / 12.0) * 2 * afterEncoderReduction; // NEO torque per volt = (2.6 N*m / 12 V), times 2
+                                                                  // NEOs in each gearbox, times gear ratio gives torque
+                                                                  // at wheel.
         break;
       case ROBOT_2020_DRIVE:
         leftMaster = new CANSparkMax(2, MotorType.kBrushless);
@@ -149,6 +151,13 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   protected void driveClosedLoopLowLevel(double left, double right) {
     leftPidController.setReference(left * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot);
     rightPidController.setReference(right * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot);
+  }
+
+  @Override
+  protected void driveClosedLoopWithFFLowLevel(double left, double right, double leftVolts, double rightVolts) {
+    leftPidController.setReference(left * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot, leftVolts);
+    rightPidController.setReference(right * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot,
+        rightVolts);
   }
 
   @Override
