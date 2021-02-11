@@ -62,11 +62,12 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         kDLow = 0.0015;
         kFLow = 0.0001821213133;
         kIZoneLow = 0;
-        wheelDiameter = 3.133102 * 2;
+        wheelDiameter = 3.133102 * 2; // TODO we should re-measure this with the new reduction constant (probably
+                                      // doesn't change it much but can't hurt)
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
-        afterEncoderReduction = 11.5;
+        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
         break;
       case ROBOT_2020_DRIVE:
         leftMaster = new CANSparkMax(2, MotorType.kBrushless);
@@ -86,7 +87,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
-        afterEncoderReduction = 11.5;
+        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
         break;
     }
     setCANTimeout(configTimeoutInit);
