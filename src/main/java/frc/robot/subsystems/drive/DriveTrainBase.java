@@ -29,6 +29,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
   protected double maxVelocityHigh;
   protected double minVelocityLow;
   protected double minVelocityHigh;
+  protected double torquePerVolt = Double.POSITIVE_INFINITY; //N*m / V.  The default of infinity ensures if it is not set, inverse dynamics will not give us an infinite voltage
   protected int leftGearPCM;
   protected int leftGearSolenoid1;
   protected int leftGearSolenoid2;
@@ -66,6 +67,31 @@ public abstract class DriveTrainBase extends SubsystemBase {
     this.openLoopSwitchAccess = openLoopSwitchAccess;
     this.shiftLockSwitchAccess = shiftLockSwitchAccess;
   }
+
+  //Some getters for commonly used constants
+
+  /**
+   * Should return the diameter of the wheels in inches
+   * @return The wheel diameter of the wheels in inches
+   */
+  public double getWheelDiameter() {
+    return wheelDiameter;
+  }
+
+  /**
+   * Returns the theoretical torque per volt of a side of the drivetrain.  This is useful for modelling the drive motors
+   * @return The torque, in Newton-meters per volt, of one side of the drivetrain.
+   */
+  public double getTorquePerVolt() {
+    return torquePerVolt;
+  }
+
+  /**
+   * Should return the gear reduction of the drive gearboxes such that when the velocity of the motor is divided by it,
+   * the velocity of the gearbox output is produced.
+   * @return The gear reduction of the drive gearboxes
+   */
+  public abstract double getGearReduction();
 
   /**
    * Creates solenoids and configures profile slots. Required before using

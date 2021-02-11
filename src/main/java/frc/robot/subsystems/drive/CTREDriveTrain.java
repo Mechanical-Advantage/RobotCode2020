@@ -177,6 +177,11 @@ public class CTREDriveTrain extends DriveTrainBase {
   }
 
   @Override
+  public double getGearReduction() {
+    return 1.0; //Encoder is directly on drive wheels
+  }
+
+  @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
