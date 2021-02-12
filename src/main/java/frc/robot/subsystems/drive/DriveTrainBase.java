@@ -304,7 +304,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * 
    * @return current velocity in rotations per second
    */
-  protected abstract double getRPSRight();
+  public abstract double getRPSRight();
 
   /**
    * Get the current velocity for the left side of the robot
@@ -320,7 +320,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * 
    * @return current velocity in rotations per second
    */
-  protected abstract double getRPSLeft();
+  public abstract double getRPSLeft();
 
   /**
    * Gets the average current for one motor.

@@ -34,6 +34,7 @@ public class DriveCharacterization extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    NetworkTableInstance.getDefault().setUpdateRate(0.01);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -46,11 +47,11 @@ public class DriveCharacterization extends CommandBase {
     outputArray[3] = driveTrain.getVoltageLeft();
     outputArray[4] = driveTrain.getVoltageRight();
 
-    outputArray[5] = driveTrain.getDistanceLeft();
-    outputArray[6] = driveTrain.getDistanceRight();
+    outputArray[5] = driveTrain.getRotationsLeft() * (2 * (Math.PI));
+    outputArray[6] = driveTrain.getRotationsRight() * (2 * (Math.PI));
 
-    outputArray[7] = driveTrain.getVelocityLeft();
-    outputArray[8] = driveTrain.getVelocityRight();
+    outputArray[7] = driveTrain.getRPSLeft() * (2 * (Math.PI));
+    outputArray[8] = driveTrain.getRPSRight() * (2 * (Math.PI));
 
     outputArray[9] = ahrs.getAngle() * (Math.PI / 180);
 
