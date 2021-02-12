@@ -234,7 +234,7 @@ public class NewRunMotionProfile extends CommandBase {
       addRequirements(driveTrain);
       double kVRadians = kV / (driveTrain.getWheelDiameter() / 2);
       driveModel = DifferentialDrivetrainDynamics.fromHybridCharacterization(mass, moi, angularDrag,
-          Units.inchesToMeters(driveTrain.getWheelDiameter() / 2.0), Units.inchesToMeters(trackWidth / 2.0), Ks,
+          Units.inchesToMeters(driveTrain.getWheelDiameter() / 2.0), Units.inchesToMeters(trackWidth / 2.0), kS,
           kVRadians, driveTrain.getTorquePerVolt(), kS, kVRadians, driveTrain.getTorquePerVolt());
     }
     this.odometry = odometry;
