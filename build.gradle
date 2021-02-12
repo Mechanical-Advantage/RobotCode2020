@@ -43,6 +43,12 @@ deploy {
     }
 }
 
+repositories {
+    maven {
+        url "http://maven.came20.net/artifactory/devel"
+    }
+}
+
 // Set this to true to enable desktop support.
 def includeDesktopSupport = false
 
@@ -67,6 +73,8 @@ dependencies {
     implementation "frckit.tools:pathview:0.0.24"
     implementation "frckit.lib:util:0.0.24"
     implementation "frckit.lib:dynamics:0.0.24"
+    implementation 'gov.nist.math:jama:1.0.3'
+    implementation "frckit.lib:pvision:0.0.22"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')

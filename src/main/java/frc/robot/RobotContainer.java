@@ -488,8 +488,4 @@ public class RobotContainer {
   public void setInitialPosition() {
     odometry.setPosition(initialAutoPosition);
   }
-
-  public void enableLimelightXCorrection(boolean enable) {
-    limelightOdometry.enableXCorrection(enable);
-  }
 }

@@ -199,9 +199,9 @@ public class NewRunMotionProfile extends CommandBase {
         maxCentripetalAcceleration = 200;
         break;
       case ROBOT_2020:
-        kS = .124;
-        kV = .0722;
-        kA = .00475;
+        kS = 0.119;
+        kV = 0.241;
+        kA = 0.0358;
         trackWidth = 25.934;
         maxVelocity = 130;
         maxAcceleration = 130;
