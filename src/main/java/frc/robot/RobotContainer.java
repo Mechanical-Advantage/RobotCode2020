@@ -34,6 +34,7 @@ import frc.robot.commands.IdleLimelightControl;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
+import frc.robot.commands.MOIDrive;
 import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunClimber;
@@ -181,6 +182,8 @@ public class RobotContainer {
             (position) -> operatorOI.setHoodPosition(position)));
     autoChooser.addOption("Drive characterization", new DriveCharacterization(driveSubsystem, ahrs));
     autoChooser.addOption("Flywheel characterization", new FlywheelCharacterization(shooterFlyWheel));
+    autoChooser.addOption("MOI Characterization (forward)", new MOIDrive(driveSubsystem, ahrs, false));
+    autoChooser.addOption("MOI Characterization (spin)", new MOIDrive(driveSubsystem, ahrs, true));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
