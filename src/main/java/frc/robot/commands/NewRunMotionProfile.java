@@ -200,11 +200,11 @@ public class NewRunMotionProfile extends CommandBase {
         break;
       case ROBOT_2020:
         kS = 0.119;
-        kV = 0.7524;
-        kA = 0.1118;
+        kV = 0.077192;
+        kA = 0.011467;
         trackWidth = 25.934;
-        maxVelocity = 130;
-        maxAcceleration = 130;
+        maxVelocity = 25;
+        maxAcceleration = 25;
         maxCentripetalAcceleration = 120;
         mass = 52.97959;
         moi = 6.948569;
@@ -232,7 +232,7 @@ public class NewRunMotionProfile extends CommandBase {
     this.driveTrain = driveTrain;
     if (driveTrain != null) {
       addRequirements(driveTrain);
-      double kVRadians = kV / (driveTrain.getWheelDiameter() / 2);
+      double kVRadians = kV * (driveTrain.getWheelDiameter() / 2);
       driveModel = DifferentialDrivetrainDynamics.fromHybridCharacterization(mass, moi, angularDrag,
           Units.inchesToMeters(driveTrain.getWheelDiameter() / 2.0), Units.inchesToMeters(trackWidth / 2.0), kS,
           kVRadians, driveTrain.getTorquePerVolt(), kS, kVRadians, driveTrain.getTorquePerVolt());
