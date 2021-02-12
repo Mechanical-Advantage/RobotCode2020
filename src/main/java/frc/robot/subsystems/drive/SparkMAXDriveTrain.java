@@ -66,7 +66,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
-        afterEncoderReduction = 11.5;
+        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
         break;
       case ROBOT_2020_DRIVE:
         leftMaster = new CANSparkMax(2, MotorType.kBrushless);
@@ -86,7 +86,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
-        afterEncoderReduction = 11.5;
+        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
         break;
     }
     setCANTimeout(configTimeoutInit);
