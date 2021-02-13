@@ -37,7 +37,7 @@ import frckit.util.GeomUtil;
 
 public class NewRunMotionProfile extends CommandBase {
 
-  private static final double kRamseteB = 0.0025; // 0.05 seems to be equivalent to the recommendation for meters
+  private static final double kRamseteB = 2; // 0.05 seems to be equivalent to the recommendation for meters
   private static final double kRamseteZeta = 0.7;
   private static final double maxVoltage = 10; // WPILib docs suggest less than 12 because of voltage drop
 
@@ -206,13 +206,13 @@ public class NewRunMotionProfile extends CommandBase {
         trackWidth = 25.934;
         maxVelocity = 130;
         maxAcceleration = 130;
-        maxCentripetalAcceleration = 180;
+        maxCentripetalAcceleration = 120;
         break;
     }
 
     // Convert to meters
-    kV = Units.inchesToMeters(kV);
-    kA = Units.inchesToMeters(kA);
+    kV = Units.metersToInches(kV);
+    kA = Units.metersToInches(kA);
     trackWidth = Units.inchesToMeters(trackWidth);
     maxVelocity = Units.inchesToMeters(maxVelocity);
     maxAcceleration = Units.inchesToMeters(maxAcceleration);
@@ -376,7 +376,7 @@ public class NewRunMotionProfile extends CommandBase {
    * Drives at meters per second (converts meters to inches)
    */
   private void driveMetersPerSecond(double left, double right) {
-    driveTrain.driveInchesPerSec(left, right);
+    driveTrain.driveInchesPerSec(Units.metersToInches(left), Units.metersToInches(right));
   }
 
   /**
