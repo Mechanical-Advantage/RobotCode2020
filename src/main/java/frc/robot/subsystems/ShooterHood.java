@@ -65,6 +65,6 @@ public class ShooterHood extends SubsystemBase {
   }
 
   public static enum HoodPosition {
-    BOTTOM, MIDDLE, TOP
+    WALL, LINE, TRENCH
   }
 }

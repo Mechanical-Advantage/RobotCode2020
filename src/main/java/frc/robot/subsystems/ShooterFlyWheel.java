@@ -15,6 +15,7 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -26,12 +27,13 @@ import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.oi.IOperatorOI.OILED;
 import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.util.TunableNumber;
+import frc.robot.util.VelocityProfiler;
 
 import com.revrobotics.ControlType;
 
 public class ShooterFlyWheel extends SubsystemBase {
 
-  private static final double defaultRampRate = 2;
+  private static final double defaultOpenLoopRampRate = 2;
   private static final boolean invertFlywheel = true;
   private static final int currentLimit = 30;
   private static final double MULTIPLIER = 1.5;
@@ -43,16 +45,18 @@ public class ShooterFlyWheel extends SubsystemBase {
   CANSparkMax flywheelFollower;
   CANPIDController flywheel_pidController;
   CANEncoder flywheelEncoder;
-  public double kP, kI, kD, kFF, kMaxOutput, kMinOutput, maxRPM;
+  public double kP, kI, kD, kMaxOutput, kMinOutput, maxRPM;
+  private SimpleMotorFeedforward feedForwardModel;
+  private boolean openLoopControl = true;
 
-  private Double lastRampRate = null; // Force this to be updated once
+  private Double lastOpenLoopRampRate = null; // Force this to be updated once
+  private VelocityProfiler closedLoopVelocityProfiler = new VelocityProfiler(3000);
   private OILEDState lastShooterLEDState = OILEDState.OFF;
 
   private TunableNumber P = new TunableNumber("Shooter FlyWheel PID/P");
   private TunableNumber I = new TunableNumber("Shooter FlyWheel PID/I");
   private TunableNumber D = new TunableNumber("Shooter FlyWheel PID/D");
-  private TunableNumber F = new TunableNumber("Shooter FlyWheel PID/F");
-  private TunableNumber rampRate = new TunableNumber("Shooter FlyWheel/ramp rate");
+  private TunableNumber openLoopRampRate = new TunableNumber("Shooter FlyWheel/Open Loop Ramp Rate");
   private TunableNumber maxOutput = new TunableNumber("Shooter FlyWheel/Max Output");
   private TunableNumber minOutput = new TunableNumber("Shooter FlyWheel/Min Output");
 
@@ -69,10 +73,12 @@ public class ShooterFlyWheel extends SubsystemBase {
       case ROBOT_2020:
         flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
         flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+        feedForwardModel = new SimpleMotorFeedforward(0.133, 0.00142, 0.000489);
         break;
       case ROBOT_2020_DRIVE:
         flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
         flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+        feedForwardModel = new SimpleMotorFeedforward(0, 0, 0);
         break;
       default:
         return;
@@ -92,11 +98,10 @@ public class ShooterFlyWheel extends SubsystemBase {
 
     flywheelMaster.setInverted(invertFlywheel);
 
-    P.setDefault(0.0012);
+    P.setDefault(0.0005);
     I.setDefault(0);
-    D.setDefault(0);
-    F.setDefault(0.00019068);
-    rampRate.setDefault(defaultRampRate); // Seconds to full power
+    D.setDefault(0.0015);
+    openLoopRampRate.setDefault(defaultOpenLoopRampRate); // Seconds to full power
     maxOutput.setDefault(1);
     minOutput.setDefault(-1);
 
@@ -104,7 +109,6 @@ public class ShooterFlyWheel extends SubsystemBase {
     kP = P.get();
     kI = I.get();
     kD = D.get();
-    kFF = F.get();
     kMaxOutput = 1;
     kMinOutput = -1;
     maxRPM = 6000;
@@ -113,7 +117,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     flywheel_pidController.setP(kP);
     flywheel_pidController.setI(kI);
     flywheel_pidController.setD(kD);
-    flywheel_pidController.setFF(kFF);
+    flywheel_pidController.setFF(0); // Using motor model
     flywheel_pidController.setOutputRange(kMinOutput, kMaxOutput);
 
     // Stop by default
@@ -146,7 +150,6 @@ public class ShooterFlyWheel extends SubsystemBase {
     double p = P.get();
     double i = I.get();
     double d = D.get();
-    double ff = F.get();
     double max = maxOutput.get();
     double min = minOutput.get();
 
@@ -164,20 +167,17 @@ public class ShooterFlyWheel extends SubsystemBase {
       flywheel_pidController.setD(d);
       kD = d;
     }
-    if ((ff != kFF)) {
-      flywheel_pidController.setFF(ff);
-      kFF = ff;
-    }
     if ((max != kMaxOutput) || (min != kMinOutput)) {
       flywheel_pidController.setOutputRange(min, max);
       kMinOutput = min;
       kMaxOutput = max;
     }
 
-    double currentRampRate = SmartDashboard.getNumber("Shooter FlyWheel/ramp rate", defaultRampRate);
-    if (lastRampRate != null && currentRampRate != lastRampRate) {
-      flywheelMaster.setOpenLoopRampRate(currentRampRate);
-      lastRampRate = currentRampRate;
+    double currentOpenLoopRampRate = SmartDashboard.getNumber("Shooter FlyWheel/Open Loop Ramp Rate",
+        defaultOpenLoopRampRate);
+    if (lastOpenLoopRampRate != null && currentOpenLoopRampRate != lastOpenLoopRampRate) {
+      flywheelMaster.setOpenLoopRampRate(currentOpenLoopRampRate);
+      lastOpenLoopRampRate = currentOpenLoopRampRate;
     }
     if (Constants.tuningMode) {
       SmartDashboard.putNumber("Shooter FlyWheel/speed", getSpeed());
@@ -201,14 +201,24 @@ public class ShooterFlyWheel extends SubsystemBase {
       updateLED.update(OILED.SHOOTER_SHOOT, shooterLEDState);
       lastShooterLEDState = shooterLEDState;
     }
+
+    // Update setpoint
+    if (!openLoopControl) {
+      double rpmSetpoint = closedLoopVelocityProfiler.getSetpoint();
+      double ffVolts = feedForwardModel.calculate(rpmSetpoint);
+      setpoint = rpmSetpoint / MULTIPLIER;
+      flywheel_pidController.setReference(setpoint, ControlType.kVelocity, 0, ffVolts);
+    }
   }
 
   public void stop() {
     if (flywheelMaster == null) {
       return;
     }
+    openLoopControl = true;
     flywheelMaster.stopMotor();
     flywheelFollower.stopMotor();
+    closedLoopVelocityProfiler.reset();
     updateRunningLEDs(false);
   }
 
@@ -216,8 +226,12 @@ public class ShooterFlyWheel extends SubsystemBase {
     if (flywheelMaster == null) {
       return;
     }
-    setpoint = rpm / MULTIPLIER;
-    flywheel_pidController.setReference(setpoint, ControlType.kVelocity);
+    if (openLoopControl) {
+      closedLoopVelocityProfiler.setSetpointGoal(rpm, getSpeed());
+    } else {
+      closedLoopVelocityProfiler.setSetpointGoal(rpm);
+    }
+    openLoopControl = false;
     updateRunningLEDs(rpm != 0);
   }
 
@@ -225,6 +239,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     if (flywheelMaster == null) {
       return;
     }
+    openLoopControl = true;
     flywheelMaster.set(power);
     updateRunningLEDs(power != 0);
   }

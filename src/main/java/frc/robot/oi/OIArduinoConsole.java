@@ -239,13 +239,13 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     public void setHoodPosition(HoodPosition position) {
         String text;
         switch (position) {
-            case BOTTOM:
+            case WALL:
                 text = "Wall";
                 break;
-            case MIDDLE:
+            case LINE:
                 text = "Line";
                 break;
-            case TOP:
+            case TRENCH:
                 text = "Trench";
                 break;
             default:

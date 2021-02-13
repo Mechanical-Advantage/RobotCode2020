@@ -36,8 +36,8 @@ public class SetHoodPositionLEDs extends InstantCommand {
   @Override
   public void initialize() {
     setHoodLCD.set(position);
-    updateLED.update(OILED.HOOD_BOTTOM, position == HoodPosition.BOTTOM ? state : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_MIDDLE, position == HoodPosition.MIDDLE ? state : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_TOP, position == HoodPosition.TOP ? state : OILEDState.OFF);
+    updateLED.update(OILED.HOOD_BOTTOM, position == HoodPosition.WALL ? state : OILEDState.OFF);
+    updateLED.update(OILED.HOOD_MIDDLE, position == HoodPosition.LINE ? state : OILEDState.OFF);
+    updateLED.update(OILED.HOOD_TOP, position == HoodPosition.TRENCH ? state : OILEDState.OFF);
   }
 }

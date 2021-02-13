@@ -32,12 +32,12 @@ public class SetShooterHoodMiddleTop extends SequentialCommandGroup {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(
-        new SetHoodPositionLEDs(top ? HoodPosition.TOP : HoodPosition.MIDDLE, updateLED, setHoodLCD,
+        new SetHoodPositionLEDs(top ? HoodPosition.TRENCH : HoodPosition.LINE, updateLED, setHoodLCD,
             OILEDState.PULSE_FAST),
         new WaitForPressure(pressureSensor), new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood), new WaitCommand(raiseWait),
         new InstantCommand(() -> shooterHood.setStopPosition(!top), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(true), shooterHood),
-        new SetHoodPositionLEDs(top ? HoodPosition.TOP : HoodPosition.MIDDLE, updateLED, setHoodLCD, OILEDState.ON));
+        new SetHoodPositionLEDs(top ? HoodPosition.TRENCH : HoodPosition.LINE, updateLED, setHoodLCD, OILEDState.ON));
   }
 }
