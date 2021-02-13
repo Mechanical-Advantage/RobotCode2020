@@ -14,6 +14,9 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.trajectory.constraint.MaxVelocityConstraint;
+import edu.wpi.first.wpilibj.trajectory.constraint.RectangularRegionConstraint;
+import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -31,6 +34,7 @@ import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.PressureSensor;
+import frckit.util.GeomUtil;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -45,6 +49,14 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
   private static final Pose2d secondShotPosition = new Pose2d(trenchStart.getX() - 24, powerCellLineY,
       Rotation2d.fromDegrees(180));
 
+  private static final Translation2d trenchVelocityConstraintBottomLeft = new Translation2d(
+      Constants.fieldLength / 2 - Constants.trenchRunLength / 2, Constants.fieldWidth / -2);
+  private static final Translation2d trenchVelocityConstraintTopRight = new Translation2d(
+      Constants.fieldLength / 2 + Constants.trenchRunLength / 2, Constants.fieldWidth / -2 + Constants.trenchRunWidth);
+  private static final RectangularRegionConstraint trenchVelocityConstraint = new RectangularRegionConstraint(
+      GeomUtil.inchesToMeters(trenchVelocityConstraintBottomLeft),
+      GeomUtil.inchesToMeters(trenchVelocityConstraintTopRight), new MaxVelocityConstraint(Units.inchesToMeters(80)));
+
   /**
    * Creates a new PointAtTargetAndShootTrenchRun.
    */
@@ -57,22 +69,14 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
         new ParallelCommandGroup(new PointAtTarget(driveTrain, limelight, ahrs),
             new WaitCommand(7).withInterrupt(() -> flywheel.atSetpoint())).andThen(
                 new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(1.5)),
-                new InstantCommand(intake::extend), new TurnToAngle(driveTrain, ahrs, 135, true, 15),
-                new NewRunMotionProfile(driveTrain, odometry, List.of(trenchStart, trenchEnd), 0, false, false)
-                    .deadlineWith(new RunIntakeForwards(intake)),
-                // new InstantCommand(intake::extend), new TurnToAngle(driveTrain, ahrs, 135,
-                // true, 10),
-                // new RunMotionProfile(driveTrain, odometry, List.of(), trenchStartPose,
-                // trenchStartVelocity, false, false),
-                // new RunMotionProfile(driveTrain, odometry, List.of(), endPose, 0, false,
-                // false)
-                // .deadlineWith(new RunIntakeForwards(intake)),
+                new TurnToAngle(driveTrain, ahrs, 135, true, 15), new InstantCommand(intake::extend),
+                new NewRunMotionProfile(driveTrain, odometry, List.of(trenchStart, trenchEnd), 0, false, false,
+                    List.of(trenchVelocityConstraint)).deadlineWith(new RunIntakeForwards(intake)),
                 new InstantCommand(intake::retract),
-                // new RunMotionProfile(driveTrain, odometry, List.of(), secondShotPosition, 0,
-                // true, false),
                 new NewRunMotionProfile(driveTrain, odometry, 0, List.of(trenchEnd, secondShotPosition), 0, true,
                     false),
-                new TurnToAngle(driveTrain, ahrs, -15, true, 5), new PointAtTarget(driveTrain, limelight, ahrs),
+                new TurnToAngle(driveTrain, ahrs, -15, true, 5),
+                new PointAtTarget(driveTrain, limelight, ahrs),
                 new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),
         new RunShooterAtDistance(flywheel, hood, odometry, pressureSensor, updateLED, setHoodLCD));
   }
