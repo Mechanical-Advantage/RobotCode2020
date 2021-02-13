@@ -48,12 +48,12 @@ public class NewRunMotionProfile extends CommandBase {
   private double moi; // Kg * m^2
   private double angularDrag; // ?
   private double kS; // Volts
-  private double kV; // Volt seconds per inch
-  private double kA; // Volt seconds squared per inch
+  private double kV; // Volt seconds per meter
+  private double kA; // Volt seconds squared per meter
   private double trackWidth;
-  private double maxVelocity; // in/s
-  private double maxAcceleration; // in/s^2
-  private double maxCentripetalAcceleration; // in/s^2
+  private double maxVelocity; // m/s
+  private double maxAcceleration; // m/s^2
+  private double maxCentripetalAcceleration; // m/s^2
 
   private DriveTrainBase driveTrain;
   private RobotOdometry odometry;
@@ -80,10 +80,11 @@ public class NewRunMotionProfile extends CommandBase {
    * 
    * @param driveTrain      The drive train
    * @param odometry        The robot odometry
-   * @param initialVelocity The velocity at the beginning of the profile
+   * @param initialVelocity The velocity at the beginning of the profile (in/s)
    * @param waypointData    The poses & circle paths including initial position
-   * @param endVelocity     The target velocity at the end of the profile
-   * @param reversed        Whether the robot drives backwards during theprofile
+   *                        (in)
+   * @param endVelocity     The target velocity at the end of the profile (in/s)
+   * @param reversed        Whether the robot drives backwards during the profile
    * @param relative        Whether the profile is a relative change to the robot
    *                        position as opposed to field coordinates
    */
@@ -96,10 +97,10 @@ public class NewRunMotionProfile extends CommandBase {
     useQuintic = true;
 
     // Identical to constructor for fixed position & cubic
-    setup(driveTrain, odometry, null, null, endVelocity, reversed, false);
+    setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, false);
     dynamicTrajectory = false;
     relativeTrajectory = relative;
-    startGeneration(initialPosition, initialVelocity);
+    startGeneration(initialPosition, Units.inchesToMeters(initialVelocity));
   }
 
   /**
@@ -108,12 +109,13 @@ public class NewRunMotionProfile extends CommandBase {
    * 
    * @param driveTrain         The drive train
    * @param odometry           The robot odometry
-   * @param initialPosition    The starting pose for the profile
-   * @param initialVelocity    The velocity at the beginning of the profile
+   * @param initialPosition    The starting pose for the profile (in)
+   * @param initialVelocity    The velocity at the beginning of the profile (in/s)
    * @param intermediatePoints The points in between the start and end of the
-   *                           profile (translation only)
-   * @param endPosition        The end pose
+   *                           profile, translation only (in)
+   * @param endPosition        The end pose (in)
    * @param endVelocity        The target velocity at the end of the profile
+   *                           (in/s)
    * @param reversed           Whether the robot drives backwards during the
    *                           profile
    * @param relative           Whether the profile is a relative change to the
@@ -127,10 +129,11 @@ public class NewRunMotionProfile extends CommandBase {
     // defined start point so always pass false and do the other neccessary logic
     // here
     updateConstants();
-    setup(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, false);
+    setup(driveTrain, odometry, convertTranslationListToMeters(intermediatePoints),
+        GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, false);
     dynamicTrajectory = false;
     relativeTrajectory = relative;
-    startGeneration(initialPosition, initialVelocity);
+    startGeneration(GeomUtil.inchesToMeters(initialPosition), Units.inchesToMeters(initialVelocity));
   }
 
   /**
@@ -139,8 +142,8 @@ public class NewRunMotionProfile extends CommandBase {
    * 
    * @param driveTrain   The drive train
    * @param odometry     The robot odometry
-   * @param waypointData The poses & circle paths after initial position
-   * @param endVelocity  The target velocity at the end of the profile
+   * @param waypointData The poses & circle paths after initial position (in)
+   * @param endVelocity  The target velocity at the end of the profile (in/s)
    * @param reversed     Whether the robot drives backwards during theprofile
    * @param relative     Whether the profile is a relative change to the robot
    *                     position as opposed to field coordinates
@@ -150,7 +153,7 @@ public class NewRunMotionProfile extends CommandBase {
     updateConstants();
     this.waypointPoses = processWaypointData(waypointData);
     useQuintic = true;
-    setup(driveTrain, odometry, null, null, endVelocity, reversed, relative);
+    setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, relative);
   }
 
   /**
@@ -160,9 +163,10 @@ public class NewRunMotionProfile extends CommandBase {
    * @param driveTrain         The drive train
    * @param odometry           The robot odometry
    * @param intermediatePoints The points in between the start and end of the
-   *                           profile (translation only)
-   * @param endPosition        The end pose
+   *                           profile, translation only (in)
+   * @param endPosition        The end pose (in)
    * @param endVelocity        The target velocity at the end of the profile
+   *                           (in/s)
    * @param reversed           Whether the robot drives backwards during the
    *                           profile
    * @param relative           Whether the profile is a relative change to the
@@ -171,7 +175,8 @@ public class NewRunMotionProfile extends CommandBase {
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
     updateConstants();
-    setup(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, relative);
+    setup(driveTrain, odometry, convertTranslationListToMeters(intermediatePoints),
+        GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, relative);
   }
 
   /**
@@ -179,6 +184,8 @@ public class NewRunMotionProfile extends CommandBase {
    */
   @SuppressWarnings("incomplete-switch")
   private void updateConstants() {
+
+    // All constants defined in inches
     switch (Constants.getRobot()) {
       case ROBOT_2019:
         kS = 1.21;
@@ -210,6 +217,14 @@ public class NewRunMotionProfile extends CommandBase {
         moi = 6.948569;
         break;
     }
+
+    // Convert to meters
+    kV = Units.inchesToMeters(kV);
+    kA = Units.inchesToMeters(kA);
+    trackWidth = Units.inchesToMeters(trackWidth);
+    maxVelocity = Units.inchesToMeters(maxVelocity);
+    maxAcceleration = Units.inchesToMeters(maxAcceleration);
+    maxCentripetalAcceleration = Units.inchesToMeters(maxCentripetalAcceleration);
   }
 
   /**
@@ -232,10 +247,10 @@ public class NewRunMotionProfile extends CommandBase {
     this.driveTrain = driveTrain;
     if (driveTrain != null) {
       addRequirements(driveTrain);
-      double kVRadians = kV * (driveTrain.getWheelDiameter() / 2);
+      double kVRadians = kV * Units.inchesToMeters(driveTrain.getWheelDiameter() / 2);
       driveModel = DifferentialDrivetrainDynamics.fromHybridCharacterization(mass, moi, angularDrag,
-          Units.inchesToMeters(driveTrain.getWheelDiameter() / 2.0), Units.inchesToMeters(trackWidth / 2.0), kS,
-          kVRadians, driveTrain.getTorquePerVolt(), kS, kVRadians, driveTrain.getTorquePerVolt());
+          Units.inchesToMeters(driveTrain.getWheelDiameter() / 2.0), trackWidth / 2.0, kS, kVRadians,
+          driveTrain.getTorquePerVolt(), kS, kVRadians, driveTrain.getTorquePerVolt());
     }
     this.odometry = odometry;
     dynamicTrajectory = true;
@@ -279,23 +294,23 @@ public class NewRunMotionProfile extends CommandBase {
     }
     if (trajectory != null && !followerStarted) {
       if (relativeTrajectory) {
-        Transform2d transform = odometry.getCurrentPose().minus(baseTrajectory.getInitialPose());
+        Transform2d transform = getCurrentPoseMeters().minus(baseTrajectory.getInitialPose());
         // For this use case, transformBy is correct, not relativeTo
         trajectory = baseTrajectory.transformBy(transform);
       }
-      follower = new DynamicRamseteFollower(trajectory, driveModel, true);
+      follower = new DynamicRamseteFollower(trajectory, driveModel, false);
       followerStarted = true;
     }
 
     if (followerStarted) {
-      DifferentialWheelCommand command = follower.update(Timer.getFPGATimestamp(), odometry.getCurrentPose());
-      driveTrain.driveInchesPerSecWithFF(command.getLeftLinearVelocity(driveTrain.getWheelDiameter() / 2.0),
-          command.getRightLinearVelocity(driveTrain.getWheelDiameter() / 2.0), command.getLeftVoltage(),
-          command.getRightVoltage());
+      DifferentialWheelCommand command = follower.update(Timer.getFPGATimestamp(), getCurrentPoseMeters());
+      driveTrain.driveInchesPerSecWithFF(
+          Units.metersToInches(command.getLeftLinearVelocity(driveTrain.getWheelDiameter() / 2.0)),
+          Units.metersToInches(command.getRightLinearVelocity(driveTrain.getWheelDiameter() / 2.0)),
+          command.getLeftVoltage(), command.getRightVoltage());
     }
 
     if (Constants.tuningMode && followerStarted) {
-      Pose2d pose = odometry.getCurrentPose();
       Pose2d error = GeomUtil.metersToInches(follower.getError());
       SmartDashboard.putNumber("MP/PosError", error.getTranslation().getNorm());
       SmartDashboard.putNumber("MP/PoseXError", error.getTranslation().getX());
@@ -324,7 +339,8 @@ public class NewRunMotionProfile extends CommandBase {
    */
   public void startGeneration() {
     if (dynamicTrajectory) {
-      startGeneration(odometry.getCurrentPose(), (driveTrain.getVelocityLeft() + driveTrain.getVelocityRight()) / 2);
+      startGeneration(getCurrentPoseMeters(),
+          Units.inchesToMeters((driveTrain.getVelocityLeft() + driveTrain.getVelocityRight()) / 2));
     }
   }
 
@@ -351,6 +367,13 @@ public class NewRunMotionProfile extends CommandBase {
   }
 
   /**
+   * Retrieves the current position from odometry in meters
+   */
+  private Pose2d getCurrentPoseMeters() {
+    return GeomUtil.inchesToMeters(odometry.getCurrentPose());
+  }
+
+  /**
    * Runs the trajectory visualizer on this command. This should not be called
    * from robot code, but instead used only when testing on development machines.
    * It can be used by putting a main method in the command file of the profile,
@@ -370,7 +393,7 @@ public class NewRunMotionProfile extends CommandBase {
    */
   public void visualize(double ppi, List<Translation2d> markers, Pose2d initialRobotPosition) {
     if (initialRobotPosition != null) {
-      startGeneration(initialRobotPosition, 0.0);
+      startGeneration(GeomUtil.inchesToMeters(initialRobotPosition), 0.0);
     }
     // Busy-wait for trajectory to finish generating
     Trajectory t = null;
@@ -383,7 +406,7 @@ public class NewRunMotionProfile extends CommandBase {
       t = generator.getTrajectory(); // Attempt to grab new path
     }
     t = adjustCircleTrajectories(t);
-    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppi, t, trackWidth, markers);
+    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppi, t, trackWidth, convertTranslationListToMeters(markers));
     viz.start();
   }
 
@@ -407,14 +430,42 @@ public class NewRunMotionProfile extends CommandBase {
   }
 
   /**
+   * Converts a list of poses in inches to meters
+   * 
+   * @param poses
+   * @return Poses in meters
+   */
+  private static List<Pose2d> convertPoseListToMeters(List<Pose2d> poses) {
+    List<Pose2d> output = new ArrayList<>();
+    for (var i = 0; i < poses.size(); i++) {
+      output.add(GeomUtil.inchesToMeters(poses.get(i)));
+    }
+    return output;
+  }
+
+  /**
+   * Converts a list of translations in inches to meters
+   * 
+   * @param translations
+   * @return Translations in meters
+   */
+  private static List<Translation2d> convertTranslationListToMeters(List<Translation2d> translations) {
+    List<Translation2d> output = new ArrayList<>();
+    for (var i = 0; i < translations.size(); i++) {
+      output.add(GeomUtil.inchesToMeters(translations.get(i)));
+    }
+    return output;
+  }
+
+  /**
    * Processes a list of Pose2d and CirclePath objects into only Pose2d objects,
-   * including saving circle path objects
+   * including saving circle path objects. Converts from inches to meters.
    */
   public List<Pose2d> processWaypointData(List<Object> waypointData) {
     List<Pose2d> outputPoses = new ArrayList<>();
     for (int i = 0; i < waypointData.size(); i++) {
       if (waypointData.get(i).getClass() == Pose2d.class) {
-        outputPoses.add((Pose2d) waypointData.get(i));
+        outputPoses.add(GeomUtil.inchesToMeters((Pose2d) waypointData.get(i)));
       } else if (waypointData.get(i).getClass() == CirclePath.class) {
         CirclePath circle = (CirclePath) waypointData.get(i);
         outputPoses.addAll(circle.calcPoses());
@@ -442,8 +493,8 @@ public class NewRunMotionProfile extends CommandBase {
    * Represents a circular path to be used in a quintic spline
    **/
   public static class CirclePath {
-    private static final double separationDistance = 0.1; // Distance between points (must be quite small to ensure
-                                                          // continuous curve)
+    private static final double separationDistance = 0.00254; // Distance between points in meters (must be quite small
+                                                              // to ensure continuous curve)
 
     public final Translation2d center;
     public final double radius;
@@ -454,8 +505,8 @@ public class NewRunMotionProfile extends CommandBase {
     /**
      * Creates a circular path with the given properties
      * 
-     * @param center           The center position of the circle
-     * @param radius           The radius of the circle
+     * @param center           The center position of the circle (in)
+     * @param radius           The radius of the circle (in)
      * @param startingRotation The rotation relative to the center at which to start
      *                         the path (NOT the starting rotation of the robot)
      * @param endingRotation   The rotation relative to the center at which to end
@@ -465,8 +516,8 @@ public class NewRunMotionProfile extends CommandBase {
      */
     public CirclePath(Translation2d center, double radius, Rotation2d startingRotation, Rotation2d endingRotation,
         boolean clockwise) {
-      this.center = center;
-      this.radius = radius;
+      this.center = GeomUtil.inchesToMeters(center);
+      this.radius = Units.inchesToMeters(radius);
       this.startingRotation = startingRotation;
       this.clockwise = clockwise;
 
@@ -552,7 +603,7 @@ public class NewRunMotionProfile extends CommandBase {
      * Checks if the provided position falls within the circular path
      */
     public boolean contains(Pose2d testPosition) {
-      if (Math.abs(testPosition.getTranslation().getDistance(center) - radius) <= 0.02) {
+      if (Math.abs(testPosition.getTranslation().getDistance(center) - radius) <= 0.0005) {
         Translation2d centerToCurrent = testPosition.getTranslation().minus(center);
         Rotation2d rotationFromCenter = new Rotation2d(Math.atan2(centerToCurrent.getY(), centerToCurrent.getX()));
 
@@ -616,12 +667,12 @@ public class NewRunMotionProfile extends CommandBase {
         circleLengthDegrees += 360;
       }
 
-      double circleLengthInchesOuter = (circleLengthDegrees / 360)
+      double circleLengthMetersOuter = (circleLengthDegrees / 360)
           * ((circlePath.radius + (driveKinematics.trackWidthMeters / 2)) * 2 * Math.PI);
-      double maxDuration = circleLengthInchesOuter / maxVelocity;
+      double maxDuration = circleLengthMetersOuter / maxVelocity;
 
-      double circleLengthInchesCenter = (circleLengthDegrees / 360) * (circlePath.radius * 2 * Math.PI);
-      calculatedMaxVelocity = circleLengthInchesCenter / maxDuration;
+      double circleLengthMetersCenter = (circleLengthDegrees / 360) * (circlePath.radius * 2 * Math.PI);
+      calculatedMaxVelocity = circleLengthMetersCenter / maxDuration;
     }
 
     @Override
