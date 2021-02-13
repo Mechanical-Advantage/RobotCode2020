@@ -40,8 +40,6 @@ import frckit.util.GeomUtil;
 
 public class NewRunMotionProfile extends CommandBase {
 
-  private static final double kRamseteB = 0.0025; // 0.05 seems to be equivalent to the recommendation for meters
-  private static final double kRamseteZeta = 0.7;
   private static final double maxVoltage = 10; // WPILib docs suggest less than 12 because of voltage drop
 
   private double mass; // Kg
@@ -219,8 +217,8 @@ public class NewRunMotionProfile extends CommandBase {
     }
 
     // Convert to meters
-    kV = Units.inchesToMeters(kV);
-    kA = Units.inchesToMeters(kA);
+    kV = Units.metersToInches(kV);
+    kA = Units.metersToInches(kA);
     trackWidth = Units.inchesToMeters(trackWidth);
     maxVelocity = Units.inchesToMeters(maxVelocity);
     maxAcceleration = Units.inchesToMeters(maxAcceleration);
