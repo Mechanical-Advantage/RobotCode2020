@@ -208,8 +208,8 @@ public class NewRunMotionProfile extends CommandBase {
         kV = 0.077192;
         kA = 0.011467;
         trackWidth = 25.934;
-        maxVelocity = 25;
-        maxAcceleration = 25;
+        maxVelocity = 130;
+        maxAcceleration = 130;
         maxCentripetalAcceleration = 120;
         mass = 52.97959;
         moi = 6.948569;
@@ -302,10 +302,9 @@ public class NewRunMotionProfile extends CommandBase {
 
     if (followerStarted) {
       DifferentialWheelCommand command = follower.update(Timer.getFPGATimestamp(), getCurrentPoseMeters());
-      driveTrain.driveInchesPerSecWithFF(
-          Units.metersToInches(command.getLeftLinearVelocity(driveTrain.getWheelDiameter() / 2.0)),
-          Units.metersToInches(command.getRightLinearVelocity(driveTrain.getWheelDiameter() / 2.0)),
-          command.getLeftVoltage(), command.getRightVoltage());
+      driveTrain.driveInchesPerSecWithFF(command.getLeftLinearVelocity(driveTrain.getWheelDiameter() / 2.0),
+          command.getRightLinearVelocity(driveTrain.getWheelDiameter() / 2.0), command.getLeftVoltage(),
+          command.getRightVoltage());
     }
 
     if (Constants.tuningMode && followerStarted) {

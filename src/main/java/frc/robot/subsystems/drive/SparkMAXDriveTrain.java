@@ -239,12 +239,10 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
 
   @Override
   public void resetSensorRate() {
-    leftMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20);
-    rightMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 20);
-    // The SPARK MAX defaults to 50ms for status 2 which is very slow for a drive
-    // train so use 20ms instead here
-    leftMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
-    rightMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 20);
+    leftMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
+    rightMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
+    leftMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
+    rightMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
   }
 
   @Override
