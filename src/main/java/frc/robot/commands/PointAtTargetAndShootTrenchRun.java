@@ -75,7 +75,7 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
                 new InstantCommand(intake::retract),
                 new NewRunMotionProfile(driveTrain, odometry, 0, List.of(trenchEnd, secondShotPosition), 0, true,
                     false),
-                new TurnToAngle(driveTrain, ahrs, -15, true, 5),
+                new TurnToAngle(driveTrain, ahrs, -15, true, 5), new InstantCommand(intake::extend),
                 new PointAtTarget(driveTrain, limelight, ahrs),
                 new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),
         new RunShooterAtDistance(flywheel, hood, odometry, pressureSensor, updateLED, setHoodLCD));
