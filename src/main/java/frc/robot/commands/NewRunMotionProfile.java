@@ -72,6 +72,37 @@ public class NewRunMotionProfile extends CommandBase {
    * Creates a new RunMotionProfile that starts from a fixed position, using a
    * quintic spline
    * 
+   * @param driveTrain       The drive train
+   * @param odometry         The robot odometry
+   * @param initialVelocity  The velocity at the beginning of the profile (in/s)
+   * @param waypointData     The poses & circle paths including initial position
+   *                         (in)
+   * @param endVelocity      The target velocity at the end of the profile (in/s)
+   * @param reversed         Whether the robot drives backwards during the profile
+   * @param relative         Whether the profile is a relative change to the robot
+   *                         position as opposed to field coordinates
+   * @param extraConstraints Extra constrints to apply to the trajectory (must be
+   *                         metric)
+   */
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
+      List<Object> waypointData, double endVelocity, boolean reversed, boolean relative,
+      List<TrajectoryConstraint> extraConstraints) {
+    updateConstants();
+    this.waypointPoses = processWaypointData(waypointData);
+    Pose2d initialPosition = this.waypointPoses.remove(0);
+    useQuintic = true;
+
+    // Identical to constructor for fixed position & cubic
+    setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, false, extraConstraints);
+    dynamicTrajectory = false;
+    relativeTrajectory = relative;
+    startGeneration(initialPosition, Units.inchesToMeters(initialVelocity));
+  }
+
+  /**
+   * Creates a new RunMotionProfile that starts from a fixed position, using a
+   * quintic spline
+   * 
    * @param driveTrain      The drive train
    * @param odometry        The robot odometry
    * @param initialVelocity The velocity at the beginning of the profile (in/s)
@@ -82,19 +113,9 @@ public class NewRunMotionProfile extends CommandBase {
    * @param relative        Whether the profile is a relative change to the robot
    *                        position as opposed to field coordinates
    */
-
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
       List<Object> waypointData, double endVelocity, boolean reversed, boolean relative) {
-    updateConstants();
-    this.waypointPoses = processWaypointData(waypointData);
-    Pose2d initialPosition = this.waypointPoses.remove(0);
-    useQuintic = true;
-
-    // Identical to constructor for fixed position & cubic
-    setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, false);
-    dynamicTrajectory = false;
-    relativeTrajectory = relative;
-    startGeneration(initialPosition, Units.inchesToMeters(initialVelocity));
+    this(driveTrain, odometry, initialVelocity, waypointData, endVelocity, reversed, relative, new ArrayList<>());
   }
 
   /**
@@ -114,20 +135,68 @@ public class NewRunMotionProfile extends CommandBase {
    *                           profile
    * @param relative           Whether the profile is a relative change to the
    *                           robot position as opposed to field coordinates
-   * 
+   * @param extraConstraints   Extra constrints to apply to the trajectory (must
+   *                           be metric)
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
       double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
-      boolean reversed, boolean relative) {
+      boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints) {
     // The setup function's relative trajectory handling is unneccessary with a
     // defined start point so always pass false and do the other neccessary logic
     // here
     updateConstants();
     setup(driveTrain, odometry, convertTranslationListToMeters(intermediatePoints),
-        GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, false);
+        GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, false, extraConstraints);
     dynamicTrajectory = false;
     relativeTrajectory = relative;
     startGeneration(GeomUtil.inchesToMeters(initialPosition), Units.inchesToMeters(initialVelocity));
+  }
+
+  /**
+   * Creates a new RunMotionProfile that starts from a fixed position, using a
+   * cubic spline
+   * 
+   * @param driveTrain         The drive train
+   * @param odometry           The robot odometry
+   * @param initialPosition    The starting pose for the profile (in)
+   * @param initialVelocity    The velocity at the beginning of the profile (in/s)
+   * @param intermediatePoints The points in between the start and end of the
+   *                           profile, translation only (in)
+   * @param endPosition        The end pose (in)
+   * @param endVelocity        The target velocity at the end of the profile
+   *                           (in/s)
+   * @param reversed           Whether the robot drives backwards during the
+   *                           profile
+   * @param relative           Whether the profile is a relative change to the
+   *                           robot position as opposed to field coordinates
+   */
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
+      double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
+      boolean reversed, boolean relative) {
+    this(driveTrain, odometry, initialPosition, initialVelocity, intermediatePoints, endPosition, endVelocity, reversed,
+        relative, new ArrayList<>());
+  }
+
+  /**
+   * Creates a new RunMotionProfile that starts from the robot's current position,
+   * using a quintic spline
+   * 
+   * @param driveTrain       The drive train
+   * @param odometry         The robot odometry
+   * @param waypointData     The poses & circle paths after initial position (in)
+   * @param endVelocity      The target velocity at the end of the profile (in/s)
+   * @param reversed         Whether the robot drives backwards during theprofile
+   * @param relative         Whether the profile is a relative change to the robot
+   *                         position as opposed to field coordinates
+   * @param extraConstraints Extra constrints to apply to the trajectory (must be
+   *                         metric)
+   */
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Object> waypointData,
+      double endVelocity, boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints) {
+    updateConstants();
+    this.waypointPoses = processWaypointData(waypointData);
+    useQuintic = true;
+    setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, relative, extraConstraints);
   }
 
   /**
@@ -144,10 +213,33 @@ public class NewRunMotionProfile extends CommandBase {
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Object> waypointData,
       double endVelocity, boolean reversed, boolean relative) {
+    this(driveTrain, odometry, waypointData, endVelocity, reversed, relative, new ArrayList<>());
+  }
+
+  /**
+   * Creates a new RunMotionProfile that starts from the robot's current position,
+   * using a cubic spline
+   * 
+   * @param driveTrain         The drive train
+   * @param odometry           The robot odometry
+   * @param intermediatePoints The points in between the start and end of the
+   *                           profile, translation only (in)
+   * @param endPosition        The end pose (in)
+   * @param endVelocity        The target velocity at the end of the profile
+   *                           (in/s)
+   * @param reversed           Whether the robot drives backwards during the
+   *                           profile
+   * @param relative           Whether the profile is a relative change to the
+   *                           robot position as opposed to field coordinates
+   * @param extraConstraints   Extra constrints to apply to the trajectory (must
+   *                           be metric)
+   */
+  public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
+      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative,
+      List<TrajectoryConstraint> extraConstraints) {
     updateConstants();
-    this.waypointPoses = processWaypointData(waypointData);
-    useQuintic = true;
-    setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, relative);
+    setup(driveTrain, odometry, convertTranslationListToMeters(intermediatePoints),
+        GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, relative, extraConstraints);
   }
 
   /**
@@ -168,9 +260,7 @@ public class NewRunMotionProfile extends CommandBase {
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
-    updateConstants();
-    setup(driveTrain, odometry, convertTranslationListToMeters(intermediatePoints),
-        GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, relative);
+    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, relative, new ArrayList<>());
   }
 
   /**
@@ -233,9 +323,12 @@ public class NewRunMotionProfile extends CommandBase {
    *                           profile
    * @param relative           Whether the profile is a relative change to the
    *                           robot position as opposed to field coordinates
+   * @param extraConstraints   Extra constrints to apply to the trajectory (must
+   *                           be metric)
    */
   private void setup(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
-      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative) {
+      Pose2d endPosition, double endVelocity, boolean reversed, boolean relative,
+      List<TrajectoryConstraint> extraConstraints) {
     this.driveTrain = driveTrain;
     if (driveTrain != null) {
       addRequirements(driveTrain);
@@ -250,11 +343,12 @@ public class NewRunMotionProfile extends CommandBase {
     this.intermediatePointsTranslations = intermediatePoints;
     this.endPosition = endPosition;
     config = new TrajectoryConfig(maxVelocity, maxAcceleration).setKinematics(driveKinematics)
-        .addConstraint(voltageConstraint).addConstraint(centripetalAccelerationConstraint).setEndVelocity(endVelocity)
-        .setReversed(reversed);
+        .addConstraint(voltageConstraint).addConstraint(centripetalAccelerationConstraint)
+        .addConstraints(extraConstraints).setEndVelocity(endVelocity).setReversed(reversed);
+    List<TrajectoryConstraint> allConstraints = List.of(voltageConstraint, centripetalAccelerationConstraint);
+    allConstraints.addAll(extraConstraints);
     for (int i = 0; i < circlePaths.size(); i++) {
-      config.addConstraint(circlePaths.get(i).getConstraint(driveKinematics, maxVelocity,
-          List.of(voltageConstraint, centripetalAccelerationConstraint)));
+      config.addConstraint(circlePaths.get(i).getConstraint(driveKinematics, maxVelocity, extraConstraints));
     }
     if (relative) {
       relativeTrajectory = true;
