@@ -38,7 +38,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final int currentLimit = 30;
   private static final double MULTIPLIER = 1.5;
   private static final double LEDSlowPulseThreshold = 0.5; // percent of setpoint rpm
-  private static final double LEDFastPulseThreshold = 0.9; // percent of setpoint rpm
+  private static final double atSetpointThreshold = 0.9; // percent of setpoint rpm
   private double setpoint = 0;
 
   CANSparkMax flywheelMaster;
@@ -187,10 +187,10 @@ public class ShooterFlyWheel extends SubsystemBase {
     setFlyWheelSpeed.set(getSpeed());
 
     // Update shooter LED
-    double targetRpm = setpoint * MULTIPLIER;
+    double targetRpm = closedLoopVelocityProfiler.getSetpointGoal();
     double currentRpm = getSpeed();
     OILEDState shooterLEDState = OILEDState.OFF;
-    if (currentRpm > targetRpm * LEDFastPulseThreshold) {
+    if (currentRpm > targetRpm * atSetpointThreshold) {
       shooterLEDState = OILEDState.MED;
     } else if (currentRpm > targetRpm * LEDSlowPulseThreshold) {
       shooterLEDState = OILEDState.PULSE_FAST;
@@ -249,6 +249,14 @@ public class ShooterFlyWheel extends SubsystemBase {
       return 0;
     }
     return flywheelEncoder.getVelocity() * MULTIPLIER;
+  }
+
+  public boolean atSetpoint() {
+    if (openLoopControl) {
+      return true;
+    } else {
+      return getSpeed() > closedLoopVelocityProfiler.getSetpointGoal() * atSetpointThreshold;
+    }
   }
 
   private void updateRunningLEDs(boolean running) {

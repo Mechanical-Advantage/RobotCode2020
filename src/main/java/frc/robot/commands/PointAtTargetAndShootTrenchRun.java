@@ -37,15 +37,13 @@ import frc.robot.util.PressureSensor;
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
 public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
 
-  private static final double powerCellLineX = Constants.fieldWidth / 2 - Constants.trenchRunWidth / 2;
-  private static final Pose2d endPose = new Pose2d(powerCellLineX, Constants.fieldLength / 2,
+  private static final double powerCellLineY = Constants.fieldWidth / -2 + Constants.trenchRunWidth / 2;
+  private static final Pose2d trenchStart = new Pose2d(Constants.fieldLength / 2 + Constants.trenchRunLength / 2,
+      powerCellLineY, Rotation2d.fromDegrees(180));
+  private static final Pose2d trenchEnd = new Pose2d(Constants.fieldLength / 2, powerCellLineY,
       Rotation2d.fromDegrees(180));
-  private static final Translation2d trenchStart = new Translation2d(powerCellLineX,
-      Constants.fieldLength / 2 + Constants.trenchRunLength / 2);
-  private static final Pose2d trenchStartPose = new Pose2d(trenchStart, Rotation2d.fromDegrees(180));
-  private static final Pose2d secondShotPosition = new Pose2d(powerCellLineX, trenchStart.getY() + 36,
+  private static final Pose2d secondShotPosition = new Pose2d(trenchStart.getX() - 24, powerCellLineY,
       Rotation2d.fromDegrees(180));
-  private static final double trenchStartVelocity = 50;
 
   /**
    * Creates a new PointAtTargetAndShootTrenchRun.
@@ -55,20 +53,27 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
       PressureSensor pressureSensor, UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
-    super(new ParallelCommandGroup(new PointAtTarget(driveTrain, limelight, ahrs),
-        new SetShooterHoodMiddleTop(hood, pressureSensor, false, updateLED, setHoodLCD),
-        new WaitCommand(7).withInterrupt(() -> flywheel.getSpeed() > 5500)).andThen(
-            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(1.5)),
-            new InstantCommand(intake::extend), new TurnToAngle(driveTrain, ahrs, 135, true, 10),
-            new RunMotionProfile(driveTrain, odometry, List.of(), trenchStartPose, trenchStartVelocity, false, false),
-            new RunMotionProfile(driveTrain, odometry, List.of(), endPose, 0, false, false)
-                .deadlineWith(new RunIntakeForwards(intake)),
-            new InstantCommand(intake::retract),
-            new RunMotionProfile(driveTrain, odometry, List.of(), secondShotPosition, 0, true, false),
-            // .alongWith(new SetShooterHoodMiddleTop(hood, pressureSensor, true, updateLED,
-            // setHoodLCD)),
-            new TurnToAngle(driveTrain, ahrs, -15, true, 5), new PointAtTarget(driveTrain, limelight, ahrs),
-            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),
-        new RunShooterFlyWheel(flywheel));
+    super(
+        new ParallelCommandGroup(new PointAtTarget(driveTrain, limelight, ahrs),
+            new WaitCommand(7).withInterrupt(() -> flywheel.atSetpoint())).andThen(
+                new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(1.5)),
+                new InstantCommand(intake::extend), new TurnToAngle(driveTrain, ahrs, 135, true, 15),
+                new NewRunMotionProfile(driveTrain, odometry, List.of(trenchStart, trenchEnd), 0, false, false)
+                    .deadlineWith(new RunIntakeForwards(intake)),
+                // new InstantCommand(intake::extend), new TurnToAngle(driveTrain, ahrs, 135,
+                // true, 10),
+                // new RunMotionProfile(driveTrain, odometry, List.of(), trenchStartPose,
+                // trenchStartVelocity, false, false),
+                // new RunMotionProfile(driveTrain, odometry, List.of(), endPose, 0, false,
+                // false)
+                // .deadlineWith(new RunIntakeForwards(intake)),
+                new InstantCommand(intake::retract),
+                // new RunMotionProfile(driveTrain, odometry, List.of(), secondShotPosition, 0,
+                // true, false),
+                new NewRunMotionProfile(driveTrain, odometry, 0, List.of(trenchEnd, secondShotPosition), 0, true,
+                    false),
+                new TurnToAngle(driveTrain, ahrs, -15, true, 5), new PointAtTarget(driveTrain, limelight, ahrs),
+                new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),
+        new RunShooterAtDistance(flywheel, hood, odometry, pressureSensor, updateLED, setHoodLCD));
   }
 }

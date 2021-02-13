@@ -67,4 +67,11 @@ public class VelocityProfiler {
     }
     return currentSetpoint;
   }
+
+  /**
+   * Returns the current setpoint goal
+   */
+  public double getSetpointGoal() {
+    return goalSetpoint;
+  }
 }
