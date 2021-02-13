@@ -345,7 +345,9 @@ public class NewRunMotionProfile extends CommandBase {
     config = new TrajectoryConfig(maxVelocity, maxAcceleration).setKinematics(driveKinematics)
         .addConstraint(voltageConstraint).addConstraint(centripetalAccelerationConstraint)
         .addConstraints(extraConstraints).setEndVelocity(endVelocity).setReversed(reversed);
-    List<TrajectoryConstraint> allConstraints = List.of(voltageConstraint, centripetalAccelerationConstraint);
+    List<TrajectoryConstraint> allConstraints = new ArrayList<>();
+    allConstraints.add(voltageConstraint);
+    allConstraints.add(centripetalAccelerationConstraint);
     allConstraints.addAll(extraConstraints);
     for (int i = 0; i < circlePaths.size(); i++) {
       config.addConstraint(circlePaths.get(i).getConstraint(driveKinematics, maxVelocity, extraConstraints));
