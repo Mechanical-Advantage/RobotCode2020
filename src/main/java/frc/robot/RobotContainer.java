@@ -27,16 +27,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
+import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.FeedUnstick;
 import frc.robot.commands.IdleLimelightControl;
-import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
-import frc.robot.commands.PointAtTargetAndShoot;
+import frc.robot.commands.PointAtTargetAndShoot;<<<<<<<HEAD
 import frc.robot.commands.RunAutoNavBarrelRacing;
 import frc.robot.commands.RunAutoNavBounce;
-import frc.robot.commands.RunAutoNavSlalom;
+import frc.robot.commands.RunAutoNavSlalom;=======
+import frc.robot.commands.PointAtTargetAndShootTrenchRun;>>>>>>>betterAuto
 import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunGalacticSearchABlue;
 import frc.robot.commands.RunGalacticSearchARed;
@@ -50,14 +51,16 @@ import frc.robot.commands.RunShooterAtDistance;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.SetLEDOverride;
-import frc.robot.commands.SetShooterHoodMiddleTop;
 import frc.robot.commands.SetShooterHoodBottom;
+import frc.robot.commands.SetShooterHoodMiddleTop;
 import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
 import frc.robot.oi.IDriverOI;
 import frc.robot.oi.IDriverOverrideOI;
 import frc.robot.oi.IOperatorOI;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.oi.OIArduinoConsole;
 import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheld;
@@ -65,23 +68,21 @@ import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIHandheldWithOverrides;
 import frc.robot.oi.OIOperatorHandheld;
 import frc.robot.oi.OIeStopConsole;
-import frc.robot.oi.IOperatorOI.OILED;
-import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.LimelightInterface.LimelightStreamingMode;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
-import frc.robot.subsystems.ShooterRoller;
-import frc.robot.subsystems.LimelightInterface.LimelightStreamingMode;
 import frc.robot.subsystems.ShooterHood;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
-import frc.robot.util.PressureSensor;
 import frc.robot.subsystems.drive.SparkMAXDriveTrain;
+import frc.robot.util.PressureSensor;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -92,7 +93,7 @@ import frc.robot.subsystems.drive.SparkMAXDriveTrain;
  */
 public class RobotContainer {
   private static final double navXWaitTime = 5; // Maximum number of seconds to wait for the navX to initialize
-  private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine, 0,
+  private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine - 16, 0,
       Rotation2d.fromDegrees(0));
 
   private IDriverOI driverOI;
@@ -172,6 +173,7 @@ public class RobotContainer {
     if (Constants.tuningMode) {
       autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
       autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
+      autoChooser.addOption("Turn about 135 degrees", new TurnToAngle(driveSubsystem, ahrs, 135, true, 5));
       autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
       autoChooser.addOption("Drive velocity", new VelocityPIDTuner(driveSubsystem));
       autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
@@ -192,6 +194,10 @@ public class RobotContainer {
     autoChooser.addOption("AutoNav (Barrel Racing)", new RunAutoNavBarrelRacing(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Slalom)", new RunAutoNavSlalom(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Bounce)", new RunAutoNavBounce(odometry, driveSubsystem));
+    autoChooser.addOption("6 ball auto",
+        new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller,
+            shooterFlyWheel, shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+            (position) -> operatorOI.setHoodPosition(position)));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -491,6 +497,7 @@ public class RobotContainer {
   }
 
   public void setInitialPosition() {
+    ahrs.zeroYaw();
     odometry.setPosition(initialAutoPosition);
   }
 }
