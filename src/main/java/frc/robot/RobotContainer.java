@@ -33,11 +33,11 @@ import frc.robot.commands.IdleLimelightControl;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
-import frc.robot.commands.PointAtTargetAndShoot;<<<<<<<HEAD
+import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunAutoNavBarrelRacing;
 import frc.robot.commands.RunAutoNavBounce;
-import frc.robot.commands.RunAutoNavSlalom;=======
-import frc.robot.commands.PointAtTargetAndShootTrenchRun;>>>>>>>betterAuto
+import frc.robot.commands.RunAutoNavSlalom;
+import frc.robot.commands.PointAtTargetAndShootTrenchRun;
 import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunGalacticSearchABlue;
 import frc.robot.commands.RunGalacticSearchARed;
