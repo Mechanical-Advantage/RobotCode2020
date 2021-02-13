@@ -211,7 +211,6 @@ public class NewRunMotionProfile extends CommandBase {
     }
 
     // Convert to meters
-    kS = Units.inchesToMeters(kS);
     kV = Units.inchesToMeters(kV);
     kA = Units.inchesToMeters(kA);
     trackWidth = Units.inchesToMeters(trackWidth);
