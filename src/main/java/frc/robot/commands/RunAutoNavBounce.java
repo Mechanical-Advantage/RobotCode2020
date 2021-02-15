@@ -47,7 +47,7 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
         Double.MAX_VALUE, true, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))), mp1, mp2, mp3,
-        mp4);
+        mp4, new InstantCommand(() -> driveTrain.stop()));
   }
 
   public static void main(String[] args) {
