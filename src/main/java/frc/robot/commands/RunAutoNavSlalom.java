@@ -35,7 +35,7 @@ public class RunAutoNavSlalom extends SequentialCommandGroup {
             new Pose2d(180.0, 30.0, Rotation2d.fromDegrees(-180.0)),
             new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(90.0 + 45.0)),
             new Pose2d(60.0, 90.0, Rotation2d.fromDegrees(90.0 + 45.0))),
-        130.0, false, false);
+        Double.MAX_VALUE, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))), mp,
         new InstantCommand(() -> driveTrain.stop()));
