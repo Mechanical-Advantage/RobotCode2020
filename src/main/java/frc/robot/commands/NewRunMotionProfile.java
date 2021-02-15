@@ -350,7 +350,7 @@ public class NewRunMotionProfile extends CommandBase {
     allConstraints.add(centripetalAccelerationConstraint);
     allConstraints.addAll(extraConstraints);
     for (int i = 0; i < circlePaths.size(); i++) {
-      config.addConstraint(circlePaths.get(i).getConstraint(driveKinematics, maxVelocity, extraConstraints));
+      config.addConstraint(circlePaths.get(i).getConstraint(driveKinematics, maxVelocity, allConstraints));
     }
     if (relative) {
       relativeTrajectory = true;
