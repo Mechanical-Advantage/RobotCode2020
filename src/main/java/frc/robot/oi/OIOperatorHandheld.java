@@ -36,7 +36,7 @@ public class OIOperatorHandheld implements IOperatorOI {
     private Button wallButton;
     private Button lineButton;
     private Button trenchButton;
-    private Trigger fakeManualHoodSwitch = dummyTrigger.negate();
+    private Trigger fakeManualHoodSwitch = dummyTrigger;
 
     private boolean climbEnabled;
 
