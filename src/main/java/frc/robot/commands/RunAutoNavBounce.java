@@ -16,6 +16,7 @@ import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.commands.NewRunMotionProfile.CirclePath;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.RobotOdometry;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -29,7 +30,7 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
   NewRunMotionProfile mp4;
 
   /** Creates a new RunAutoNavBounce. */
-  public RunAutoNavBounce(RobotOdometry odometry, DriveTrainBase driveTrain) {
+  public RunAutoNavBounce(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
     mp1 = new NewRunMotionProfile(driveTrain, odometry, 0,
         List.of(new Pose2d(30, 90, new Rotation2d()), new Pose2d(90, 150, Rotation2d.fromDegrees(90))), 0, false,
         false);
@@ -46,13 +47,13 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
         List.of(new Pose2d(270, 150, Rotation2d.fromDegrees(90)), new Pose2d(300, 100, Rotation2d.fromDegrees(130))),
         Double.MAX_VALUE, true, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
-    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))), mp1, mp2, mp3,
-        mp4, new InstantCommand(() -> driveTrain.stop()));
+    addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))),
+        new InstantCommand(intake::extend), mp1, mp2, mp3, mp4, new InstantCommand(() -> driveTrain.stop()));
   }
 
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
-    RunAutoNavBounce cmd = new RunAutoNavBounce(null, null);
+    RunAutoNavBounce cmd = new RunAutoNavBounce(null, null, null);
     cmd.mp1.visualize(80, List.of());
     // List.of(new Translation2d(90, 150), new Translation2d(180, 150), new
     // Translation2d(270, 150),
