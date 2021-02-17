@@ -44,6 +44,7 @@ import frc.robot.commands.RunGalacticSearchARed;
 import frc.robot.commands.RunGalacticSearchBBlue;
 import frc.robot.commands.RunGalacticSearchBRed;
 import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunHyperdriveLightspeedCircuit;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
@@ -198,6 +199,8 @@ public class RobotContainer {
     autoChooser.addOption("AutoNav (Barrel Racing)", new RunAutoNavBarrelRacing(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Slalom)", new RunAutoNavSlalom(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Bounce)", new RunAutoNavBounce(odometry, driveSubsystem, intake));
+    autoChooser.addOption("Hyperdrive (Lightspeed Circuit)",
+        new RunHyperdriveLightspeedCircuit(odometry, driveSubsystem));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
