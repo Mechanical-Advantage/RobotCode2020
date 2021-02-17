@@ -31,6 +31,7 @@ public class OIDualJoysticks implements IDriverOI {
     private Button lowGear;
 
     private Button visionTestButton;
+    private Button autoAimButton;
     private Button shooterRollerButton;
     private Button shooterUnstickButton;
 
@@ -48,6 +49,7 @@ public class OIDualJoysticks implements IDriverOI {
         lowGear = new JoystickButton(leftController, 4);
 
         visionTestButton = new JoystickButton(rightController, 8);
+        autoAimButton = new JoystickButton(rightController, 1);
         shooterRollerButton = new JoystickButton(rightController, 5);
         shooterUnstickButton = new JoystickButton(rightController, 4);
     }
@@ -122,6 +124,11 @@ public class OIDualJoysticks implements IDriverOI {
     @Override
     public Trigger getVisionTestButton() {
         return visionTestButton;
+    }
+
+    @Override
+    public Trigger getAutoAimButton() {
+        return autoAimButton;
     }
 
     @Override
