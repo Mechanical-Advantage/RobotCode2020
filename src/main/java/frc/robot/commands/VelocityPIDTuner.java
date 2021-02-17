@@ -23,10 +23,9 @@ public class VelocityPIDTuner extends CommandBase {
   private TunableNumber P = new TunableNumber("Drive PID/P");
   private TunableNumber I = new TunableNumber("Drive PID/I");
   private TunableNumber D = new TunableNumber("Drive PID/D");
-  private TunableNumber F = new TunableNumber("Drive PID/F");
   private TunableNumber setpoint = new TunableNumber("Drive PID/setpoint");
 
-  private double lastP, lastI, lastD, lastF = -1;
+  private double lastP, lastI, lastD = -1;
 
   public VelocityPIDTuner(DriveTrainBase drive) {
     addRequirements(drive);
@@ -40,7 +39,6 @@ public class VelocityPIDTuner extends CommandBase {
     P.setDefault(driveSubsystem.getP());
     I.setDefault(driveSubsystem.getI());
     D.setDefault(driveSubsystem.getD());
-    F.setDefault(driveSubsystem.getF());
     setpoint.setDefault(0);
     SmartDashboard.putBoolean("Drive PID/enabled", false);
   }
@@ -51,13 +49,11 @@ public class VelocityPIDTuner extends CommandBase {
     double currentP = P.get();
     double currentI = I.get();
     double currentD = D.get();
-    double currentF = F.get();
-    if (currentP != lastP || currentI != lastI || currentD != lastD || currentF != lastF) {
-      driveSubsystem.setPID(currentP, currentI, currentD, currentF, 0);
+    if (currentP != lastP || currentI != lastI || currentD != lastD) {
+      driveSubsystem.setPID(currentP, currentI, currentD, 0);
       lastP = currentP;
       lastI = currentI;
       lastD = currentD;
-      lastF = currentF;
     }
     if (SmartDashboard.getBoolean("Drive PID/enabled", false)) {
       driveSubsystem.driveInchesPerSec(setpoint.get(), setpoint.get() * (spin ? -1 : 1));
