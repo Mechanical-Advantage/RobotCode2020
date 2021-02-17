@@ -19,7 +19,9 @@ import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
+import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.Constants;
+import frckit.physics.drivetrain.differential.DifferentialDrivetrainDynamics;
 
 public class CTREDriveTrain extends DriveTrainBase {
 
@@ -54,7 +56,6 @@ public class CTREDriveTrain extends DriveTrainBase {
         rightMaster = new TalonSRX(3);
         rightFollower1 = new TalonSRX(4);
         maxVelocityLow = 122.282131;
-        minVelocityLow = 5.14872;
         encoderType = FeedbackDevice.QuadEncoder;
         ticksPerRotation = 1440;
         wheelDiameter = 5.9000000002; // 6
@@ -65,8 +66,20 @@ public class CTREDriveTrain extends DriveTrainBase {
         kPLow = 2;
         kILow = 0;
         kDLow = 40;
-        kFLow = 1.07;
         kIZoneLow = 0;
+        leftKsLow = 0;
+        leftKvLow = 0.287655057;
+        leftKaLow = 0;
+        leftTorquePerVoltLow = Double.POSITIVE_INFINITY;
+        rightKsLow = 0;
+        rightKvLow = 0.287655057;
+        rightKaLow = 0;
+        rightTorquePerVoltLow = Double.POSITIVE_INFINITY;
+        massKg = 0;
+        moiKgM2 = 0;
+        angularDragLow = 0.0;
+        wheelbaseInches = 24.0;
+        trackScrubFactor = 1;
         break;
       case ORIGINAL_ROBOT_2018:
         leftMaster = new TalonSRX(12);
@@ -81,8 +94,6 @@ public class CTREDriveTrain extends DriveTrainBase {
         rightGearPCM = 0;
         maxVelocityLow = 106;
         maxVelocityHigh = 230;
-        minVelocityLow = 3.25971;
-        minVelocityHigh = 13.038837;
         dualGear = true;
         encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
         ticksPerRotation = 4096;
@@ -95,11 +106,30 @@ public class CTREDriveTrain extends DriveTrainBase {
         kILow = 0.003;
         kIZoneLow = 300;
         kDLow = 30;
-        kFLow = 0.3145756458;
         kPHigh = 0.8;
         kIHigh = 0;
         kDHigh = 10;
-        kFHigh = 0.1449829932;
+        leftKsLow = 0;
+        leftKvLow = 0.24055;
+        leftKaLow = 0;
+        leftTorquePerVoltLow = Double.POSITIVE_INFINITY;
+        rightKsLow = 0;
+        rightKvLow = 0.24055;
+        rightKaLow = 0;
+        rightTorquePerVoltLow = Double.POSITIVE_INFINITY;
+        leftKsHigh = 0;
+        leftKvHigh = 0.11086;
+        leftKaHigh = 0;
+        leftTorquePerVoltHigh = Double.POSITIVE_INFINITY;
+        rightKsHigh = 0;
+        rightKvHigh = 0.11086;
+        rightKaHigh = 0;
+        rightTorquePerVoltHigh = Double.POSITIVE_INFINITY;
+        massKg = 0;
+        moiKgM2 = 0;
+        angularDragLow = 0.0;
+        wheelbaseInches = 24.0;
+        trackScrubFactor = 1;
         break;
       case ROBOT_2019:
         leftMaster = new TalonSRX(12);
@@ -112,7 +142,6 @@ public class CTREDriveTrain extends DriveTrainBase {
         ptoSolenoid2 = 2;
         ptoPCM = 1;
         maxVelocityLow = 170.566392;
-        minVelocityLow = 8.8836662;
         sixMotorDrive = true;
         encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
         ticksPerRotation = 4096;
@@ -125,7 +154,19 @@ public class CTREDriveTrain extends DriveTrainBase {
         kILow = 0;
         kIZoneLow = 0;
         kDLow = 30;
-        kFLow = 0.23; // Calculated 0.213125
+        leftKsLow = 1.21;
+        leftKvLow = 0.13690515;
+        leftKaLow = 0.0421603;
+        leftTorquePerVoltLow = (2.6 / 12.0) * 2 * Double.POSITIVE_INFINITY;
+        rightKsLow = 1.21;
+        rightKvLow = 0.13690515;
+        rightKaLow = 0.0421603;
+        rightTorquePerVoltLow = (2.6 / 12.0) * 2 * Double.POSITIVE_INFINITY;
+        massKg = 0;
+        moiKgM2 = 0;
+        angularDragLow = 0.0;
+        wheelbaseInches = 24.0;
+        trackScrubFactor = 27.5932064868814 / wheelbaseInches;
         hasPTO = true;
         break;
       case REBOT:
@@ -136,7 +177,6 @@ public class CTREDriveTrain extends DriveTrainBase {
         rightFollower1 = new VictorSPX(2);
         rightFollower2 = new VictorSPX(3);
         maxVelocityLow = 125.94;
-        minVelocityLow = 5.18;
         sixMotorDrive = true;
         encoderType = FeedbackDevice.CTRE_MagEncoder_Relative;
         ticksPerRotation = 4096;
@@ -148,10 +188,29 @@ public class CTREDriveTrain extends DriveTrainBase {
         kPLow = 0.6;
         kILow = 0.0007;
         kDLow = 6;
-        kFLow = 0.2842;
         kIZoneLow = 4096 * 50 / 600;
+        leftKsLow = 0;
+        leftKvLow = 0.21733;
+        leftKaLow = 0;
+        leftTorquePerVoltLow = (2.6 / 12.0) * 2 * Double.POSITIVE_INFINITY;
+        rightKsLow = 0;
+        rightKvLow = 0.21733;
+        rightKaLow = 0;
+        rightTorquePerVoltLow = (2.6 / 12.0) * 2 * Double.POSITIVE_INFINITY;
+        massKg = 0;
+        moiKgM2 = 0;
+        angularDragLow = 0.0;
+        wheelbaseInches = 24.0;
+        trackScrubFactor = 1;
         break;
     }
+    dynamicsLow = DifferentialDrivetrainDynamics.fromHybridCharacterization(massKg, moiKgM2, angularDragLow,
+        Units.inchesToMeters(wheelDiameter / 2), Units.inchesToMeters(wheelbaseInches) * trackScrubFactor / 2.0,
+        leftKsLow, leftKvLow, leftTorquePerVoltLow, rightKsLow, rightKvLow, rightTorquePerVoltLow);
+    dynamicsHigh = DifferentialDrivetrainDynamics.fromHybridCharacterization(massKg, moiKgM2, angularDragHigh,
+        Units.inchesToMeters(wheelDiameter / 2), Units.inchesToMeters(wheelbaseInches) * trackScrubFactor / 2.0,
+        leftKsHigh, leftKvHigh, leftTorquePerVoltHigh, rightKsHigh, rightKvHigh, rightTorquePerVoltHigh);
+
     leftMaster.configFactoryDefault(configTimeoutInit);
     leftFollower1.configFactoryDefault(configTimeoutInit);
     leftMaster.configSelectedFeedbackSensor(encoderType, 0, configTimeoutInit);
@@ -174,6 +233,10 @@ public class CTREDriveTrain extends DriveTrainBase {
       rightFollower2.setInverted(reverseOutputRight);
       rightFollower2.follow(rightMaster);
     }
+    leftMaster.configVoltageCompSaturation(12.0, configTimeoutInit);
+    rightMaster.configVoltageCompSaturation(12.0, configTimeoutInit);
+    leftMaster.enableVoltageCompensation(true);
+    rightMaster.enableVoltageCompensation(true);
     initialize();
   }
 
@@ -195,23 +258,16 @@ public class CTREDriveTrain extends DriveTrainBase {
 
   @Override
   protected void driveOpenLoopLowLevel(double left, double right) {
-    leftMaster.set(ControlMode.PercentOutput, left);
-    rightMaster.set(ControlMode.PercentOutput, right);
+    leftMaster.set(ControlMode.PercentOutput, left / 12);
+    rightMaster.set(ControlMode.PercentOutput, right / 12);
   }
 
   @Override
-  protected void driveClosedLoopWithFFLowLevel(double left, double right, double leftVolts, double rightVolts) {
-
-    leftMaster.set(ControlMode.Velocity, left * ticksPerRotation / 10, DemandType.ArbitraryFeedForward,
-        leftVolts / 12.0);
-    rightMaster.set(ControlMode.Velocity, right * ticksPerRotation / 10, DemandType.ArbitraryFeedForward,
-        rightVolts / 12.0);
-  }
-
-  @Override
-  protected void driveClosedLoopLowLevel(double left, double right) {
-    leftMaster.set(ControlMode.Velocity, left * ticksPerRotation / 10);
-    rightMaster.set(ControlMode.Velocity, right * ticksPerRotation / 10);
+  protected void driveClosedLoopLowLevel(double left, double right, double leftVolts, double rightVolts) {
+    double leftTicksPer100ms = left * ticksPerRotation / (20 * Math.PI);
+    double rightTicksPer100ms = right * ticksPerRotation / (20 * Math.PI);
+    leftMaster.set(ControlMode.Velocity, leftTicksPer100ms, DemandType.ArbitraryFeedForward, leftVolts / 12.0);
+    rightMaster.set(ControlMode.Velocity, rightTicksPer100ms, DemandType.ArbitraryFeedForward, rightVolts / 12.0);
   }
 
   @Override
@@ -259,16 +315,16 @@ public class CTREDriveTrain extends DriveTrainBase {
   }
 
   @Override
-  protected void setPID(int slotIdx, double p, double i, double d, double f, int iZone) {
+  protected void setPID(int slotIdx, double p, double i, double d, int iZone) {
     leftMaster.config_kP(slotIdx, p, configTimeoutRuntime);
     leftMaster.config_kI(slotIdx, i, configTimeoutRuntime);
     leftMaster.config_kD(slotIdx, d, configTimeoutRuntime);
-    leftMaster.config_kF(slotIdx, f, configTimeoutRuntime);
+    leftMaster.config_kF(slotIdx, 0.0, configTimeoutRuntime);
     leftMaster.config_IntegralZone(slotIdx, iZone, configTimeoutRuntime);
     rightMaster.config_kP(slotIdx, p, configTimeoutRuntime);
     rightMaster.config_kI(slotIdx, i, configTimeoutRuntime);
     rightMaster.config_kD(slotIdx, d, configTimeoutRuntime);
-    rightMaster.config_kF(slotIdx, f, configTimeoutRuntime);
+    rightMaster.config_kF(slotIdx, 0.0, configTimeoutRuntime);
     rightMaster.config_IntegralZone(slotIdx, iZone, configTimeoutRuntime);
   }
 

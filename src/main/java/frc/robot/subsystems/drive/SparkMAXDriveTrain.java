@@ -18,7 +18,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Units;
 import frc.robot.Constants;
+import frckit.physics.drivetrain.differential.DifferentialDrivetrainDynamics;
 
 public class SparkMAXDriveTrain extends DriveTrainBase {
 
@@ -55,21 +57,31 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         rightFollower = new CANSparkMax(15, MotorType.kBrushless);
         leftEncoder = leftMaster.getEncoder();
         rightEncoder = rightMaster.getEncoder();
-        minVelocityLow = 3;
+        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
         maxVelocityLow = 150;
         kPLow = 0.00015;
         kILow = 0;
         kDLow = 0.0015;
-        kFLow = 0.0001821213133;
         kIZoneLow = 0;
+        leftKsLow = 0.0935;
+        leftKvLow = 0.241;
+        leftKaLow = 0.0384;
+        leftTorquePerVoltLow = (2.6 / 12.0) * 2 * afterEncoderReduction; // NEO torque per volt = (2.6 N*m / 12 V),
+                                                                         // times 2 NEOs in each gearbox, times gear
+                                                                         // ratio gives torque at wheel.
+        rightKsLow = 0.146;
+        rightKvLow = 0.241;
+        rightKaLow = 0.0331;
+        rightTorquePerVoltLow = (2.6 / 12.0) * 2 * afterEncoderReduction;
+        massKg = 52.97959;
+        moiKgM2 = 6.948569;
+        angularDragLow = 0.0;
         wheelDiameter = 3.12207 * 2;
+        wheelbaseInches = 24.0;
+        trackScrubFactor = 25.934 / wheelbaseInches;
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
-        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
-        torquePerVolt = (2.6 / 12.0) * 2 * afterEncoderReduction; // NEO torque per volt = (2.6 N*m / 12 V), times 2
-                                                                  // NEOs in each gearbox, times gear ratio gives torque
-                                                                  // at wheel.
         break;
       case ROBOT_2020_DRIVE:
         leftMaster = new CANSparkMax(2, MotorType.kBrushless);
@@ -78,20 +90,38 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         rightFollower = new CANSparkMax(15, MotorType.kBrushless);
         leftEncoder = leftMaster.getEncoder();
         rightEncoder = rightMaster.getEncoder();
-        minVelocityLow = 3;
+        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
         maxVelocityLow = 150;
         kPLow = 0.00015;
         kILow = 0;
         kDLow = 0.0015;
-        kFLow = 0.0001821213133;
         kIZoneLow = 0;
+        leftKsLow = 0.14;
+        leftKvLow = 0.2274;
+        leftKaLow = 0.0384;
+        leftTorquePerVoltLow = Double.POSITIVE_INFINITY;
+        rightKsLow = 0.14;
+        rightKvLow = 0.2274;
+        rightKaLow = 0.0384;
+        rightTorquePerVoltLow = Double.POSITIVE_INFINITY;
+        massKg = 0;
+        moiKgM2 = 0;
+        angularDragLow = 0.0;
         wheelDiameter = 6;
+        wheelbaseInches = 24.0;
+        trackScrubFactor = 24.890470780033485 / wheelbaseInches;
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
-        afterEncoderReduction = 1.0 / ((9.0 / 62.0) * (18.0 / 30.0));
         break;
     }
+    dynamicsLow = DifferentialDrivetrainDynamics.fromHybridCharacterization(massKg, moiKgM2, angularDragLow,
+        Units.inchesToMeters(wheelDiameter / 2), Units.inchesToMeters(wheelbaseInches) * trackScrubFactor / 2.0,
+        leftKsLow, leftKvLow, leftTorquePerVoltLow, rightKsLow, rightKvLow, rightTorquePerVoltLow);
+    dynamicsHigh = DifferentialDrivetrainDynamics.fromHybridCharacterization(massKg, moiKgM2, angularDragHigh,
+        Units.inchesToMeters(wheelDiameter / 2), Units.inchesToMeters(wheelbaseInches) * trackScrubFactor / 2.0,
+        leftKsHigh, leftKvHigh, leftTorquePerVoltHigh, rightKsHigh, rightKvHigh, rightTorquePerVoltHigh);
+
     setCANTimeout(configTimeoutInit);
     leftMaster.restoreFactoryDefaults();
     leftFollower.restoreFactoryDefaults();
@@ -142,21 +172,17 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
 
   @Override
   protected void driveOpenLoopLowLevel(double left, double right) {
-    leftMaster.set(left);
-    rightMaster.set(right);
+    leftMaster.setVoltage(left);
+    rightMaster.setVoltage(right);
   }
 
   @Override
-  protected void driveClosedLoopLowLevel(double left, double right) {
-    leftPidController.setReference(left * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot);
-    rightPidController.setReference(right * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot);
-  }
+  protected void driveClosedLoopLowLevel(double left, double right, double leftVolts, double rightVolts) {
+    double leftRpm = left * 60 / (2.0 * Math.PI) * afterEncoderReduction;
+    double rightRpm = right * 60 / (2.0 * Math.PI) * afterEncoderReduction;
 
-  @Override
-  protected void driveClosedLoopWithFFLowLevel(double left, double right, double leftVolts, double rightVolts) {
-    leftPidController.setReference(left * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot, leftVolts);
-    rightPidController.setReference(right * 60 * afterEncoderReduction, ControlType.kVelocity, currentPidSlot,
-        rightVolts);
+    leftPidController.setReference(leftRpm, ControlType.kVelocity, currentPidSlot, leftVolts);
+    rightPidController.setReference(rightRpm, ControlType.kVelocity, currentPidSlot, rightVolts);
   }
 
   @Override
@@ -202,16 +228,16 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
   }
 
   @Override
-  protected void setPID(int slotIdx, double p, double i, double d, double f, int iZone) {
+  protected void setPID(int slotIdx, double p, double i, double d, int iZone) {
     leftPidController.setP(p, slotIdx);
     leftPidController.setI(i, slotIdx);
     leftPidController.setD(d, slotIdx);
-    leftPidController.setFF(f, slotIdx);
+    leftPidController.setFF(0.0, slotIdx);
     leftPidController.setIZone(iZone, slotIdx);
     rightPidController.setP(p, slotIdx);
     rightPidController.setI(i, slotIdx);
     rightPidController.setD(d, slotIdx);
-    rightPidController.setFF(f, slotIdx);
+    rightPidController.setFF(0.0, slotIdx);
     rightPidController.setIZone(iZone, slotIdx);
   }
 

@@ -6,18 +6,46 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frckit.physics.drivetrain.differential.DifferentialDrivetrainDynamics;
+import frckit.physics.drivetrain.differential.DifferentialWheelState;
+import frckit.physics.state.RigidBodyState2d;
 
 public abstract class DriveTrainBase extends SubsystemBase {
+
+  // Kv and Ka stored in radians
+  protected double massKg;
+  protected double moiKgM2;
+  protected double angularDragLow = 0.0;
+  protected double angularDragHigh = 0.0;
+  protected double wheelbaseInches;
+  protected double trackScrubFactor;
+  protected double leftKsLow;
+  protected double leftKvLow;
+  protected double leftKaLow;
+  protected double leftTorquePerVoltLow = Double.POSITIVE_INFINITY;
+  protected double leftKsHigh;
+  protected double leftKvHigh;
+  protected double leftKaHigh;
+  protected double leftTorquePerVoltHigh = Double.POSITIVE_INFINITY;
+  protected double rightKsLow;
+  protected double rightKvLow;
+  protected double rightKaLow;
+  protected double rightTorquePerVoltLow = Double.POSITIVE_INFINITY;
+  protected double rightKsHigh;
+  protected double rightKvHigh;
+  protected double rightKaHigh;
+  protected double rightTorquePerVoltHigh = Double.POSITIVE_INFINITY;
+
+  protected DifferentialDrivetrainDynamics dynamicsLow;
+  protected DifferentialDrivetrainDynamics dynamicsHigh;
 
   protected double kPLow;
   protected double kILow;
   protected double kDLow;
-  protected double kFLow;
   protected int kIZoneLow;
   protected double kPHigh;
   protected double kIHigh;
   protected double kDHigh;
-  protected double kFHigh;
   protected int kIZoneHigh;
 
   protected double wheelDiameter; // inches
@@ -27,11 +55,6 @@ public abstract class DriveTrainBase extends SubsystemBase {
   protected double PTOLeftSpeedAdjust;
   protected double maxVelocityLow;
   protected double maxVelocityHigh;
-  protected double minVelocityLow;
-  protected double minVelocityHigh;
-  protected double torquePerVolt = Double.POSITIVE_INFINITY; // N*m / V. The default of infinity ensures if it is not
-                                                             // set, inverse dynamics will not give us an infinite
-                                                             // voltage
   protected int leftGearPCM;
   protected int leftGearSolenoid1;
   protected int leftGearSolenoid2;
@@ -82,16 +105,6 @@ public abstract class DriveTrainBase extends SubsystemBase {
   }
 
   /**
-   * Returns the theoretical torque per volt of a side of the drivetrain. This is
-   * useful for modelling the drive motors
-   * 
-   * @return The torque, in Newton-meters per volt, of one side of the drivetrain.
-   */
-  public double getTorquePerVolt() {
-    return torquePerVolt;
-  }
-
-  /**
    * Should return the gear reduction of the drive gearboxes such that when the
    * velocity of the motor is divided by it, the velocity of the gearbox output is
    * produced.
@@ -108,10 +121,10 @@ public abstract class DriveTrainBase extends SubsystemBase {
     if (dualGear) {
       leftGearSolenoid = new DoubleSolenoid(leftGearPCM, leftGearSolenoid1, leftGearSolenoid2);
       rightGearSolenoid = new DoubleSolenoid(rightGearPCM, rightGearSolenoid1, rightGearSolenoid2);
-      setPID(1, kPHigh, kIHigh, kDHigh, kFHigh, kIZoneHigh);
+      setPID(1, kPHigh, kIHigh, kDHigh, kIZoneHigh);
       switchGear(DriveGear.HIGH);
     }
-    setPID(0, kPLow, kILow, kDLow, kFLow, kIZoneLow);
+    setPID(0, kPLow, kILow, kDLow, kIZoneLow);
     if (hasPTO) {
       pto = new DoubleSolenoid(ptoPCM, ptoSolenoid1, ptoSolenoid2);
       disablePTO();
@@ -154,70 +167,50 @@ public abstract class DriveTrainBase extends SubsystemBase {
         right = 0;
       }
 
-      if (openLoopSwitchAccess.getAsBoolean()) {
-        driveOpenLoopLowLevel(calcActualVelocity(left, false) / getMaxVelocity(),
-            calcActualVelocity(right, false) / getMaxVelocity());
+      double leftRadPerSec = left / (wheelDiameter / 2.0);
+      double rightRadPerSec = right / (wheelDiameter / 2.0);
+
+      DifferentialDrivetrainDynamics model;
+      if (currentGear == DriveGear.HIGH) {
+        model = dynamicsHigh;
       } else {
-        driveClosedLoopLowLevel((calcActualVelocity(left, false) / (wheelDiameter * Math.PI)),
-            (calcActualVelocity(right, false) / (wheelDiameter * Math.PI)));
+        model = dynamicsLow;
+      }
+      double leftVoltage = model.getLeftTransmission().inverseDynamics(leftRadPerSec, 0.0);
+      double rightVoltage = model.getRightTransmission().inverseDynamics(rightRadPerSec, 0.0);
+
+      if (openLoopSwitchAccess.getAsBoolean()) {
+        driveOpenLoopLowLevel(leftVoltage, rightVoltage);
+      } else {
+        driveClosedLoopLowLevel(leftRadPerSec, rightRadPerSec, leftVoltage, rightVoltage);
       }
     }
   }
 
   /**
-   * Drives the robot with speed specified as inches per second, including FF
-   * volts (does not work in open loop)
+   * Drives the robot based on a rigid body state object
    * 
-   * TODO this is not very well matching the existing API, fix sometime
-   * 
-   * @param left       Left inches per second
-   * @param right      Right inches per second
-   * @param leftVolts  Left FF volts
-   * @param rightVolts Right FF volts
+   * @param state
    */
-  public void driveInchesPerSecWithFF(double left, double right, double leftVolts, double rightVolts) {
+  public void drive(RigidBodyState2d state) {
     if (currentControlMode == DriveControlMode.STANDARD_DRIVE) {
       if (driveDisableSwitchAccess.getAsBoolean()) {
-        left = 0;
-        right = 0;
+        state = RigidBodyState2d.ZERO;
       }
 
-      if (openLoopSwitchAccess.getAsBoolean()) {
-        driveOpenLoopLowLevel(0.0, 0.0);
+      DifferentialDrivetrainDynamics model;
+      if (currentGear == DriveGear.HIGH) {
+        model = dynamicsHigh;
       } else {
-        driveClosedLoopWithFFLowLevel(left / (wheelDiameter * Math.PI), (right / (wheelDiameter * Math.PI)), leftVolts,
-            rightVolts);
+        model = dynamicsLow;
       }
-    }
-  }
-
-  /**
-   * Increases inputs that are less than minVelocity to minVelocity.
-   * 
-   * @param input        Input value, either inches per second or percentage
-   * @param isPercentage Whether the input is a percentage
-   * @return Calculated velocity
-   */
-  private double calcActualVelocity(double input, boolean isPercentage) {
-    double minVelocity;
-    if (!dualGear || currentGear == DriveGear.LOW) {
-      minVelocity = minVelocityLow;
-    } else {
-      minVelocity = minVelocityHigh;
-    }
-    double minNonZero = 0.1;
-    if (isPercentage) {
-      minVelocity /= getMaxVelocity();
-      minNonZero = 0.001;
-    }
-    if (input > minNonZero * -1 && input < minNonZero) {
-      return 0;
-    } else if (input >= minNonZero && input < minVelocity) {
-      return minVelocity;
-    } else if (input <= minNonZero * -1 && input > minVelocity * -1) {
-      return minVelocity * -1;
-    } else {
-      return input;
+      DifferentialWheelState wheelState = model.inverseDynamics(state);
+      if (openLoopSwitchAccess.getAsBoolean()) {
+        driveOpenLoopLowLevel(wheelState.getLeftVoltage(), wheelState.getRightVoltage());
+      } else {
+        driveClosedLoopLowLevel(wheelState.getLeftVelocity(), wheelState.getRightVelocity(),
+            wheelState.getLeftVoltage(), wheelState.getRightVoltage());
+      }
     }
   }
 
@@ -250,21 +243,10 @@ public abstract class DriveTrainBase extends SubsystemBase {
       if (dualGear && alwaysHighMaxVel && currentGear == DriveGear.LOW) {
         maxVelocity = maxVelocityHigh;
       }
-      left = calcActualVelocity(left, true);
-      right = calcActualVelocity(right, true);
-      // If in closed loop, convert max velocity from inches per second to rotations
-      // per second to match input unit of driveClosedLoopLowLevel
-      if (!openLoopSwitchAccess.getAsBoolean()) {
-        maxVelocity /= wheelDiameter * Math.PI;
-      }
       left *= maxVelocity;
       right *= maxVelocity;
 
-      if (openLoopSwitchAccess.getAsBoolean()) {
-        driveOpenLoopLowLevel(left / getMaxVelocity(), right / getMaxVelocity());
-      } else {
-        driveClosedLoopLowLevel(left, right);
-      }
+      driveInchesPerSec(left, right);
     }
   }
 
@@ -287,21 +269,21 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * Internal method to directly send an open loop setpoint to the motor
    * controllers.
    * 
-   * @param left  The left percent output (-1 to 1)
-   * @param right The right percent output (-1 to 1)
+   * @param left  The left voltage
+   * @param right The right voltage
    */
   protected abstract void driveOpenLoopLowLevel(double left, double right);
 
   /**
    * Internal method to directly send a closed loop setpoint to the motor
-   * controllers.
+   * controllers, along with arbitrary feed forward values.
    * 
-   * @param left  The left velocity (rotations per second)
-   * @param right The right velocity (rotations per second)
+   * @param left       The left velocity (radians per second)
+   * @param right      The right velocity (radians per second)
+   * @param leftVolts  The left feed forward value
+   * @param rightVolts The right feed forward value
    */
-  protected abstract void driveClosedLoopLowLevel(double left, double right);
-
-  protected abstract void driveClosedLoopWithFFLowLevel(double left, double right, double leftVolts, double rightVolts);
+  protected abstract void driveClosedLoopLowLevel(double left, double right, double leftVolts, double rightVolts);
 
   /**
    * Enables or disables brake mode (shorting motor terminals to create braking
@@ -398,10 +380,9 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * @param p     P
    * @param i     I
    * @param d     D
-   * @param f     F
    * @param iZone Integral zone
    */
-  public void setPID(double p, double i, double d, double f, int iZone) {
+  public void setPID(double p, double i, double d, int iZone) {
     int slot;
     if (currentControlMode == DriveControlMode.STANDARD_DRIVE && (currentGear == DriveGear.LOW || !dualGear)) {
       slot = 0;
@@ -411,7 +392,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
       slot = -1;
     }
     if (slot >= 0) {
-      setPID(slot, p, i, d, f, iZone);
+      setPID(slot, p, i, d, iZone);
     }
   }
 
@@ -425,7 +406,7 @@ public abstract class DriveTrainBase extends SubsystemBase {
    * @param f       F
    * @param iZone   Integral zone
    */
-  protected abstract void setPID(int slotIdx, double p, double i, double d, double f, int iZone);
+  protected abstract void setPID(int slotIdx, double p, double i, double d, int iZone);
 
   public double getP() {
     if (currentGear == DriveGear.HIGH) {
@@ -451,19 +432,55 @@ public abstract class DriveTrainBase extends SubsystemBase {
     }
   }
 
-  public double getF() {
-    if (currentGear == DriveGear.HIGH) {
-      return kFHigh;
-    } else {
-      return kFLow;
-    }
-  }
-
   public int getIZone() {
     if (currentGear == DriveGear.HIGH) {
       return kIZoneHigh;
     } else {
       return kIZoneLow;
+    }
+  }
+
+  public double getKs() {
+    if (currentGear == DriveGear.HIGH) {
+      return (leftKsHigh + rightKsHigh) / 2;
+    } else {
+      return (leftKsLow + rightKsLow) / 2;
+    }
+  }
+
+  public double getKv() {
+    if (currentGear == DriveGear.HIGH) {
+      return (leftKvHigh + rightKvHigh) / 2 / (wheelDiameter / 2);
+    } else {
+      return (leftKvLow + rightKvLow) / 2 / (wheelDiameter / 2);
+    }
+  }
+
+  public double getKa() {
+    if (currentGear == DriveGear.HIGH) {
+      return (leftKaHigh + rightKaHigh) / 2 / (wheelDiameter / 2);
+    } else {
+      return (leftKaLow + rightKaLow) / 2 / (wheelDiameter / 2);
+    }
+  }
+
+  public double getImpericalTrackWidth() {
+    return wheelbaseInches * trackScrubFactor;
+  }
+
+  public double getMassKg() {
+    return massKg;
+  }
+
+  public double getMoiKgM2() {
+    return moiKgM2;
+  }
+
+  public double getAngularDrag() {
+    if (currentGear == DriveGear.HIGH) {
+      return angularDragHigh;
+    } else {
+      return angularDragLow;
     }
   }
 
