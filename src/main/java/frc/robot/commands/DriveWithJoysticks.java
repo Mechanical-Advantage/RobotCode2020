@@ -13,6 +13,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.subsystems.drive.DriveTrainBase;
 
 public class DriveWithJoysticks extends CommandBase {
@@ -23,6 +24,7 @@ public class DriveWithJoysticks extends CommandBase {
   private static final boolean alwaysUseHighMaxVel = true; // Whether to always use the max velocity of high gear or
   // of current gear
   private static final double rightStickScale = 0.5; // Factor of right stick when added
+  private static final double curvatureTurnSensitivity = 1.5; // Greater than 1 allows for reverse output on inner side
 
   private DoubleSupplier oiLeftDriveX;
   private DoubleSupplier oiLeftDriveY;
@@ -88,49 +90,62 @@ public class DriveWithJoysticks extends CommandBase {
   public void execute() {
     double joystickLeft = 0, joystickRight = 0;
     double baseDrive;
-    double totalTurn;
+    double turnSpeed;
     switch (joystickChooser.getSelected()) {
-    case Tank:
-      joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
-          : (processJoystickAxis(oiLeftDriveY.getAsDouble()));
-      joystickLeft = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
-          : processJoystickAxis(oiRightDriveY.getAsDouble());
-      break;
-    case SplitArcade:
-      baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
-          : processJoystickAxis(oiLeftDriveY.getAsDouble());
-      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
-          : baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble());
-      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
-          : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble());
+      case Tank:
+        joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+            : (processJoystickAxis(oiLeftDriveY.getAsDouble()));
+        joystickLeft = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+            : processJoystickAxis(oiRightDriveY.getAsDouble());
+        break;
+      case Trigger:
+        baseDrive = joysticksReversed ? ((oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1)
+            : (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble()) * -1;
+        turnSpeed = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
 
-      joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-      break;
-    case SplitArcadeRightDrive:
-      baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
-          : processJoystickAxis(oiRightDriveY.getAsDouble());
-      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble()))
-          : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble());
-      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble()))
-          : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble());
+        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(turnSpeed))
+            : baseDrive + processJoystickAxis(turnSpeed);
+        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(turnSpeed))
+            : baseDrive - processJoystickAxis(turnSpeed);
 
-      joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-      break;
-    case Trigger:
-      baseDrive = joysticksReversed ? ((oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1)
-          : (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble()) * -1;
-      totalTurn = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
+        joystickRight = joystickRight > 1 ? 1 : joystickRight;
+        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
+        break;
+      case SplitArcade:
+        baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+            : processJoystickAxis(oiLeftDriveY.getAsDouble());
+        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
+            : baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble());
+        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
+            : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble());
 
-      joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(totalTurn))
-          : baseDrive + processJoystickAxis(totalTurn);
-      joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(totalTurn))
-          : baseDrive - processJoystickAxis(totalTurn);
+        joystickRight = joystickRight > 1 ? 1 : joystickRight;
+        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
+        break;
+      case SplitArcadeRightDrive:
+        baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+            : processJoystickAxis(oiRightDriveY.getAsDouble());
+        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble()))
+            : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble());
+        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble()))
+            : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble());
 
-      joystickRight = joystickRight > 1 ? 1 : joystickRight;
-      joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-      break;
+        joystickRight = joystickRight > 1 ? 1 : joystickRight;
+        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
+        break;
+      case Curvature:
+        baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+            : processJoystickAxis(oiLeftDriveY.getAsDouble());
+        turnSpeed = joysticksReversed ? (processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
+            : processJoystickAxis(oiRightDriveX.getAsDouble());
+        if (baseDrive != 0) {
+          double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
+          baseDrive = MathUtil.clamp(baseDrive, maxBaseDrive * -1, maxBaseDrive);
+          turnSpeed = Math.abs(baseDrive) * turnSpeed * curvatureTurnSensitivity;
+        }
+        joystickRight = MathUtil.clamp(baseDrive + turnSpeed, -1, 1);
+        joystickLeft = MathUtil.clamp(baseDrive - turnSpeed, -1, 1);
+        break;
     }
 
     if (oiSniperMode.getAsBoolean()) {
@@ -173,6 +188,6 @@ public class DriveWithJoysticks extends CommandBase {
   }
 
   public static enum JoystickMode {
-    Tank, SplitArcade, SplitArcadeRightDrive, Trigger;
+    Tank, Trigger, SplitArcade, SplitArcadeRightDrive, Curvature;
   }
 }
