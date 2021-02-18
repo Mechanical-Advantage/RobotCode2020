@@ -99,23 +99,10 @@ public class DriveWithJoysticks extends CommandBase {
     double turnSpeed;
     switch (joystickChooser.getSelected()) {
       case Tank:
-        joystickRight = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+        joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
             : (processJoystickAxis(oiRightDriveY.getAsDouble()));
-        joystickLeft = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+        joystickLeft = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
             : processJoystickAxis(oiLeftDriveY.getAsDouble());
-        break;
-      case Trigger:
-        baseDrive = joysticksReversed ? ((oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1)
-            : (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble()) * -1;
-        turnSpeed = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
-
-        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(turnSpeed))
-            : baseDrive + processJoystickAxis(turnSpeed);
-        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(turnSpeed))
-            : baseDrive - processJoystickAxis(turnSpeed);
-
-        joystickRight = joystickRight > 1 ? 1 : joystickRight;
-        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
         break;
       case SplitArcade:
         baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
@@ -124,33 +111,44 @@ public class DriveWithJoysticks extends CommandBase {
             : baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble());
         joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
             : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble());
-
-        joystickRight = joystickRight > 1 ? 1 : joystickRight;
-        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
-        break;
-      case SplitArcadeRightDrive:
-        baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
-            : processJoystickAxis(oiRightDriveY.getAsDouble());
-        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble()))
-            : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble());
-        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble()))
-            : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble());
-
-        joystickRight = joystickRight > 1 ? 1 : joystickRight;
-        joystickLeft = joystickLeft > 1 ? 1 : joystickLeft;
         break;
       case Curvature:
         baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
             : processJoystickAxis(oiLeftDriveY.getAsDouble());
         turnSpeed = joysticksReversed ? (processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
             : processJoystickAxis(oiRightDriveX.getAsDouble());
+
         if (baseDrive != 0) {
           double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
           baseDrive = MathUtil.clamp(baseDrive, maxBaseDrive * -1, maxBaseDrive);
           turnSpeed = Math.abs(baseDrive) * turnSpeed * curvatureTurnSensitivity;
         }
-        joystickRight = MathUtil.clamp(baseDrive + turnSpeed, -1, 1);
-        joystickLeft = MathUtil.clamp(baseDrive - turnSpeed, -1, 1);
+        joystickRight = baseDrive + turnSpeed;
+        joystickLeft = baseDrive - turnSpeed;
+        break;
+      case Trigger:
+        baseDrive = joysticksReversed ? (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble())
+            : (oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble());
+        turnSpeed = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
+
+        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(turnSpeed))
+            : baseDrive + processJoystickAxis(turnSpeed);
+        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(turnSpeed))
+            : baseDrive - processJoystickAxis(turnSpeed);
+        break;
+      case TriggerCurvature:
+        baseDrive = joysticksReversed ? (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble())
+            : (oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble());
+        turnSpeed = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
+        turnSpeed = joysticksReversed ? processJoystickAxis(turnSpeed) * -1 : processJoystickAxis(turnSpeed);
+
+        if (baseDrive != 0) {
+          double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
+          baseDrive = MathUtil.clamp(baseDrive, maxBaseDrive * -1, maxBaseDrive);
+          turnSpeed = Math.abs(baseDrive) * turnSpeed * curvatureTurnSensitivity;
+        }
+        joystickRight = baseDrive + turnSpeed;
+        joystickLeft = baseDrive - turnSpeed;
         break;
     }
 
@@ -160,7 +158,8 @@ public class DriveWithJoysticks extends CommandBase {
       joystickRight *= multiplierLevel;
     }
 
-    driveSubsystem.drive(joystickLeft, joystickRight, alwaysUseHighMaxVel);
+    driveSubsystem.drive(MathUtil.clamp(joystickLeft, -1, 1), MathUtil.clamp(joystickRight, -1, 1),
+        alwaysUseHighMaxVel);
   }
 
   public double getMultiplierForSniperMode() {
@@ -194,6 +193,6 @@ public class DriveWithJoysticks extends CommandBase {
   }
 
   public static enum JoystickMode {
-    Tank, Trigger, SplitArcade, SplitArcadeRightDrive, Curvature;
+    Tank, SplitArcade, Curvature, Trigger, TriggerCurvature;
   }
 }

@@ -469,12 +469,12 @@ public class RobotContainer {
   private void setupJoystickModeChooser() {
     joystickModeChooser = new SendableChooser<JoystickMode>();
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
+    joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
+    joystickModeChooser.addOption("Curvature", JoystickMode.Curvature);
     if (driverOI.hasDriveTriggers()) {
       joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
+      joystickModeChooser.addOption("Trigger (Curvature)", JoystickMode.TriggerCurvature);
     }
-    joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
-    joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
-    joystickModeChooser.addOption("Curvature", JoystickMode.Curvature);
     SmartDashboard.putData("Joystick Mode", joystickModeChooser);
   }
 
