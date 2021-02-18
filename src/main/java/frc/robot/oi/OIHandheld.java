@@ -151,6 +151,6 @@ public class OIHandheld implements IDriverOI {
 
     @Override
     public double getDeadband() {
-        return 0.10;
+        return 0.12;
     }
 }
