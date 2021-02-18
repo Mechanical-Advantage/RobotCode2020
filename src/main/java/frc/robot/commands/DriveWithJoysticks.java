@@ -99,10 +99,10 @@ public class DriveWithJoysticks extends CommandBase {
     double turnSpeed;
     switch (joystickChooser.getSelected()) {
       case Tank:
-        joystickRight = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
-            : (processJoystickAxis(oiLeftDriveY.getAsDouble()));
-        joystickLeft = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
-            : processJoystickAxis(oiRightDriveY.getAsDouble());
+        joystickRight = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+            : (processJoystickAxis(oiRightDriveY.getAsDouble()));
+        joystickLeft = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
+            : processJoystickAxis(oiLeftDriveY.getAsDouble());
         break;
       case Trigger:
         baseDrive = joysticksReversed ? ((oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble()) * -1)
