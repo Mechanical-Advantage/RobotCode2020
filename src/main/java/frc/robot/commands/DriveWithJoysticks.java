@@ -82,7 +82,13 @@ public class DriveWithJoysticks extends CommandBase {
   private double processJoystickAxis(double joystickAxis) {
     // cube to improve low speed control, multiply by -1 because negative joystick
     // means forward, 0 if within deadband
-    return Math.abs(joystickAxis) > oiGetDeadband.getAsDouble() ? joystickAxis * Math.abs(joystickAxis) * -1 : 0;
+    double deadband = oiGetDeadband.getAsDouble();
+    if (Math.abs(joystickAxis) > deadband) {
+      double adjustedValue = (joystickAxis - deadband) / (1 - deadband);
+      return adjustedValue * Math.abs(adjustedValue) * -1;
+    } else {
+      return 0;
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
