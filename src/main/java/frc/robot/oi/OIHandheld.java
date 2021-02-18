@@ -119,15 +119,15 @@ public class OIHandheld implements IDriverOI {
         return false;
     }
 
-    // @Override
-    // public Trigger getJoysticksForwardButton() {
-    // return joysticksForward;
-    // }
+    @Override
+    public Trigger getJoysticksForwardButton() {
+        return joysticksForward;
+    }
 
-    // @Override
-    // public Trigger getJoysticksReverseButton() {
-    // return joysticksReverse;
-    // }
+    @Override
+    public Trigger getJoysticksReverseButton() {
+        return joysticksReverse;
+    }
 
     @Override
     public Trigger getAutoAimButton() {
