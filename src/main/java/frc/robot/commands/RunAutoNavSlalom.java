@@ -44,12 +44,8 @@ public class RunAutoNavSlalom extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunAutoNavSlalom cmd = new RunAutoNavSlalom(null, null);
-    cmd.mp.visualize(80, List.of());
-    // List.of(new Translation2d(30, 120), new Translation2d(60, 120), new
-    // Translation2d(30, 60),
-    // new Translation2d(60, 60), new Translation2d(120, 60), new Translation2d(150,
-    // 60), new Translation2d(180, 60),
-    // new Translation2d(210, 60), new Translation2d(240, 60), new
-    // Translation2d(300, 60))
+    cmd.mp.visualize(80, List.of(new Translation2d(30, 120), new Translation2d(60, 120), new Translation2d(30, 60),
+        new Translation2d(60, 60), new Translation2d(120, 60), new Translation2d(150, 60), new Translation2d(180, 60),
+        new Translation2d(210, 60), new Translation2d(240, 60), new Translation2d(300, 60)));
   }
 }

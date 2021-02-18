@@ -32,8 +32,8 @@ public class RunHyperdriveLightspeedCircuit extends SequentialCommandGroup {
    */
   public RunHyperdriveLightspeedCircuit(RobotOdometry odometry, DriveTrainBase driveTrain) {
     List<Object> lap = List.of(new Pose2d(105, 150, new Rotation2d()), new Pose2d(195, 90, new Rotation2d()),
-        new CirclePath(new Translation2d(270, 120), 30, Rotation2d.fromDegrees(150), Rotation2d.fromDegrees(15), true),
-        new CirclePath(new Translation2d(300, 60), 30, Rotation2d.fromDegrees(15), Rotation2d.fromDegrees(-90), true),
+        new CirclePath(new Translation2d(270, 120), 30, Rotation2d.fromDegrees(160), Rotation2d.fromDegrees(10), true),
+        new CirclePath(new Translation2d(300, 60), 30, Rotation2d.fromDegrees(10), Rotation2d.fromDegrees(-90), true),
         new Pose2d(195, 30, Rotation2d.fromDegrees(180)), new Pose2d(105, 90, Rotation2d.fromDegrees(-180)));
     List<Object> waypoints = new ArrayList<>();
     waypoints.add(new Pose2d(60, 90, Rotation2d.fromDegrees(90)));
@@ -41,7 +41,7 @@ public class RunHyperdriveLightspeedCircuit extends SequentialCommandGroup {
     waypoints.add(
         new CirclePath(new Translation2d(90, 120), 30, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90), true));
     waypoints.addAll(lap);
-    waypoints.add(new Pose2d(60, 42, Rotation2d.fromDegrees(-90)));
+    waypoints.add(new Pose2d(55, 60, Rotation2d.fromDegrees(-135)));
     mp = new NewRunMotionProfile(driveTrain, odometry, 0.0, waypoints, Double.MAX_VALUE, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(60, 90, Rotation2d.fromDegrees(90)))), mp,
@@ -51,11 +51,10 @@ public class RunHyperdriveLightspeedCircuit extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunHyperdriveLightspeedCircuit cmd = new RunHyperdriveLightspeedCircuit(null, null);
-    cmd.mp.visualize(80, List.of());
-    // List.of(new Translation2d(30, 120), new Translation2d(60, 120), new
-    // Translation2d(30, 60),
-    // new Translation2d(60, 60), new Translation2d(150, 60), new Translation2d(240,
-    // 120),
-    // new Translation2d(300, 60))
+    cmd.mp.visualize(80, List.of(new Translation2d(30, 60), new Translation2d(90, 60), new Translation2d(120, 60),
+        new Translation2d(180, 60), new Translation2d(210, 60), new Translation2d(240, 60), new Translation2d(270, 60),
+        new Translation2d(300, 60), new Translation2d(270, 90), new Translation2d(30, 120), new Translation2d(90, 120),
+        new Translation2d(120, 120), new Translation2d(180, 120), new Translation2d(210, 120),
+        new Translation2d(270, 120), new Translation2d(330, 120), new Translation2d(180, 150)));
   }
 }

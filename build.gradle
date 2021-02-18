@@ -70,7 +70,7 @@ dependencies {
     // upon debugging
     simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
 
-    implementation "frckit.tools:pathview:0.0.24"
+    implementation "frckit.tools:pathview:0.0.28"
     implementation "frckit.lib:util:0.0.24"
     implementation 'gov.nist.math:jama:1.0.3'
     implementation "frckit.lib:pvision:0.0.22"
