@@ -9,9 +9,11 @@ package frc.robot.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -28,30 +30,30 @@ import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConst
 import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.drive.DriveTrainBase;
-import frckit.physics.drivetrain.DifferentialDrivetrainDynamics;
-import frckit.physics.drivetrain.DifferentialWheelCommand;
-import frckit.physics.drivetrain.DynamicRamseteFollower;
+import frckit.physics.drivetrain.follower.DrivetrainTrajectoryFollower;
+import frckit.physics.drivetrain.follower.NonholonomicNonlinearFeedback;
+import frckit.physics.state.RigidBodyState2d;
 import frckit.tools.pathview.TrajectoryVisualizer;
 import frckit.util.GeomUtil;
 
 public class NewRunMotionProfile extends CommandBase {
+  private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
   private static final double maxVoltage = 10; // WPILib docs suggest less than 12 because of voltage drop
 
-  private double mass; // Kg
-  private double moi; // Kg * m^2
-  private double angularDrag; // ?
-  private double kS; // Volts
-  private double kV; // Volt seconds per meter
-  private double kA; // Volt seconds squared per meter
-  private double trackWidth;
   private double maxVelocity; // m/s
   private double maxAcceleration; // m/s^2
   private double maxCentripetalAcceleration; // m/s^2
+
+  // Set default values when running in visualizer (TODO: retrieve these from the
+  // drive always)
+  private double kS = 0.11975;
+  private double kV = 0.07719;
+  private double kA = 0.01145;
+  private double trackWidth = 25.934;
 
   private DriveTrainBase driveTrain;
   private RobotOdometry odometry;
@@ -60,7 +62,6 @@ public class NewRunMotionProfile extends CommandBase {
   private DifferentialDriveKinematics driveKinematics;
   private Trajectory trajectory;
   private Trajectory baseTrajectory; // Trajectory before running relativeTo
-  private MPGenerator generator;
   private List<Pose2d> waypointPoses; // Does not include initial position
   private List<CirclePath> circlePaths = new ArrayList<>();
   private List<Translation2d> intermediatePointsTranslations;
@@ -69,8 +70,8 @@ public class NewRunMotionProfile extends CommandBase {
   private TrajectoryConfig config;
   private boolean trajectoryUpdated;
   private boolean followerStarted;
-  private DifferentialDrivetrainDynamics driveModel;
-  private DynamicRamseteFollower follower;
+  private DrivetrainTrajectoryFollower follower;
+  private Future<Trajectory> trajectoryFuture = null;
 
   /**
    * Creates a new RunMotionProfile that starts from a fixed position, using a
@@ -186,40 +187,23 @@ public class NewRunMotionProfile extends CommandBase {
     // All constants defined in inches
     switch (Constants.getRobot()) {
       case ROBOT_2019:
-        kS = 1.21;
-        kV = 0.0591;
-        kA = 0.0182;
-        trackWidth = 27.5932064868814;
         maxVelocity = 150;
         maxAcceleration = 50;
         maxCentripetalAcceleration = 200;
         break;
       case ROBOT_2020_DRIVE:
-        kS = 0.14;
-        kV = 0.0758;
-        kA = 0.0128;
-        trackWidth = 24.890470780033485;
         maxVelocity = 120;
         maxAcceleration = 50;
         maxCentripetalAcceleration = 200;
         break;
       case ROBOT_2020:
-        kS = 0.119;
-        kV = 0.077192;
-        kA = 0.011467;
-        trackWidth = 25.934;
         maxVelocity = 130;
         maxAcceleration = 130;
         maxCentripetalAcceleration = 120;
-        mass = 52.97959;
-        moi = 6.948569;
         break;
     }
 
     // Convert to meters
-    kV = Units.metersToInches(kV);
-    kA = Units.metersToInches(kA);
-    trackWidth = Units.inchesToMeters(trackWidth);
     maxVelocity = Units.inchesToMeters(maxVelocity);
     maxAcceleration = Units.inchesToMeters(maxAcceleration);
     maxCentripetalAcceleration = Units.inchesToMeters(maxCentripetalAcceleration);
@@ -245,16 +229,17 @@ public class NewRunMotionProfile extends CommandBase {
     this.driveTrain = driveTrain;
     if (driveTrain != null) {
       addRequirements(driveTrain);
-      double kVRadians = kV * Units.inchesToMeters(driveTrain.getWheelDiameter() / 2);
-      driveModel = DifferentialDrivetrainDynamics.fromHybridCharacterization(mass, moi, angularDrag,
-          Units.inchesToMeters(driveTrain.getWheelDiameter() / 2.0), trackWidth / 2.0, kS, kVRadians,
-          driveTrain.getTorquePerVolt(), kS, kVRadians, driveTrain.getTorquePerVolt());
+      kS = driveTrain.getKs();
+      kV = driveTrain.getKv();
+      kA = driveTrain.getKa();
+      trackWidth = driveTrain.getImpericalTrackWidth();
     }
     this.odometry = odometry;
     dynamicTrajectory = true;
-    driveKinematics = new DifferentialDriveKinematics(trackWidth);
+    driveKinematics = new DifferentialDriveKinematics(Units.inchesToMeters(trackWidth));
     DifferentialDriveVoltageConstraint voltageConstraint = new DifferentialDriveVoltageConstraint(
-        new SimpleMotorFeedforward(kS, kV, kA), driveKinematics, maxVoltage);
+        new SimpleMotorFeedforward(kS, Units.metersToInches(kV), Units.metersToInches(kA)), driveKinematics,
+        maxVoltage);
     CentripetalAccelerationConstraint centripetalAccelerationConstraint = new CentripetalAccelerationConstraint(
         maxCentripetalAcceleration);
     this.intermediatePointsTranslations = intermediatePoints;
@@ -284,11 +269,15 @@ public class NewRunMotionProfile extends CommandBase {
   public void execute() {
     if (trajectory == null) {
       // This will just set trajectory to null again if not generated yet
-      trajectory = generator.getTrajectory();
-      if (trajectory != null) {
-        trajectory = adjustCircleTrajectories(trajectory);
+      if (trajectoryFuture != null && trajectoryFuture.isDone()) {
+        try {
+          trajectory = trajectoryFuture.get();
+          trajectory = adjustCircleTrajectories(trajectory);
+          baseTrajectory = trajectory;
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
-      baseTrajectory = trajectory;
     }
     if (trajectory != null && !followerStarted) {
       if (relativeTrajectory) {
@@ -296,15 +285,13 @@ public class NewRunMotionProfile extends CommandBase {
         // For this use case, transformBy is correct, not relativeTo
         trajectory = baseTrajectory.transformBy(transform);
       }
-      follower = new DynamicRamseteFollower(trajectory, driveModel, false);
+      follower = new DrivetrainTrajectoryFollower(trajectory, new NonholonomicNonlinearFeedback());
       followerStarted = true;
     }
 
     if (followerStarted) {
-      DifferentialWheelCommand command = follower.update(Timer.getFPGATimestamp(), getCurrentPoseMeters());
-      driveTrain.driveInchesPerSecWithFF(command.getLeftLinearVelocity(driveTrain.getWheelDiameter() / 2.0),
-          command.getRightLinearVelocity(driveTrain.getWheelDiameter() / 2.0), command.getLeftVoltage(),
-          command.getRightVoltage());
+      RigidBodyState2d command = follower.update(Timer.getFPGATimestamp(), getCurrentPoseMeters());
+      driveTrain.drive(command);
     }
 
     if (Constants.tuningMode && followerStarted) {
@@ -355,11 +342,11 @@ public class NewRunMotionProfile extends CommandBase {
       List<Pose2d> fullWaypointPoses = new ArrayList<>();
       fullWaypointPoses.add(initialPosition);
       fullWaypointPoses.addAll(waypointPoses);
-      generator = new MPGenerator(fullWaypointPoses, config);
+      trajectoryFuture = executor.submit(() -> TrajectoryGenerator.generateTrajectory(fullWaypointPoses, config));
     } else {
-      generator = new MPGenerator(initialPosition, intermediatePointsTranslations, endPosition, config);
+      trajectoryFuture = executor.submit(() -> TrajectoryGenerator.generateTrajectory(initialPosition,
+          intermediatePointsTranslations, endPosition, config));
     }
-    generator.start();
     trajectoryUpdated = true;
   }
 
@@ -400,10 +387,17 @@ public class NewRunMotionProfile extends CommandBase {
       } catch (InterruptedException e) {
         return; // We got interrupted (probably user hit stop), so just exit
       }
-      t = generator.getTrajectory(); // Attempt to grab new path
+      if (trajectoryFuture != null && trajectoryFuture.isDone()) {
+        try {
+          trajectory = trajectoryFuture.get();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
     }
     t = adjustCircleTrajectories(t);
-    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppi, t, trackWidth, convertTranslationListToMeters(markers));
+    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppi, t, Units.inchesToMeters(trackWidth),
+        convertTranslationListToMeters(markers));
     viz.start();
   }
 
@@ -706,52 +700,6 @@ public class NewRunMotionProfile extends CommandBase {
         return new MinMax(minResult, maxResult);
       }
       return new MinMax(-Double.MAX_VALUE, Double.MAX_VALUE);
-    }
-  }
-
-  private static class MPGenerator extends Thread {
-
-    private Pose2d initialPosition;
-    private List<Translation2d> intermediatePointsTranslations;
-    private List<Pose2d> waypointPoses; // Includes initial position
-    private boolean useQuintic;
-    private Pose2d endPosition;
-    private TrajectoryConfig config;
-    private volatile Trajectory trajectory;
-
-    public MPGenerator(List<Pose2d> waypointPoses, TrajectoryConfig config) {
-      this.waypointPoses = waypointPoses;
-      this.config = config;
-      useQuintic = true;
-    }
-
-    public MPGenerator(Pose2d initialPosition, List<Translation2d> intermediatePoints, Pose2d endPosition,
-        TrajectoryConfig config) {
-      this.intermediatePointsTranslations = intermediatePoints;
-      this.initialPosition = initialPosition;
-      this.endPosition = endPosition;
-      this.config = config;
-      useQuintic = false;
-    }
-
-    @Override
-    public void run() {
-      if (useQuintic) {
-        trajectory = TrajectoryGenerator.generateTrajectory(waypointPoses, config);
-      } else {
-        trajectory = TrajectoryGenerator.generateTrajectory(initialPosition, intermediatePointsTranslations,
-            endPosition, config);
-      }
-    }
-
-    @Override
-    public void start() {
-      trajectory = null;
-      super.start();
-    }
-
-    public Trajectory getTrajectory() {
-      return trajectory;
     }
   }
 }

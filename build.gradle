@@ -72,7 +72,7 @@ dependencies {
 
     implementation "frckit.tools:pathview:0.0.27"
     implementation "frckit.lib:util:0.0.27"
-    implementation "frckit.lib:dynamics:0.0.27"
+    implementation "frckit.lib:dynamics:0.0.30"
     implementation 'gov.nist.math:jama:1.0.3'
     implementation "frckit.lib:pvision:0.0.22"
 }
