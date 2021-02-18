@@ -487,13 +487,13 @@ public class NewRunMotionProfile extends CommandBase {
    * there is no real robot in the visualization, a fake initial robot position
    * must be provided
    * 
-   * @param ppi                  The number of pixels which should represent one
-   *                             inch. 2.5 is a good starting value
+   * @param ppm                  The number of pixels which should represent one
+   *                             meter. 80 is a good starting value
    * @param markers              A list of positions to draw "markers" (7 inch
    *                             magenta circles) on.
    * @param initialRobotPosition The starting position of the robot to test with
    */
-  public void visualize(double ppi, List<Translation2d> markers, Pose2d initialRobotPosition) {
+  public void visualize(double ppm, List<Translation2d> markers, Pose2d initialRobotPosition) {
     if (initialRobotPosition != null) {
       startGeneration(GeomUtil.inchesToMeters(initialRobotPosition), 0.0);
     }
@@ -508,7 +508,7 @@ public class NewRunMotionProfile extends CommandBase {
       t = generator.getTrajectory(); // Attempt to grab new path
     }
     t = adjustCircleTrajectories(t);
-    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppi, t, trackWidth, convertTranslationListToMeters(markers));
+    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppm, t, trackWidth, convertTranslationListToMeters(markers));
     viz.start();
   }
 
@@ -522,13 +522,13 @@ public class NewRunMotionProfile extends CommandBase {
    * This version of the method should be used for profiles that have a defined
    * starting position, i.e. not in dynamic mode.
    * 
-   * @param ppi     The number of pixels which should represent one inch. 2.5 is a
+   * @param ppm     The number of pixels which should represent one meter. 80 is a
    *                good starting value
    * @param markers A list of positions to draw "markers" (7 inch magenta circles)
    *                on.
    */
-  public void visualize(double ppi, List<Translation2d> markers) {
-    visualize(ppi, markers, null);
+  public void visualize(double ppm, List<Translation2d> markers) {
+    visualize(ppm, markers, null);
   }
 
   /**
