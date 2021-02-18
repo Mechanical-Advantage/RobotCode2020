@@ -470,7 +470,9 @@ public class RobotContainer {
     joystickModeChooser = new SendableChooser<JoystickMode>();
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
+    joystickModeChooser.addOption("Split Arcade (Southpaw)", JoystickMode.SplitArcadeSouthpaw);
     joystickModeChooser.addOption("Curvature", JoystickMode.Curvature);
+    joystickModeChooser.addOption("Curvature (Southpaw)", JoystickMode.CurvatureSouthpaw);
     if (driverOI.hasDriveTriggers()) {
       joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
       joystickModeChooser.addOption("Trigger (Curvature)", JoystickMode.TriggerCurvature);

@@ -84,7 +84,7 @@ public class DriveWithJoysticks extends CommandBase {
     // means forward, 0 if within deadband
     double deadband = oiGetDeadband.getAsDouble();
     if (Math.abs(joystickAxis) > deadband) {
-      double adjustedValue = (joystickAxis - deadband) / (1 - deadband);
+      double adjustedValue = Math.copySign((Math.abs(joystickAxis) - deadband) / (1 - deadband), joystickAxis);
       return adjustedValue * Math.abs(adjustedValue) * -1;
     } else {
       return 0;
@@ -112,6 +112,14 @@ public class DriveWithJoysticks extends CommandBase {
         joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble()) * -1)
             : baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble());
         break;
+      case SplitArcadeSouthpaw:
+        baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+            : processJoystickAxis(oiRightDriveY.getAsDouble());
+        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble()) * -1)
+            : baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble());
+        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble()) * -1)
+            : baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble());
+        break;
       case Curvature:
         baseDrive = joysticksReversed ? (processJoystickAxis(oiLeftDriveY.getAsDouble()) * -1)
             : processJoystickAxis(oiLeftDriveY.getAsDouble());
@@ -126,21 +134,37 @@ public class DriveWithJoysticks extends CommandBase {
         joystickRight = baseDrive + turnSpeed;
         joystickLeft = baseDrive - turnSpeed;
         break;
+      case CurvatureSouthpaw:
+        baseDrive = joysticksReversed ? (processJoystickAxis(oiRightDriveY.getAsDouble()) * -1)
+            : processJoystickAxis(oiRightDriveY.getAsDouble());
+        turnSpeed = joysticksReversed ? (processJoystickAxis(oiLeftDriveX.getAsDouble()) * -1)
+            : processJoystickAxis(oiLeftDriveX.getAsDouble());
+
+        if (baseDrive != 0) {
+          double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
+          baseDrive = MathUtil.clamp(baseDrive, maxBaseDrive * -1, maxBaseDrive);
+          turnSpeed = Math.abs(baseDrive) * turnSpeed * curvatureTurnSensitivity;
+        }
+        joystickRight = baseDrive + turnSpeed;
+        joystickLeft = baseDrive - turnSpeed;
+        break;
       case Trigger:
         baseDrive = joysticksReversed ? (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble())
             : (oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble());
-        turnSpeed = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
+        baseDrive = baseDrive * Math.abs(baseDrive);
+        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble())
+            + (processJoystickAxis(oiRightDriveX.getAsDouble()) * rightStickScale);
 
-        joystickRight = joysticksReversed ? (baseDrive - processJoystickAxis(turnSpeed))
-            : baseDrive + processJoystickAxis(turnSpeed);
-        joystickLeft = joysticksReversed ? (baseDrive + processJoystickAxis(turnSpeed))
-            : baseDrive - processJoystickAxis(turnSpeed);
+        joystickRight = joysticksReversed ? baseDrive - turnSpeed : baseDrive + turnSpeed;
+        joystickLeft = joysticksReversed ? baseDrive + turnSpeed : baseDrive - turnSpeed;
         break;
       case TriggerCurvature:
         baseDrive = joysticksReversed ? (oiLeftDriveTrigger.getAsDouble() - oiRightDriveTrigger.getAsDouble())
             : (oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble());
-        turnSpeed = oiLeftDriveX.getAsDouble() + (oiRightDriveX.getAsDouble() * rightStickScale);
-        turnSpeed = joysticksReversed ? processJoystickAxis(turnSpeed) * -1 : processJoystickAxis(turnSpeed);
+        baseDrive = baseDrive * Math.abs(baseDrive);
+        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble())
+            + (processJoystickAxis(oiRightDriveX.getAsDouble()) * rightStickScale);
+        turnSpeed = joysticksReversed ? turnSpeed * -1 : turnSpeed;
 
         if (baseDrive != 0) {
           double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
@@ -193,6 +217,6 @@ public class DriveWithJoysticks extends CommandBase {
   }
 
   public static enum JoystickMode {
-    Tank, SplitArcade, Curvature, Trigger, TriggerCurvature;
+    Tank, SplitArcade, SplitArcadeSouthpaw, Curvature, CurvatureSouthpaw, Trigger, TriggerCurvature;
   }
 }
