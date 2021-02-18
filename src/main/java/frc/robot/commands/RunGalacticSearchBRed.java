@@ -37,6 +37,7 @@ public class RunGalacticSearchBRed extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunGalacticSearchBRed cmd = new RunGalacticSearchBRed(null, null);
-    cmd.mp.visualize(2.0, List.of(new Translation2d(90, 120), new Translation2d(150, 60), new Translation2d(210, 120)));
+    cmd.mp.visualize(80.0,
+        List.of(new Translation2d(90, 120), new Translation2d(150, 60), new Translation2d(210, 120)));
   }
 }
