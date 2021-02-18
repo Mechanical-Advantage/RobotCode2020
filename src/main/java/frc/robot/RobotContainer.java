@@ -474,6 +474,7 @@ public class RobotContainer {
     }
     joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
     joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
+    joystickModeChooser.addOption("Curvature", JoystickMode.Curvature);
     SmartDashboard.putData("Joystick Mode", joystickModeChooser);
   }
 
