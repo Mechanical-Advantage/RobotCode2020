@@ -138,6 +138,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
     leftMaster.setInverted(reverseOutputLeft);
     rightMaster.setInverted(reverseOutputRight);
     resetSensorRate(); // SPARK MAX default doesn't match ours
+    resetControlRate();
     initialize();
     leftMaster.burnFlash();
     leftFollower.burnFlash();
@@ -279,8 +280,8 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
 
   @Override
   public void resetControlRate() {
-    leftMaster.setControlFramePeriodMs(10);
-    rightMaster.setControlFramePeriodMs(10);
+    leftMaster.setControlFramePeriodMs(0);
+    rightMaster.setControlFramePeriodMs(0);
   }
 
   @Override
