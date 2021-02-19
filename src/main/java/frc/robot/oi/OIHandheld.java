@@ -70,6 +70,11 @@ public class OIHandheld implements IDriverOI {
     }
 
     @Override
+    public boolean getQuickTurn() {
+        return driverController.getBumper(Hand.kRight);
+    }
+
+    @Override
     public boolean hasDriveTriggers() {
         return true;
     }
@@ -94,30 +99,30 @@ public class OIHandheld implements IDriverOI {
         }
     }
 
-    @Override
-    public boolean getSniperMode() {
-        return getSniperHigh() || getSniperLow();
-    }
+    // @Override
+    // public boolean getSniperMode() {
+    // return getSniperHigh() || getSniperLow();
+    // }
 
-    @Override
-    public double getSniperHighLevel() {
-        return sniperHighLevel;
-    }
+    // @Override
+    // public double getSniperHighLevel() {
+    // return sniperHighLevel;
+    // }
 
-    @Override
-    public double getSniperLowLevel() {
-        return sniperLowLevel;
-    }
+    // @Override
+    // public double getSniperLowLevel() {
+    // return sniperLowLevel;
+    // }
 
-    @Override
-    public boolean getSniperHigh() {
-        return driverController.getBumper(Hand.kRight);
-    }
+    // @Override
+    // public boolean getSniperHigh() {
+    // return driverController.getBumper(Hand.kRight);
+    // }
 
-    @Override
-    public boolean hasDualSniperMode() {
-        return false;
-    }
+    // @Override
+    // public boolean hasDualSniperMode() {
+    // return false;
+    // }
 
     @Override
     public Trigger getJoysticksForwardButton() {

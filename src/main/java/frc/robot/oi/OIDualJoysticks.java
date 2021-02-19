@@ -25,6 +25,7 @@ public class OIDualJoysticks implements IDriverOI {
     private Button secondCameraButton;
     private Button joysticksForward;
     private Button joysticksReverse;
+    private Button quickTurn;
     private Button sniperMode;
     private Button toggleGear;
     private Button highGear;
@@ -43,13 +44,14 @@ public class OIDualJoysticks implements IDriverOI {
         secondCameraButton = new JoystickButton(rightController, 2);
         joysticksForward = new JoystickButton(leftController, 3);
         joysticksReverse = new JoystickButton(leftController, 2);
+        quickTurn = new JoystickButton(rightController, 1);
         sniperMode = new JoystickButton(rightController, 1);
         toggleGear = new JoystickButton(leftController, 1);
         highGear = new JoystickButton(leftController, 5);
         lowGear = new JoystickButton(leftController, 4);
 
         visionTestButton = new JoystickButton(rightController, 8);
-        autoAimButton = new JoystickButton(rightController, 1);
+        autoAimButton = new JoystickButton(leftController, 1);
         shooterRollerButton = new JoystickButton(rightController, 5);
         shooterUnstickButton = new JoystickButton(rightController, 4);
     }
@@ -75,9 +77,14 @@ public class OIDualJoysticks implements IDriverOI {
     }
 
     @Override
-    public boolean getSniperMode() {
-        return sniperMode.get();
+    public boolean getQuickTurn() {
+        return quickTurn.get();
     }
+
+    // @Override
+    // public boolean getSniperMode() {
+    // return sniperMode.get();
+    // }
 
     @Override
     public double getSniperLevel() {
@@ -96,10 +103,10 @@ public class OIDualJoysticks implements IDriverOI {
         return lowGear;
     }
 
-    @Override
-    public Trigger getToggleGearButton() {
-        return toggleGear;
-    }
+    // @Override
+    // public Trigger getToggleGearButton() {
+    // return toggleGear;
+    // }
 
     @Override
     public Trigger getJoysticksForwardButton() {

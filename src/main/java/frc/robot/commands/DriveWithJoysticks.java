@@ -21,10 +21,11 @@ public class DriveWithJoysticks extends CommandBase {
    * Creates a new DriveWithJoysticks.
    */
 
-  private static final boolean alwaysUseHighMaxVel = true; // Whether to always use the max velocity of high gear or
-  // of current gear
-  private static final double rightStickScale = 0.5; // Factor of right stick when added
+  private static final boolean alwaysUseHighMaxVel = true; // Whether to always use the max velocity of high gear or of
+                                                           // current gear
+  private static final double rightStickScale = 0.5; // Factor of right stick when added for trigger
   private static final double curvatureTurnSensitivity = 1.5; // Greater than 1 allows for reverse output on inner side
+  private static final double hybridCurvatureThreshold = 0.15; // Under this base speed, blend to split arcade
 
   private DoubleSupplier oiLeftDriveX;
   private DoubleSupplier oiLeftDriveY;
@@ -32,6 +33,7 @@ public class DriveWithJoysticks extends CommandBase {
   private DoubleSupplier oiRightDriveX;
   private DoubleSupplier oiRightDriveY;
   private DoubleSupplier oiRightDriveTrigger;
+  private BooleanSupplier oiGetQuickTurn;
   private DoubleSupplier oiGetDeadband;
   private BooleanSupplier oiSniperMode;
   private DoubleSupplier oiSniperLevel;
@@ -47,7 +49,7 @@ public class DriveWithJoysticks extends CommandBase {
 
   public DriveWithJoysticks(DoubleSupplier leftDriveX, DoubleSupplier leftDriveY, DoubleSupplier leftDriveTrigger,
       DoubleSupplier rightDriveX, DoubleSupplier rightDriveY, DoubleSupplier rightDriveTrigger,
-      DoubleSupplier getDeadband, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
+      BooleanSupplier getQuickTurn, DoubleSupplier getDeadband, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
       DoubleSupplier sniperHighLevel, DoubleSupplier sniperLowLevel, BooleanSupplier sniperLow,
       BooleanSupplier sniperHigh, boolean hasDualSniperMode, SendableChooser<JoystickMode> joystickModeChooser,
       DriveTrainBase driveSubsystem) {
@@ -61,6 +63,7 @@ public class DriveWithJoysticks extends CommandBase {
     oiRightDriveX = rightDriveX;
     oiRightDriveY = rightDriveY;
     oiRightDriveTrigger = rightDriveTrigger;
+    oiGetQuickTurn = getQuickTurn;
     oiGetDeadband = getDeadband;
     oiSniperMode = sniperMode;
     oiSniperLevel = sniperLevel;
@@ -89,88 +92,141 @@ public class DriveWithJoysticks extends CommandBase {
     }
   }
 
+  private static class WheelSpeeds {
+    public double left;
+    public double right;
+
+    public WheelSpeeds(double left, double right) {
+      this.left = left;
+      this.right = right;
+    }
+
+    public double getLeftProcessed(boolean reversed, double multipler) {
+      return (reversed ? MathUtil.clamp(right, -1, 1) * -1 : MathUtil.clamp(left, -1, 1)) * multipler;
+    }
+
+    public double getRightProcessed(boolean reversed, double multipler) {
+      return (reversed ? MathUtil.clamp(left, -1, 1) * -1 : MathUtil.clamp(right, -1, 1)) * multipler;
+    }
+
+    public static WheelSpeeds fromArcade(double baseSpeed, double turnSpeed) {
+      return new WheelSpeeds(baseSpeed + turnSpeed, baseSpeed - turnSpeed);
+    }
+
+    public static WheelSpeeds fromCurvature(double baseSpeed, double turnSpeed) {
+      double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
+      double baseSpeedLimited = MathUtil.clamp(baseSpeed, maxBaseDrive * -1, maxBaseDrive);
+      turnSpeed = Math.abs(baseSpeedLimited) * turnSpeed * curvatureTurnSensitivity;
+      return new WheelSpeeds(baseSpeed + turnSpeed, baseSpeed - turnSpeed);
+    }
+  }
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double outputLeft = 0, outputRight = 0;
-    double baseDrive;
-    double turnSpeed;
+    WheelSpeeds outputSpeeds = new WheelSpeeds(0, 0);
+    double baseSpeed, turnSpeed, hybridScale;
+    WheelSpeeds splitArcadeSpeeds, curvatureSpeeds;
     switch (joystickChooser.getSelected()) {
       case Tank:
-        outputRight = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
-        outputLeft = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
+        outputSpeeds = new WheelSpeeds(processJoystickAxis(oiLeftDriveY.getAsDouble(), true),
+            processJoystickAxis(oiRightDriveY.getAsDouble(), true));
         break;
       case SplitArcade:
-        baseDrive = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
-        outputRight = baseDrive - processJoystickAxis(oiRightDriveX.getAsDouble(), false);
-        outputLeft = baseDrive + processJoystickAxis(oiRightDriveX.getAsDouble(), false);
+        outputSpeeds = WheelSpeeds.fromArcade(processJoystickAxis(oiLeftDriveY.getAsDouble(), true),
+            processJoystickAxis(oiRightDriveX.getAsDouble(), false));
         break;
       case SplitArcadeSouthpaw:
-        baseDrive = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
-        outputRight = baseDrive - processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
-        outputLeft = baseDrive + processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
+        outputSpeeds = WheelSpeeds.fromArcade(processJoystickAxis(oiRightDriveY.getAsDouble(), true),
+            processJoystickAxis(oiLeftDriveX.getAsDouble(), false));
         break;
-      case Curvature:
-        baseDrive = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
+      case ManualCurvature:
+        baseSpeed = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
         turnSpeed = processJoystickAxis(oiRightDriveX.getAsDouble(), false);
 
-        if (baseDrive != 0) {
-          double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
-          baseDrive = MathUtil.clamp(baseDrive, maxBaseDrive * -1, maxBaseDrive);
-          turnSpeed = Math.abs(baseDrive) * turnSpeed * curvatureTurnSensitivity;
+        if (oiGetQuickTurn.getAsBoolean()) {
+          outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        } else {
+          outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
         }
-        outputRight = baseDrive - turnSpeed;
-        outputLeft = baseDrive + turnSpeed;
         break;
-      case CurvatureSouthpaw:
-        baseDrive = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
+      case ManualCurvatureSouthpaw:
+        baseSpeed = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
         turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
 
-        if (baseDrive != 0) {
-          double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
-          baseDrive = MathUtil.clamp(baseDrive, maxBaseDrive * -1, maxBaseDrive);
-          turnSpeed = Math.abs(baseDrive) * turnSpeed * curvatureTurnSensitivity;
+        if (oiGetQuickTurn.getAsBoolean()) {
+          outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        } else {
+          outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
         }
-        outputRight = baseDrive - turnSpeed;
-        outputLeft = baseDrive + turnSpeed;
+        break;
+      case HybridCurvature:
+        baseSpeed = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
+        turnSpeed = processJoystickAxis(oiRightDriveX.getAsDouble(), false);
+
+        splitArcadeSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        curvatureSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
+
+        hybridScale = Math.abs(baseSpeed) / hybridCurvatureThreshold;
+        hybridScale = hybridScale > 1 ? 1 : hybridScale;
+        outputSpeeds = new WheelSpeeds(
+            (curvatureSpeeds.left * hybridScale) + (splitArcadeSpeeds.left * (1 - hybridScale)),
+            (curvatureSpeeds.right * hybridScale) + (splitArcadeSpeeds.right * (1 - hybridScale)));
+        break;
+      case HybridCurvatureSouthpaw:
+        baseSpeed = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
+        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
+
+        splitArcadeSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        curvatureSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
+
+        hybridScale = Math.abs(baseSpeed) / hybridCurvatureThreshold;
+        hybridScale = hybridScale > 1 ? 1 : hybridScale;
+        outputSpeeds = new WheelSpeeds(
+            (curvatureSpeeds.left * hybridScale) + (splitArcadeSpeeds.left * (1 - hybridScale)),
+            (curvatureSpeeds.right * hybridScale) + (splitArcadeSpeeds.right * (1 - hybridScale)));
         break;
       case Trigger:
-        baseDrive = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
-        baseDrive = baseDrive * Math.abs(baseDrive);
+        baseSpeed = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
+        baseSpeed = baseSpeed * Math.abs(baseSpeed);
         turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false)
             + (processJoystickAxis(oiRightDriveX.getAsDouble(), false) * rightStickScale);
 
-        outputRight = baseDrive - turnSpeed;
-        outputLeft = baseDrive + turnSpeed;
+        outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
         break;
-      case TriggerCurvature:
-        baseDrive = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
-        baseDrive = baseDrive * Math.abs(baseDrive);
+      case TriggerManualCurvature:
+        baseSpeed = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
+        baseSpeed = baseSpeed * Math.abs(baseSpeed);
         turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false)
             + (processJoystickAxis(oiRightDriveX.getAsDouble(), false) * rightStickScale);
 
-        if (baseDrive != 0) {
-          double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
-          baseDrive = MathUtil.clamp(baseDrive, maxBaseDrive * -1, maxBaseDrive);
-          turnSpeed = Math.abs(baseDrive) * turnSpeed * curvatureTurnSensitivity;
+        if (oiGetQuickTurn.getAsBoolean()) {
+          outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        } else {
+          outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
         }
-        outputRight = baseDrive - turnSpeed;
-        outputLeft = baseDrive + turnSpeed;
+        break;
+      case TriggerHybridCurvature:
+        baseSpeed = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
+        baseSpeed = baseSpeed * Math.abs(baseSpeed);
+        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false)
+            + (processJoystickAxis(oiRightDriveX.getAsDouble(), false) * rightStickScale);
+
+        splitArcadeSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        curvatureSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
+
+        hybridScale = Math.abs(baseSpeed) / hybridCurvatureThreshold;
+        hybridScale = hybridScale > 1 ? 1 : hybridScale;
+        outputSpeeds = new WheelSpeeds(
+            (curvatureSpeeds.left * hybridScale) + (splitArcadeSpeeds.left * (1 - hybridScale)),
+            (curvatureSpeeds.right * hybridScale) + (splitArcadeSpeeds.right * (1 - hybridScale)));
         break;
     }
 
-    if (oiSniperMode.getAsBoolean()) {
-      double multiplierLevel = getMultiplierForSniperMode();
-      outputLeft *= multiplierLevel;
-      outputRight *= multiplierLevel;
-    }
-
-    if (joysticksReversed) {
-      outputLeft = outputRight * -1;
-      outputRight = outputLeft * -1;
-    }
-
-    driveSubsystem.drive(MathUtil.clamp(outputLeft, -1, 1), MathUtil.clamp(outputRight, -1, 1), alwaysUseHighMaxVel);
+    double multiplierLevel = oiSniperMode.getAsBoolean() ? getMultiplierForSniperMode() : 1;
+    double outputLeft = outputSpeeds.getLeftProcessed(joysticksReversed, multiplierLevel);
+    double outputRight = outputSpeeds.getRightProcessed(joysticksReversed, multiplierLevel);
+    driveSubsystem.drive(outputLeft, outputRight, alwaysUseHighMaxVel);
   }
 
   public double getMultiplierForSniperMode() {
@@ -204,6 +260,7 @@ public class DriveWithJoysticks extends CommandBase {
   }
 
   public static enum JoystickMode {
-    Tank, SplitArcade, SplitArcadeSouthpaw, Curvature, CurvatureSouthpaw, Trigger, TriggerCurvature;
+    Tank, SplitArcade, SplitArcadeSouthpaw, ManualCurvature, ManualCurvatureSouthpaw, HybridCurvature,
+    HybridCurvatureSouthpaw, Trigger, TriggerManualCurvature, TriggerHybridCurvature;
   }
 }

@@ -349,9 +349,9 @@ public class RobotContainer {
 
     DriveWithJoysticks driveCommand = new DriveWithJoysticks(driverOI::getLeftDriveX, driverOI::getLeftDriveY,
         driverOI::getLeftDriveTrigger, driverOI::getRightDriveX, driverOI::getRightDriveY,
-        driverOI::getRightDriveTrigger, driverOI::getDeadband, driverOI::getSniperMode, driverOI::getSniperLevel,
-        driverOI::getSniperHighLevel, driverOI::getSniperLowLevel, driverOI::getSniperLow, driverOI::getSniperHigh,
-        driverOI.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+        driverOI::getRightDriveTrigger, driverOI::getQuickTurn, driverOI::getDeadband, driverOI::getSniperMode,
+        driverOI::getSniperLevel, driverOI::getSniperHighLevel, driverOI::getSniperLowLevel, driverOI::getSniperLow,
+        driverOI::getSniperHigh, driverOI.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
@@ -471,11 +471,14 @@ public class RobotContainer {
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
     joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
     joystickModeChooser.addOption("Split Arcade (Southpaw)", JoystickMode.SplitArcadeSouthpaw);
-    joystickModeChooser.addOption("Curvature", JoystickMode.Curvature);
-    joystickModeChooser.addOption("Curvature (Southpaw)", JoystickMode.CurvatureSouthpaw);
+    joystickModeChooser.addOption("Manual Curvature", JoystickMode.ManualCurvature);
+    joystickModeChooser.addOption("Manual Curvature (Southpaw)", JoystickMode.ManualCurvatureSouthpaw);
+    joystickModeChooser.addOption("Hybrid Curvature", JoystickMode.HybridCurvature);
+    joystickModeChooser.addOption("Hybrid Curvature (Southpaw)", JoystickMode.HybridCurvatureSouthpaw);
     if (driverOI.hasDriveTriggers()) {
       joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
-      joystickModeChooser.addOption("Trigger (Curvature)", JoystickMode.TriggerCurvature);
+      joystickModeChooser.addOption("Trigger (Manual Curvature)", JoystickMode.TriggerManualCurvature);
+      joystickModeChooser.addOption("Trigger (Hybrid Curvature)", JoystickMode.TriggerHybridCurvature);
     }
     SmartDashboard.putData("Joystick Mode", joystickModeChooser);
   }
