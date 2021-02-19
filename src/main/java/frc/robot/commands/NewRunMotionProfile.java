@@ -389,7 +389,7 @@ public class NewRunMotionProfile extends CommandBase {
       }
       if (trajectoryFuture != null && trajectoryFuture.isDone()) {
         try {
-          trajectory = trajectoryFuture.get();
+          t = trajectoryFuture.get();
         } catch (Exception e) {
           e.printStackTrace();
         }
