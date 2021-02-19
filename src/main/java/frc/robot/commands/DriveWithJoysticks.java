@@ -114,103 +114,89 @@ public class DriveWithJoysticks extends CommandBase {
     }
 
     public static WheelSpeeds fromCurvature(double baseSpeed, double turnSpeed) {
-      double maxBaseDrive = 1 / (1 + (turnSpeed * curvatureTurnSensitivity)); // Max speed where no output >1
-      double baseSpeedLimited = MathUtil.clamp(baseSpeed, maxBaseDrive * -1, maxBaseDrive);
+      double maxBaseSpeed = 1 / (1 + (Math.abs(turnSpeed) * curvatureTurnSensitivity)); // Max speed where no output >1
+      double baseSpeedLimited = MathUtil.clamp(baseSpeed, maxBaseSpeed * -1, maxBaseSpeed);
       turnSpeed = Math.abs(baseSpeedLimited) * turnSpeed * curvatureTurnSensitivity;
-      return new WheelSpeeds(baseSpeed + turnSpeed, baseSpeed - turnSpeed);
+      return new WheelSpeeds(baseSpeedLimited + turnSpeed, baseSpeedLimited - turnSpeed);
     }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    double primaryX, primaryY, secondaryX, secondaryY; // Primary for driving, secondary for turning
+    double leftTrigger = oiLeftDriveTrigger.getAsDouble();
+    double rightTrigger = oiRightDriveTrigger.getAsDouble();
+    boolean quickTurn = oiGetQuickTurn.getAsBoolean();
+    switch (joystickChooser.getSelected()) {
+      case SplitArcadeSouthpaw:
+      case ManualCurvatureSouthpaw:
+      case HybridCurvatureSouthpaw:
+        primaryX = processJoystickAxis(oiRightDriveX.getAsDouble(), false);
+        primaryY = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
+        secondaryX = processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
+        secondaryY = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
+        break;
+      default:
+        primaryX = processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
+        primaryY = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
+        secondaryX = processJoystickAxis(oiRightDriveX.getAsDouble(), false);
+        secondaryY = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
+        break;
+    }
+
     WheelSpeeds outputSpeeds = new WheelSpeeds(0, 0);
     double baseSpeed, turnSpeed, hybridScale;
     WheelSpeeds splitArcadeSpeeds, curvatureSpeeds;
     switch (joystickChooser.getSelected()) {
       case Tank:
-        outputSpeeds = new WheelSpeeds(processJoystickAxis(oiLeftDriveY.getAsDouble(), true),
-            processJoystickAxis(oiRightDriveY.getAsDouble(), true));
+        outputSpeeds = new WheelSpeeds(primaryY, secondaryY);
         break;
       case SplitArcade:
-        outputSpeeds = WheelSpeeds.fromArcade(processJoystickAxis(oiLeftDriveY.getAsDouble(), true),
-            processJoystickAxis(oiRightDriveX.getAsDouble(), false));
-        break;
       case SplitArcadeSouthpaw:
-        outputSpeeds = WheelSpeeds.fromArcade(processJoystickAxis(oiRightDriveY.getAsDouble(), true),
-            processJoystickAxis(oiLeftDriveX.getAsDouble(), false));
+        outputSpeeds = WheelSpeeds.fromArcade(primaryY, secondaryX);
         break;
       case ManualCurvature:
-        baseSpeed = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
-        turnSpeed = processJoystickAxis(oiRightDriveX.getAsDouble(), false);
-
-        if (oiGetQuickTurn.getAsBoolean()) {
-          outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
-        } else {
-          outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
-        }
-        break;
       case ManualCurvatureSouthpaw:
-        baseSpeed = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
-        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
-
-        if (oiGetQuickTurn.getAsBoolean()) {
-          outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        if (quickTurn) {
+          outputSpeeds = WheelSpeeds.fromArcade(primaryY, secondaryX);
         } else {
-          outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
+          outputSpeeds = WheelSpeeds.fromCurvature(primaryY, secondaryX);
         }
         break;
       case HybridCurvature:
-        baseSpeed = processJoystickAxis(oiLeftDriveY.getAsDouble(), true);
-        turnSpeed = processJoystickAxis(oiRightDriveX.getAsDouble(), false);
-
-        splitArcadeSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
-        curvatureSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
-
-        hybridScale = Math.abs(baseSpeed) / hybridCurvatureThreshold;
-        hybridScale = hybridScale > 1 ? 1 : hybridScale;
-        outputSpeeds = new WheelSpeeds(
-            (curvatureSpeeds.left * hybridScale) + (splitArcadeSpeeds.left * (1 - hybridScale)),
-            (curvatureSpeeds.right * hybridScale) + (splitArcadeSpeeds.right * (1 - hybridScale)));
-        break;
       case HybridCurvatureSouthpaw:
-        baseSpeed = processJoystickAxis(oiRightDriveY.getAsDouble(), true);
-        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false);
+        splitArcadeSpeeds = WheelSpeeds.fromArcade(primaryY, secondaryX);
+        curvatureSpeeds = WheelSpeeds.fromCurvature(primaryY, secondaryX);
 
-        splitArcadeSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
-        curvatureSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
-
-        hybridScale = Math.abs(baseSpeed) / hybridCurvatureThreshold;
+        hybridScale = Math.abs(primaryY) / hybridCurvatureThreshold;
         hybridScale = hybridScale > 1 ? 1 : hybridScale;
         outputSpeeds = new WheelSpeeds(
             (curvatureSpeeds.left * hybridScale) + (splitArcadeSpeeds.left * (1 - hybridScale)),
             (curvatureSpeeds.right * hybridScale) + (splitArcadeSpeeds.right * (1 - hybridScale)));
         break;
       case Trigger:
-        baseSpeed = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
+        baseSpeed = rightTrigger - leftTrigger;
         baseSpeed = baseSpeed * Math.abs(baseSpeed);
-        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false)
-            + (processJoystickAxis(oiRightDriveX.getAsDouble(), false) * rightStickScale);
+        turnSpeed = primaryX + (secondaryX * rightStickScale);
 
         outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
         break;
       case TriggerManualCurvature:
-        baseSpeed = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
+        baseSpeed = rightTrigger - leftTrigger;
         baseSpeed = baseSpeed * Math.abs(baseSpeed);
-        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false)
-            + (processJoystickAxis(oiRightDriveX.getAsDouble(), false) * rightStickScale);
+        turnSpeed = primaryX + (secondaryX * rightStickScale);
 
-        if (oiGetQuickTurn.getAsBoolean()) {
+        if (quickTurn) {
           outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
         } else {
           outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
         }
         break;
       case TriggerHybridCurvature:
-        baseSpeed = oiRightDriveTrigger.getAsDouble() - oiLeftDriveTrigger.getAsDouble();
+        baseSpeed = rightTrigger - leftTrigger;
         baseSpeed = baseSpeed * Math.abs(baseSpeed);
-        turnSpeed = processJoystickAxis(oiLeftDriveX.getAsDouble(), false)
-            + (processJoystickAxis(oiRightDriveX.getAsDouble(), false) * rightStickScale);
+        turnSpeed = primaryX + (secondaryX * rightStickScale);
 
         splitArcadeSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
         curvatureSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
