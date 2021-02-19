@@ -38,7 +38,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final int currentLimit = 30;
   private static final double MULTIPLIER = 1.5;
   private static final double LEDSlowPulseThreshold = 0.5; // percent of setpoint rpm
-  private static final double atSetpointThreshold = 0.9; // percent of setpoint rpm
+  private static final double atSetpointThreshold = 0.95; // percent of setpoint rpm
   private double setpoint = 0;
 
   CANSparkMax flywheelMaster;
