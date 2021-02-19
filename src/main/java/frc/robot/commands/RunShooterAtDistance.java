@@ -39,7 +39,7 @@ public class RunShooterAtDistance extends CommandBase {
   private final Command lineCommand;
   private final Command trenchCommand;
 
-  private HoodPosition lastCommandedPosition;
+  private HoodPosition lastCommandedPosition = HoodPosition.UNKNOWN;
 
   /**
    * Creates a new RunShooterAtDistance, which updates flywheel speed and hood
@@ -70,7 +70,7 @@ public class RunShooterAtDistance extends CommandBase {
   @Override
   public void initialize() {
     // Force the position to be commanded once
-    lastCommandedPosition = null;
+    lastCommandedPosition = HoodPosition.UNKNOWN;
 
     if (staticPosition != null) {
       update(staticPosition);
@@ -106,11 +106,13 @@ public class RunShooterAtDistance extends CommandBase {
         wallLineTransition = minLineDistance;
         lineTrenchTransition = minTrenchDistance;
         break;
+      case UNKNOWN:
       default:
         wallLineTransition = (maxWallDistance + minLineDistance) / 2;
         lineTrenchTransition = (maxLineDistance + minTrenchDistance) / 2;
         break;
     }
+
     if (distance < wallLineTransition) {
       bestPosition = HoodPosition.WALL;
       regression = wallRegression;
