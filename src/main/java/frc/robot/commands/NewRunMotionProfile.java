@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frckit.tools.pathview.TrajectoryMarker;
 import frckit.tools.pathview.TrajectoryVisualizer;
 import frckit.util.GeomUtil;
 
@@ -489,11 +490,10 @@ public class NewRunMotionProfile extends CommandBase {
    * 
    * @param ppm                  The number of pixels which should represent one
    *                             meter. 80 is a good starting value
-   * @param markers              A list of positions to draw "markers" (7 inch
-   *                             magenta circles) on.
+   * @param markers              A list of markers to draw on the path (inches).
    * @param initialRobotPosition The starting position of the robot to test with
    */
-  public void visualize(double ppm, List<Translation2d> markers, Pose2d initialRobotPosition) {
+  public void visualize(double ppm, List<TrajectoryMarker> markersInches, Pose2d initialRobotPosition) {
     if (initialRobotPosition != null) {
       startGeneration(GeomUtil.inchesToMeters(initialRobotPosition), 0.0);
     }
@@ -508,7 +508,13 @@ public class NewRunMotionProfile extends CommandBase {
       t = generator.getTrajectory(); // Attempt to grab new path
     }
     t = adjustCircleTrajectories(t);
-    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppm, t, trackWidth, convertTranslationListToMeters(markers));
+    List<TrajectoryMarker> markersMeters = new ArrayList<>();
+    for (var i = 0; i < markersInches.size(); i++) {
+      TrajectoryMarker marker = markersInches.get(i);
+      markersMeters.add(new TrajectoryMarker(GeomUtil.inchesToMeters(marker.getPosition()),
+          Units.inchesToMeters(marker.getDiameterMeters()), marker.getColor()));
+    }
+    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppm, List.of(t), trackWidth, markersMeters);
     viz.start();
   }
 
@@ -524,10 +530,9 @@ public class NewRunMotionProfile extends CommandBase {
    * 
    * @param ppm     The number of pixels which should represent one meter. 80 is a
    *                good starting value
-   * @param markers A list of positions to draw "markers" (7 inch magenta circles)
-   *                on.
+   * @param markers A list of markers to draw on the path (inches).
    */
-  public void visualize(double ppm, List<Translation2d> markers) {
+  public void visualize(double ppm, List<TrajectoryMarker> markers) {
     visualize(ppm, markers, null);
   }
 

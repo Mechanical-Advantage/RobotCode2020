@@ -7,12 +7,14 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
+import java.awt.Color;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frckit.tools.pathview.TrajectoryMarker;
 import frc.robot.commands.NewRunMotionProfile.CirclePath;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
@@ -28,6 +30,12 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
   NewRunMotionProfile mp2;
   NewRunMotionProfile mp3;
   NewRunMotionProfile mp4;
+  private static final double markerDiameter = 4;
+  private static final double markerDiameterCrates = 12;
+  private static final Color markerColorMain = Color.BLACK;
+  private static final Color markerColorCrates = new Color(240, 190, 0);
+  private static final Color markerColorStart = new Color(0, 200, 0);;
+  private static final Color markerColorEnd = Color.RED;
 
   /** Creates a new RunAutoNavBounce. */
   public RunAutoNavBounce(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
@@ -54,11 +62,26 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunAutoNavBounce cmd = new RunAutoNavBounce(null, null, null);
-    cmd.mp4.visualize(80, List.of(new Translation2d(90, 150), new Translation2d(180, 150), new Translation2d(270, 150),
-        new Translation2d(30, 120), new Translation2d(60, 120), new Translation2d(120, 120),
-        new Translation2d(150, 120), new Translation2d(210, 120), new Translation2d(240, 120),
-        new Translation2d(300, 120), new Translation2d(330, 120), new Translation2d(30, 60), new Translation2d(60, 60),
-        new Translation2d(90, 60), new Translation2d(150, 60), new Translation2d(210, 60), new Translation2d(240, 60),
-        new Translation2d(300, 60), new Translation2d(330, 60), new Translation2d(90, 30)));
+    cmd.mp2.visualize(80,
+        List.of(new TrajectoryMarker(new Translation2d(90, 150), markerDiameterCrates, markerColorCrates),
+            new TrajectoryMarker(new Translation2d(180, 150), markerDiameterCrates, markerColorCrates),
+            new TrajectoryMarker(new Translation2d(270, 150), markerDiameterCrates, markerColorCrates),
+            new TrajectoryMarker(new Translation2d(30, 120), markerDiameter, markerColorStart),
+            new TrajectoryMarker(new Translation2d(60, 120), markerDiameter, markerColorStart),
+            new TrajectoryMarker(new Translation2d(120, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(150, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(210, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(240, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(300, 120), markerDiameter, markerColorEnd),
+            new TrajectoryMarker(new Translation2d(330, 120), markerDiameter, markerColorEnd),
+            new TrajectoryMarker(new Translation2d(30, 60), markerDiameter, markerColorStart),
+            new TrajectoryMarker(new Translation2d(60, 60), markerDiameter, markerColorStart),
+            new TrajectoryMarker(new Translation2d(90, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(150, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(210, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(240, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(300, 60), markerDiameter, markerColorEnd),
+            new TrajectoryMarker(new Translation2d(330, 60), markerDiameter, markerColorEnd),
+            new TrajectoryMarker(new Translation2d(90, 30), markerDiameter, markerColorMain)));
   }
 }

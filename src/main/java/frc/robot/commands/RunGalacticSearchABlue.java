@@ -7,12 +7,14 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
+import java.awt.Color;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frckit.tools.pathview.TrajectoryMarker;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.RobotOdometry;
@@ -23,6 +25,10 @@ import frc.robot.subsystems.RobotOdometry;
 public class RunGalacticSearchABlue extends SequentialCommandGroup {
 
   NewRunMotionProfile mp;
+  private static final double markerDiameterZones = 4;
+  private static final double markerDiameterBalls = 7;
+  private static final Color markerColorZones = Color.BLACK;
+  private static final Color markerColorBalls = Color.BLUE;
 
   /** Creates a new RunGalacticSearchABlue. */
   public RunGalacticSearchABlue(RobotOdometry odometry, DriveTrainBase driveTrain) {
@@ -38,6 +44,12 @@ public class RunGalacticSearchABlue extends SequentialCommandGroup {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunGalacticSearchABlue cmd = new RunGalacticSearchABlue(null, null);
     cmd.mp.visualize(80.0,
-        List.of(new Translation2d(180, 30), new Translation2d(210, 120), new Translation2d(270, 90)));
+        List.of(new TrajectoryMarker(new Translation2d(30, 60), markerDiameterZones, markerColorZones),
+            new TrajectoryMarker(new Translation2d(30, 120), markerDiameterZones, markerColorZones),
+            new TrajectoryMarker(new Translation2d(330, 60), markerDiameterZones, markerColorZones),
+            new TrajectoryMarker(new Translation2d(330, 120), markerDiameterZones, markerColorZones),
+            new TrajectoryMarker(new Translation2d(180, 30), markerDiameterBalls, markerColorBalls),
+            new TrajectoryMarker(new Translation2d(210, 120), markerDiameterBalls, markerColorBalls),
+            new TrajectoryMarker(new Translation2d(270, 90), markerDiameterBalls, markerColorBalls)));
   }
 }

@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frckit.tools.pathview.TrajectoryMarker;
 import frc.robot.commands.NewRunMotionProfile.CirclePath;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
@@ -25,6 +27,10 @@ import frc.robot.subsystems.RobotOdometry;
 public class RunHyperdriveLightspeedCircuit extends SequentialCommandGroup {
 
   NewRunMotionProfile mp;
+  private static final double markerDiameter = 4;
+  private static final Color markerColorMain = Color.BLACK;
+  private static final Color markerColorStart = new Color(0, 200, 0);;
+  private static final Color markerColorEnd = Color.RED;
 
   /**
    * Creates a new RunHyperdriveLightspeedCircuit. This path is NOT part of the
@@ -51,10 +57,23 @@ public class RunHyperdriveLightspeedCircuit extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunHyperdriveLightspeedCircuit cmd = new RunHyperdriveLightspeedCircuit(null, null);
-    cmd.mp.visualize(80, List.of(new Translation2d(30, 60), new Translation2d(90, 60), new Translation2d(120, 60),
-        new Translation2d(180, 60), new Translation2d(210, 60), new Translation2d(240, 60), new Translation2d(270, 60),
-        new Translation2d(300, 60), new Translation2d(270, 90), new Translation2d(30, 120), new Translation2d(90, 120),
-        new Translation2d(120, 120), new Translation2d(180, 120), new Translation2d(210, 120),
-        new Translation2d(270, 120), new Translation2d(330, 120), new Translation2d(180, 150)));
+    cmd.mp.visualize(80,
+        List.of(new TrajectoryMarker(new Translation2d(30, 60), markerDiameter, markerColorEnd),
+            new TrajectoryMarker(new Translation2d(90, 60), markerDiameter, markerColorEnd),
+            new TrajectoryMarker(new Translation2d(120, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(180, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(210, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(240, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(270, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(300, 60), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(270, 90), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(30, 120), markerDiameter, markerColorStart),
+            new TrajectoryMarker(new Translation2d(90, 120), markerDiameter, markerColorStart),
+            new TrajectoryMarker(new Translation2d(120, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(180, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(210, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(270, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(330, 120), markerDiameter, markerColorMain),
+            new TrajectoryMarker(new Translation2d(180, 150), markerDiameter, markerColorMain)));
   }
 }
