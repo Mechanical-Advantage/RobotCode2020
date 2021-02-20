@@ -37,6 +37,10 @@ public interface IDriverOI {
         return 0;
     }
 
+    public default boolean getQuickTurn() {
+        return false;
+    }
+
     public default boolean hasDriveTriggers() {
         return false;
     }

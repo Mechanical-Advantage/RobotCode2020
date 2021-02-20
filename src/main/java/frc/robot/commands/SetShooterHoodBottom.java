@@ -31,6 +31,6 @@ public class SetShooterHoodBottom extends SequentialCommandGroup {
     // super(new FooCommand(), new BarCommand());
     super(new InstantCommand(() -> shooterHood.setStopPosition(false), shooterHood),
         new InstantCommand(() -> shooterHood.setLiftPosition(false), shooterHood),
-        new SetHoodPositionLEDs(HoodPosition.BOTTOM, updateLED, setHoodLCD, OILEDState.ON));
+        new SetHoodPositionLEDs(HoodPosition.WALL, updateLED, setHoodLCD, OILEDState.ON));
   }
 }

@@ -38,6 +38,16 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     }
 
     @Override
+    public Trigger getJoysticksForwardButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getJoysticksReverseButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
     public Trigger getShooterFlywheelRunButton() {
         return shooterFlywheelRunButton;
     }

@@ -35,11 +35,13 @@ public class TurnToAngle extends CommandBase {
   public TurnToAngle(DriveTrainBase driveTrain, AHRS ahrs, double angle, boolean absoluteAngle, double tolerance) {
     this(driveTrain, ahrs, angle, absoluteAngle);
     toleranceDegrees = tolerance;
+    turnController.setTolerance(tolerance);
   }
 
   public TurnToAngle(DriveTrainBase driveTrain, AHRS ahrs, double angle, double tolerance) {
     this(driveTrain, ahrs, angle);
     toleranceDegrees = tolerance;
+    turnController.setTolerance(tolerance);
   }
 
   public TurnToAngle(DriveTrainBase driveTrain, AHRS ahrs, double angle) {
@@ -55,46 +57,46 @@ public class TurnToAngle extends CommandBase {
     // limit input to -179 to 180
     targetAngle = UtilFunctions.boundHalfDegrees(angle);
     switch (Constants.getRobot()) {
-    case REBOT:
-      kP = 0.0077; // 0.008
-      kI = 0;
-      kD = 0.0137; // 0.014
-      toleranceDegrees = 1.0;
-      toleranceValuesToAverage = 10;
-      break;
-    case ORIGINAL_ROBOT_2018:
-      kP = 0.007;
-      kI = 0;
-      kD = 0.02;
-      toleranceDegrees = 1;
-      toleranceValuesToAverage = 3;
-      gear = DriveGear.LOW;
-      break;
-    case NOTBOT:
-      // This has a slower update rate (0.05 sec) before so these gains are probably
-      // wrong (too high)
-      kP = 0.01;
-      kI = 0;
-      kD = 0.003;
-      toleranceDegrees = 1.0;
-      toleranceValuesToAverage = 10;
-      break;
-    case ROBOT_2019:
-      kP = 0.007;
-      kI = 0;
-      kD = 0.00015; // 0.015 in old command
-      toleranceDegrees = 1;
-      toleranceValuesToAverage = 3;
-      break;
-    case ROBOT_2020:
-    case ROBOT_2020_DRIVE:
-      kP = 0.008;
-      kI = 0;
-      kD = 0.00015;
-      toleranceDegrees = 1;
-      toleranceValuesToAverage = 3;
-    default:
-      break;
+      case REBOT:
+        kP = 0.0077; // 0.008
+        kI = 0;
+        kD = 0.0137; // 0.014
+        toleranceDegrees = 1.0;
+        toleranceValuesToAverage = 10;
+        break;
+      case ORIGINAL_ROBOT_2018:
+        kP = 0.007;
+        kI = 0;
+        kD = 0.02;
+        toleranceDegrees = 1;
+        toleranceValuesToAverage = 3;
+        gear = DriveGear.LOW;
+        break;
+      case NOTBOT:
+        // This has a slower update rate (0.05 sec) before so these gains are probably
+        // wrong (too high)
+        kP = 0.01;
+        kI = 0;
+        kD = 0.003;
+        toleranceDegrees = 1.0;
+        toleranceValuesToAverage = 10;
+        break;
+      case ROBOT_2019:
+        kP = 0.007;
+        kI = 0;
+        kD = 0.00015; // 0.015 in old command
+        toleranceDegrees = 1;
+        toleranceValuesToAverage = 3;
+        break;
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        kP = 0.008;
+        kI = 0;
+        kD = 0.00015;
+        toleranceDegrees = 1;
+        toleranceValuesToAverage = 3;
+      default:
+        break;
     }
     turnController = new PIDController(kP, kI, kD);
     turnController.setTolerance(toleranceDegrees);

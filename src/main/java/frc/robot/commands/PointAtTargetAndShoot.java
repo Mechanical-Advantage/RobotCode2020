@@ -25,6 +25,7 @@ import frc.robot.util.PressureSensor;
 // information, see:
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
 public class PointAtTargetAndShoot extends ParallelDeadlineGroup {
+
   /**
    * Creates a new PointAtTargetAndShoot.
    */

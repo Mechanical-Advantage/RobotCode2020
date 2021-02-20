@@ -27,9 +27,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
+import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.FeedUnstick;
 import frc.robot.commands.IdleLimelightControl;
-import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
 import frc.robot.commands.PointAtTarget;
@@ -37,26 +37,31 @@ import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunAutoNavBarrelRacing;
 import frc.robot.commands.RunAutoNavBounce;
 import frc.robot.commands.RunAutoNavSlalom;
+import frc.robot.commands.PointAtTargetAndShootTrenchRun;
 import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunGalacticSearchABlue;
 import frc.robot.commands.RunGalacticSearchARed;
 import frc.robot.commands.RunGalacticSearchBBlue;
 import frc.robot.commands.RunGalacticSearchBRed;
 import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunHyperdriveLightspeedCircuit;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
+import frc.robot.commands.RunShooterAtDistance;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.SetLEDOverride;
-import frc.robot.commands.SetShooterHoodMiddleTop;
 import frc.robot.commands.SetShooterHoodBottom;
+import frc.robot.commands.SetShooterHoodMiddleTop;
 import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
 import frc.robot.oi.IDriverOI;
 import frc.robot.oi.IDriverOverrideOI;
 import frc.robot.oi.IOperatorOI;
+import frc.robot.oi.IOperatorOI.OILED;
+import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.oi.OIArduinoConsole;
 import frc.robot.oi.OIDualJoysticks;
 import frc.robot.oi.OIHandheld;
@@ -64,23 +69,21 @@ import frc.robot.oi.OIHandheldAllInOne;
 import frc.robot.oi.OIHandheldWithOverrides;
 import frc.robot.oi.OIOperatorHandheld;
 import frc.robot.oi.OIeStopConsole;
-import frc.robot.oi.IOperatorOI.OILED;
-import frc.robot.oi.IOperatorOI.OILEDState;
 import frc.robot.subsystems.CameraSystem;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.LimelightInterface.LimelightStreamingMode;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
-import frc.robot.subsystems.ShooterRoller;
-import frc.robot.subsystems.LimelightInterface.LimelightStreamingMode;
 import frc.robot.subsystems.ShooterHood;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
-import frc.robot.util.PressureSensor;
 import frc.robot.subsystems.drive.SparkMAXDriveTrain;
+import frc.robot.util.PressureSensor;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -91,7 +94,7 @@ import frc.robot.subsystems.drive.SparkMAXDriveTrain;
  */
 public class RobotContainer {
   private static final double navXWaitTime = 5; // Maximum number of seconds to wait for the navX to initialize
-  private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine, 0,
+  private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine - 16, 0,
       Rotation2d.fromDegrees(0));
 
   private IDriverOI driverOI;
@@ -171,6 +174,7 @@ public class RobotContainer {
     if (Constants.tuningMode) {
       autoChooser.addOption("Turn 90 degrees", new TurnToAngle(driveSubsystem, ahrs, 90));
       autoChooser.addOption("Turn 15 degrees", new TurnToAngle(driveSubsystem, ahrs, 15));
+      autoChooser.addOption("Turn about 135 degrees", new TurnToAngle(driveSubsystem, ahrs, 135, true, 5));
       autoChooser.addOption("Drive 5 feet", new DriveDistanceOnHeading(driveSubsystem, ahrs, 60));
       autoChooser.addOption("Drive velocity", new VelocityPIDTuner(driveSubsystem));
       autoChooser.addOption("Drive 5 feet (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
@@ -180,17 +184,23 @@ public class RobotContainer {
       autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
-    autoChooser.addOption("Aim and fire loaded balls",
+    autoChooser.addOption("Fire loaded balls",
         new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood,
             pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
-    autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem));
+    autoChooser.addOption("Fire loaded balls & collect trench run",
+        new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller,
+            shooterFlyWheel, shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+            (position) -> operatorOI.setHoodPosition(position)));
+    autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem, intake));
     autoChooser.addOption("Galactic Search (A/Red)", new RunGalacticSearchARed(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (B/Blue)", new RunGalacticSearchBBlue(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (B/Red)", new RunGalacticSearchBRed(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Barrel Racing)", new RunAutoNavBarrelRacing(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Slalom)", new RunAutoNavSlalom(odometry, driveSubsystem));
-    autoChooser.addOption("AutoNav (Bounce)", new RunAutoNavBounce(odometry, driveSubsystem));
+    autoChooser.addOption("AutoNav (Bounce)", new RunAutoNavBounce(odometry, driveSubsystem, intake));
+    autoChooser.addOption("Hyperdrive (Lightspeed Circuit)",
+        new RunHyperdriveLightspeedCircuit(odometry, driveSubsystem));
     SmartDashboard.putData("Auto Mode", autoChooser);
   }
 
@@ -339,9 +349,9 @@ public class RobotContainer {
 
     DriveWithJoysticks driveCommand = new DriveWithJoysticks(driverOI::getLeftDriveX, driverOI::getLeftDriveY,
         driverOI::getLeftDriveTrigger, driverOI::getRightDriveX, driverOI::getRightDriveY,
-        driverOI::getRightDriveTrigger, driverOI::getDeadband, driverOI::getSniperMode, driverOI::getSniperLevel,
-        driverOI::getSniperHighLevel, driverOI::getSniperLowLevel, driverOI::getSniperLow, driverOI::getSniperHigh,
-        driverOI.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+        driverOI::getRightDriveTrigger, driverOI::getQuickTurn, driverOI::getDeadband, driverOI::getSniperMode,
+        driverOI::getSniperLevel, driverOI::getSniperHighLevel, driverOI::getSniperLowLevel, driverOI::getSniperLow,
+        driverOI::getSniperHigh, driverOI.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
@@ -396,9 +406,13 @@ public class RobotContainer {
 
     intake.updateLEDs();
 
-    RunShooterFlyWheel runShooter = new RunShooterFlyWheel(shooterFlyWheel);
-    operatorOI.getShooterFlywheelRunButton().whenActive(runShooter);
-    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooter);
+    RunShooterFlyWheel runShooterSimple = new RunShooterFlyWheel(shooterFlyWheel);
+    RunShooterAtDistance runShooterAuto = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry,
+        pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+        (position) -> operatorOI.setHoodPosition(position));
+    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch()).whenActive(runShooterSimple);
+    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch().negate()).whenActive(runShooterAuto);
+    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooterSimple).cancelWhenActive(runShooterAuto);
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
@@ -455,11 +469,17 @@ public class RobotContainer {
   private void setupJoystickModeChooser() {
     joystickModeChooser = new SendableChooser<JoystickMode>();
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
+    joystickModeChooser.addOption("Split Arcade", JoystickMode.SplitArcade);
+    joystickModeChooser.setDefaultOption("Hybrid Curvature", JoystickMode.HybridCurvature);
+    joystickModeChooser.addOption("Manual Curvature", JoystickMode.ManualCurvature);
+    joystickModeChooser.addOption("Split Arcade (Southpaw)", JoystickMode.SplitArcadeSouthpaw);
+    joystickModeChooser.addOption("Hybrid Curvature (Southpaw)", JoystickMode.HybridCurvatureSouthpaw);
+    joystickModeChooser.addOption("Manual Curvature (Southpaw)", JoystickMode.ManualCurvatureSouthpaw);
     if (driverOI.hasDriveTriggers()) {
       joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
+      joystickModeChooser.addOption("Trigger (Hybrid Curvature)", JoystickMode.TriggerHybridCurvature);
+      joystickModeChooser.addOption("Trigger (Manual Curvature)", JoystickMode.TriggerManualCurvature);
     }
-    joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
-    joystickModeChooser.addOption("Split Arcade (right drive)", JoystickMode.SplitArcadeRightDrive);
     SmartDashboard.putData("Joystick Mode", joystickModeChooser);
   }
 
@@ -486,6 +506,7 @@ public class RobotContainer {
   }
 
   public void setInitialPosition() {
+    ahrs.zeroYaw();
     odometry.setPosition(initialAutoPosition);
   }
 }
