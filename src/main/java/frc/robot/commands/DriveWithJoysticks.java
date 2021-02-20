@@ -156,14 +156,6 @@ public class DriveWithJoysticks extends CommandBase {
       case SplitArcadeSouthpaw:
         outputSpeeds = WheelSpeeds.fromArcade(primaryY, secondaryX);
         break;
-      case ManualCurvature:
-      case ManualCurvatureSouthpaw:
-        if (quickTurn) {
-          outputSpeeds = WheelSpeeds.fromArcade(primaryY, secondaryX);
-        } else {
-          outputSpeeds = WheelSpeeds.fromCurvature(primaryY, secondaryX);
-        }
-        break;
       case HybridCurvature:
       case HybridCurvatureSouthpaw:
         splitArcadeSpeeds = WheelSpeeds.fromArcade(primaryY, secondaryX);
@@ -175,23 +167,20 @@ public class DriveWithJoysticks extends CommandBase {
             (curvatureSpeeds.left * hybridScale) + (splitArcadeSpeeds.left * (1 - hybridScale)),
             (curvatureSpeeds.right * hybridScale) + (splitArcadeSpeeds.right * (1 - hybridScale)));
         break;
+      case ManualCurvature:
+      case ManualCurvatureSouthpaw:
+        if (quickTurn) {
+          outputSpeeds = WheelSpeeds.fromArcade(primaryY, secondaryX);
+        } else {
+          outputSpeeds = WheelSpeeds.fromCurvature(primaryY, secondaryX);
+        }
+        break;
       case Trigger:
         baseSpeed = rightTrigger - leftTrigger;
         baseSpeed = baseSpeed * Math.abs(baseSpeed);
         turnSpeed = primaryX + (secondaryX * rightStickScale);
 
         outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
-        break;
-      case TriggerManualCurvature:
-        baseSpeed = rightTrigger - leftTrigger;
-        baseSpeed = baseSpeed * Math.abs(baseSpeed);
-        turnSpeed = primaryX + (secondaryX * rightStickScale);
-
-        if (quickTurn) {
-          outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
-        } else {
-          outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
-        }
         break;
       case TriggerHybridCurvature:
         baseSpeed = rightTrigger - leftTrigger;
@@ -206,6 +195,17 @@ public class DriveWithJoysticks extends CommandBase {
         outputSpeeds = new WheelSpeeds(
             (curvatureSpeeds.left * hybridScale) + (splitArcadeSpeeds.left * (1 - hybridScale)),
             (curvatureSpeeds.right * hybridScale) + (splitArcadeSpeeds.right * (1 - hybridScale)));
+        break;
+      case TriggerManualCurvature:
+        baseSpeed = rightTrigger - leftTrigger;
+        baseSpeed = baseSpeed * Math.abs(baseSpeed);
+        turnSpeed = primaryX + (secondaryX * rightStickScale);
+
+        if (quickTurn) {
+          outputSpeeds = WheelSpeeds.fromArcade(baseSpeed, turnSpeed);
+        } else {
+          outputSpeeds = WheelSpeeds.fromCurvature(baseSpeed, turnSpeed);
+        }
         break;
     }
 

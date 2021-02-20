@@ -469,16 +469,16 @@ public class RobotContainer {
   private void setupJoystickModeChooser() {
     joystickModeChooser = new SendableChooser<JoystickMode>();
     joystickModeChooser.addOption("Tank", JoystickMode.Tank);
-    joystickModeChooser.setDefaultOption("Split Arcade", JoystickMode.SplitArcade);
-    joystickModeChooser.addOption("Split Arcade (Southpaw)", JoystickMode.SplitArcadeSouthpaw);
+    joystickModeChooser.addOption("Split Arcade", JoystickMode.SplitArcade);
+    joystickModeChooser.setDefaultOption("Hybrid Curvature", JoystickMode.HybridCurvature);
     joystickModeChooser.addOption("Manual Curvature", JoystickMode.ManualCurvature);
-    joystickModeChooser.addOption("Manual Curvature (Southpaw)", JoystickMode.ManualCurvatureSouthpaw);
-    joystickModeChooser.addOption("Hybrid Curvature", JoystickMode.HybridCurvature);
+    joystickModeChooser.addOption("Split Arcade (Southpaw)", JoystickMode.SplitArcadeSouthpaw);
     joystickModeChooser.addOption("Hybrid Curvature (Southpaw)", JoystickMode.HybridCurvatureSouthpaw);
+    joystickModeChooser.addOption("Manual Curvature (Southpaw)", JoystickMode.ManualCurvatureSouthpaw);
     if (driverOI.hasDriveTriggers()) {
       joystickModeChooser.addOption("Trigger", JoystickMode.Trigger);
-      joystickModeChooser.addOption("Trigger (Manual Curvature)", JoystickMode.TriggerManualCurvature);
       joystickModeChooser.addOption("Trigger (Hybrid Curvature)", JoystickMode.TriggerHybridCurvature);
+      joystickModeChooser.addOption("Trigger (Manual Curvature)", JoystickMode.TriggerManualCurvature);
     }
     SmartDashboard.putData("Joystick Mode", joystickModeChooser);
   }
