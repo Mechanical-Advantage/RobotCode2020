@@ -75,7 +75,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         rightTorquePerVoltLow = (2.6 / 12.0) * 2 * afterEncoderReduction;
         massKg = 52.97959;
         moiKgM2 = 6.948569;
-        angularDragLow = 0.0;
+        angularDragLow = 12.0;
         wheelDiameter = 3.12207 * 2;
         wheelbaseInches = 24.0;
         trackScrubFactor = 25.934 / wheelbaseInches;
@@ -139,6 +139,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
     rightMaster.setInverted(reverseOutputRight);
     resetSensorRate(); // SPARK MAX default doesn't match ours
     resetControlRate();
+    resetStatusRate();
     initialize();
     leftMaster.burnFlash();
     leftFollower.burnFlash();
@@ -250,8 +251,8 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
 
   @Override
   public void resetStatusRate() {
-    leftMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
-    rightMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
+    leftMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 5);
+    rightMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 5);
   }
 
   @Override
@@ -280,8 +281,8 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
 
   @Override
   public void resetControlRate() {
-    leftMaster.setControlFramePeriodMs(0);
-    rightMaster.setControlFramePeriodMs(0);
+    leftMaster.setControlFramePeriodMs(5);
+    rightMaster.setControlFramePeriodMs(5);
   }
 
   @Override
