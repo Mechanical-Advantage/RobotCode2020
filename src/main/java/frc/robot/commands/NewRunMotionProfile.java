@@ -490,7 +490,7 @@ public class NewRunMotionProfile extends CommandBase {
    * 
    * @param ppm                  The number of pixels which should represent one
    *                             meter. 80 is a good starting value
-   * @param markers              A list of markers to draw on the path (inches).
+   * @param markersInches        A list of markers to draw on the path (inches).
    * @param initialRobotPosition The starting position of the robot to test with
    */
   public void visualize(double ppm, List<TrajectoryMarker> markersInches, Pose2d initialRobotPosition) {
@@ -528,12 +528,12 @@ public class NewRunMotionProfile extends CommandBase {
    * This version of the method should be used for profiles that have a defined
    * starting position, i.e. not in dynamic mode.
    * 
-   * @param ppm     The number of pixels which should represent one meter. 80 is a
-   *                good starting value
-   * @param markers A list of markers to draw on the path (inches).
+   * @param ppm           The number of pixels which should represent one meter.
+   *                      80 is a good starting value
+   * @param markersInches A list of markers to draw on the path (inches).
    */
-  public void visualize(double ppm, List<TrajectoryMarker> markers) {
-    visualize(ppm, markers, null);
+  public void visualize(double ppm, List<TrajectoryMarker> markersInches) {
+    visualize(ppm, markersInches, null);
   }
 
   /**
