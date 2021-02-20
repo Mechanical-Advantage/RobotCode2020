@@ -192,7 +192,7 @@ public class RobotContainer {
         new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller,
             shooterFlyWheel, shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
-    autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem));
+    autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem, intake));
     autoChooser.addOption("Galactic Search (A/Red)", new RunGalacticSearchARed(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (B/Blue)", new RunGalacticSearchBBlue(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (B/Red)", new RunGalacticSearchBRed(odometry, driveSubsystem));
