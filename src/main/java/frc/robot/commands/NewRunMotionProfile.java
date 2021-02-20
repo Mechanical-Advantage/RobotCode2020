@@ -457,13 +457,6 @@ public class NewRunMotionProfile extends CommandBase {
   }
 
   /**
-   * <<<<<<< HEAD ======= Drives at meters per second (converts meters to inches)
-   */
-  private void driveMetersPerSecond(double left, double right) {
-    driveTrain.driveInchesPerSec(Units.metersToInches(left), Units.metersToInches(right));
-  }
-
-  /**
    * >>>>>>> atHomeAutos Runs the trajectory visualizer on this command. This
    * should not be called from robot code, but instead used only when testing on
    * development machines. It can be used by putting a main method in the command
@@ -507,7 +500,8 @@ public class NewRunMotionProfile extends CommandBase {
       markersMeters.add(new TrajectoryMarker(GeomUtil.inchesToMeters(marker.getPosition()),
           Units.inchesToMeters(marker.getDiameterMeters()), marker.getColor()));
     }
-    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppm, List.of(t), trackWidth, markersMeters);
+    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppm, List.of(t), Units.inchesToMeters(trackWidth),
+        markersMeters);
     viz.start();
   }
 
