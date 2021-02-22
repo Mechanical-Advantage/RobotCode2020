@@ -14,8 +14,8 @@ import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.util.PolynomialRegression;
 
 public class RunShooterAtDistance extends CommandBase {
-  private static final double maxWallDistance = 115; // inches to center of robot
-  private static final double minLineDistance = 100; // inches to center of robot
+  private static final double maxWallDistance = 110; // inches to center of robot
+  private static final double minLineDistance = 110; // inches to center of robot
   private static final double maxLineDistance = 210; // inches to center of robot
   private static final double minTrenchDistance = 190; // inches to center of robot
   private static final double maxFlywheelSpeed = 6500; // RPM
