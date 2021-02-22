@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
@@ -52,8 +53,6 @@ import frc.robot.commands.RunShooterAtDistance;
 import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.SetLEDOverride;
-import frc.robot.commands.SetShooterHoodBottom;
-import frc.robot.commands.SetShooterHoodMiddleTop;
 import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.VelocityPIDTuner;
 import frc.robot.oi.DummyOI;
@@ -75,6 +74,7 @@ import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.LimelightInterface.LimelightStreamingMode;
+import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterHood;
@@ -110,12 +110,13 @@ public class RobotContainer {
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((led, state) -> operatorOI.updateLED(led, state),
       (double rpm) -> operatorOI.setFlyWheelSpeed(rpm));
   private final ShooterRoller shooterRoller = new ShooterRoller();
-  private final ShooterHood shooterHood = new ShooterHood();
+  private final PressureSensor pressureSensor = new PressureSensor(0, (pressure) -> operatorOI.setPressure(pressure));
+  private final ShooterHood shooterHood = new ShooterHood(pressureSensor,
+      (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position));
   private final Intake intake = new Intake((led, state) -> operatorOI.updateLED(led, state));
   private final Hopper hopper = new Hopper();
   private final Climber climber = new Climber();
   private RobotOdometry odometry;
-  private final PressureSensor pressureSensor = new PressureSensor(0, (pressure) -> operatorOI.setPressure(pressure));
 
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
@@ -391,7 +392,8 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    driverOI.getShooterRollerButton()
+    Trigger hoodReady = new Trigger(shooterHood::atTargetPosition);
+    driverOI.getShooterRollerButton().and(hoodReady)
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
     driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
@@ -407,23 +409,18 @@ public class RobotContainer {
     intake.updateLEDs();
 
     RunShooterFlyWheel runShooterSimple = new RunShooterFlyWheel(shooterFlyWheel);
-    RunShooterAtDistance runShooterAuto = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry,
-        pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
-        (position) -> operatorOI.setHoodPosition(position));
+    RunShooterAtDistance runShooterAuto = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry);
     operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch()).whenActive(runShooterSimple);
     operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch().negate()).whenActive(runShooterAuto);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooterSimple).cancelWhenActive(runShooterAuto);
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodBottom(shooterHood, (led, state) -> operatorOI.updateLED(led, state),
-            (position) -> operatorOI.setHoodPosition(position)));
+        .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.WALL));
     operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, false,
-            (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position)));
+        .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.LINE));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(new SetShooterHoodMiddleTop(shooterHood, pressureSensor, true,
-            (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position)));
+        .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.TRENCH));
 
     operatorOI.getClimbEnableSwitch().whenActive(climber::deploy, climber);
     operatorOI.getClimbEnableSwitch().whenInactive(climber::reset, climber);
