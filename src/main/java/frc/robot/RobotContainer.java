@@ -393,7 +393,8 @@ public class RobotContainer {
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
     Trigger hoodReady = new Trigger(shooterHood::atTargetPosition);
-    driverOI.getShooterRollerButton().and(hoodReady)
+    Trigger flywheelSafeToFeed = new Trigger(shooterFlyWheel::safeToFeed);
+    driverOI.getShooterRollerButton().and(hoodReady).and(flywheelSafeToFeed)
         .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
     driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));

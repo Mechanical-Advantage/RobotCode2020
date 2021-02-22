@@ -39,6 +39,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final double MULTIPLIER = 1.5;
   private static final double LEDSlowPulseThreshold = 0.5; // percent of setpoint rpm
   private static final double atSetpointThreshold = 0.95; // percent of setpoint rpm
+  private static final double safeFeedThreshold = 2500; // min rpm to feed balls where they won't get stuck
   private double setpoint = 0;
 
   CANSparkMax flywheelMaster;
@@ -257,6 +258,10 @@ public class ShooterFlyWheel extends SubsystemBase {
     } else {
       return getSpeed() > closedLoopVelocityProfiler.getSetpointGoal() * atSetpointThreshold;
     }
+  }
+
+  public boolean safeToFeed() {
+    return getSpeed() > safeFeedThreshold;
   }
 
   private void updateRunningLEDs(boolean running) {
