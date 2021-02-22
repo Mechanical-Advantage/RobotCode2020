@@ -32,7 +32,7 @@ public class ShooterHood extends SubsystemBase {
   private Solenoid liftSolenoid;
   private Solenoid stopSolenoid;
   private HoodPosition currentPosition = HoodPosition.UNKNOWN;
-  private HoodPosition targetPosition = HoodPosition.UNKNOWN; // Unknown target disables movement
+  private HoodPosition targetPosition = HoodPosition.WALL; // Forces reset to known position
   private Timer moveTimer = new Timer();
 
   /**
