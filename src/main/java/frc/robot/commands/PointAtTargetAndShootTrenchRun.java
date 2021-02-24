@@ -78,6 +78,6 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
                 new TurnToAngle(driveTrain, ahrs, -15, true, 5), new InstantCommand(intake::extend),
                 new PointAtTarget(driveTrain, limelight, ahrs),
                 new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),
-        new RunShooterAtDistance(flywheel, hood, odometry));
+        new RunShooterAtDistance(flywheel, hood, odometry, true));
   }
 }

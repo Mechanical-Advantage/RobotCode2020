@@ -409,11 +409,13 @@ public class RobotContainer {
 
     intake.updateLEDs();
 
-    RunShooterFlyWheel runShooterSimple = new RunShooterFlyWheel(shooterFlyWheel);
-    RunShooterAtDistance runShooterAuto = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry);
-    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch()).whenActive(runShooterSimple);
-    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch().negate()).whenActive(runShooterAuto);
-    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooterSimple).cancelWhenActive(runShooterAuto);
+    RunShooterAtDistance runShooterAutoHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, true);
+    RunShooterAtDistance runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
+    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch()).whenActive(runShooterManualHood);
+    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch().negate())
+        .whenActive(runShooterAutoHood);
+    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooterManualHood)
+        .cancelWhenActive(runShooterAutoHood);
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())

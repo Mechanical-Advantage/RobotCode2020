@@ -30,29 +30,35 @@ public class RunShooterAtDistance extends CommandBase {
   private final ShooterFlyWheel shooterFlyWheel;
   private final ShooterHood shooterHood;
   private final RobotOdometry odometry;
-  private Translation2d staticPosition;
+  private final Translation2d staticPosition;
+  private final boolean autoHood;
 
   /**
    * Creates a new RunShooterAtDistance, which updates flywheel speed and hood
    * position once based on a known pose.
    */
-  public RunShooterAtDistance(ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, Translation2d position) {
+  public RunShooterAtDistance(ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, Translation2d position,
+      boolean autoHood) {
     this.shooterFlyWheel = shooterFlyWheel;
     this.shooterHood = shooterHood;
     this.odometry = null;
     this.staticPosition = position;
-    addRequirements(shooterFlyWheel);
+    this.autoHood = autoHood;
+    addRequirements(shooterFlyWheel, shooterHood);
   }
 
   /**
    * Creates a new RunShooterAtDistance, which updates flywheel speed and hood
    * position continously based on odometry.
    */
-  public RunShooterAtDistance(ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, RobotOdometry odometry) {
+  public RunShooterAtDistance(ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, RobotOdometry odometry,
+      boolean autoHood) {
     this.shooterFlyWheel = shooterFlyWheel;
     this.shooterHood = shooterHood;
     this.odometry = odometry;
-    addRequirements(shooterFlyWheel);
+    this.staticPosition = null;
+    this.autoHood = autoHood;
+    addRequirements(shooterFlyWheel, shooterHood);
   }
 
   // Called when the command is initially scheduled.
@@ -75,47 +81,54 @@ public class RunShooterAtDistance extends CommandBase {
     double distance = position
         .getDistance(new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1));
 
-    // Determine zone
-    HoodPosition bestPosition;
-    PolynomialRegression regression;
-    double wallLineTransition, lineTrenchTransition;
-    switch (shooterHood.getTargetPosition()) {
-      case WALL:
-        wallLineTransition = maxWallDistance;
-        lineTrenchTransition = maxLineDistance;
-        break;
-      case LINE:
-        wallLineTransition = minLineDistance;
-        lineTrenchTransition = maxLineDistance;
-        break;
-      case TRENCH:
-        wallLineTransition = minLineDistance;
-        lineTrenchTransition = minTrenchDistance;
-        break;
-      case UNKNOWN:
-      default:
-        wallLineTransition = (maxWallDistance + minLineDistance) / 2;
-        lineTrenchTransition = (maxLineDistance + minTrenchDistance) / 2;
-        break;
-    }
-
-    if (distance < wallLineTransition) {
-      bestPosition = HoodPosition.WALL;
-      regression = wallRegression;
-    } else if (distance < lineTrenchTransition) {
-      bestPosition = HoodPosition.LINE;
-      regression = lineRegression;
-    } else {
-      bestPosition = HoodPosition.TRENCH;
-      regression = trenchRegression;
+    // Update hood position
+    if (autoHood) {
+      double wallLineTransition, lineTrenchTransition;
+      switch (shooterHood.getTargetPosition()) {
+        case WALL:
+          wallLineTransition = maxWallDistance;
+          lineTrenchTransition = maxLineDistance;
+          break;
+        case LINE:
+          wallLineTransition = minLineDistance;
+          lineTrenchTransition = maxLineDistance;
+          break;
+        case TRENCH:
+          wallLineTransition = minLineDistance;
+          lineTrenchTransition = minTrenchDistance;
+          break;
+        case UNKNOWN:
+        default:
+          wallLineTransition = (maxWallDistance + minLineDistance) / 2;
+          lineTrenchTransition = (maxLineDistance + minTrenchDistance) / 2;
+          break;
+      }
+      if (distance < wallLineTransition) {
+        shooterHood.setTargetPosition(HoodPosition.WALL);
+      } else if (distance < lineTrenchTransition) {
+        shooterHood.setTargetPosition(HoodPosition.LINE);
+      } else {
+        shooterHood.setTargetPosition(HoodPosition.TRENCH);
+      }
     }
 
     // Update flywheel speed
-    double predictedSpeed = regression.predict(distance);
+    double predictedSpeed;
+    switch (shooterHood.getTargetPosition()) {
+      case WALL:
+        predictedSpeed = wallRegression.predict(distance);
+        break;
+      case LINE:
+        predictedSpeed = lineRegression.predict(distance);
+        break;
+      case TRENCH:
+        predictedSpeed = trenchRegression.predict(distance);
+        break;
+      default:
+        predictedSpeed = 0;
+        break;
+    }
     shooterFlyWheel.setShooterRPM(predictedSpeed > maxFlywheelSpeed ? maxFlywheelSpeed : predictedSpeed);
-
-    // Update hood position
-    shooterHood.setTargetPosition(bestPosition);
   }
 
   // Called once the command ends or is interrupted.
