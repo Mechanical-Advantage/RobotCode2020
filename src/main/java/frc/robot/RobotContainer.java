@@ -97,9 +97,10 @@ public class RobotContainer {
   private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine - 16, 0,
       Rotation2d.fromDegrees(0));
 
-  private IDriverOI driverOI;
-  private IDriverOverrideOI driverOverrideOI;
-  private IOperatorOI operatorOI;
+  private static final DummyOI dummyOI = new DummyOI();
+  private IDriverOI driverOI = dummyOI;
+  private IDriverOverrideOI driverOverrideOI = dummyOI;
+  private IOperatorOI operatorOI = dummyOI;
   private String[] lastJoystickNames;
   private boolean changedToCoast;
 
@@ -130,11 +131,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Use a dummy OI initially
-    DummyOI dummyOI = new DummyOI();
-    driverOI = dummyOI;
-    driverOverrideOI = dummyOI;
-    operatorOI = dummyOI;
     // The subsystems can't be recreated when OI changes so provide them with a
     // BooleanSupplier to access the current value from whatever OI is current
     BooleanSupplier openLoopSwitchAccess = () -> driverOverrideOI.getOpenLoopSwitch().get();
@@ -216,13 +212,16 @@ public class RobotContainer {
       // might need to map buttons internally
       CommandScheduler.getInstance().clearButtons();
 
+      // Reset to dummy OI to guarantee old controls won't carry over
+      driverOI = dummyOI;
+      driverOverrideOI = dummyOI;
+      operatorOI = dummyOI;
+
       // The first name that is seen will be used and any other
       // controller names will be ignored (will only complete a pair)
       int firstController = 0; // Used to store first ID for controller pairs
       String firstControllerName = null;
       String joystickName;
-      boolean operatorOIFound = false;
-      boolean driverOIFound = false;
 
       // Look for operator controller
       for (joystickNum = 0; joystickNum < 6; joystickNum++) {
@@ -236,7 +235,6 @@ public class RobotContainer {
               OIArduinoConsole arduinoConsole = new OIArduinoConsole(firstController, joystickNum);
               operatorOI = arduinoConsole;
               driverOverrideOI = arduinoConsole;
-              operatorOIFound = true;
               System.out.println("Operator: Arduino console");
             }
             break;
@@ -248,7 +246,6 @@ public class RobotContainer {
               OIeStopConsole eStopConsole = new OIeStopConsole(firstController, joystickNum);
               operatorOI = eStopConsole;
               driverOverrideOI = eStopConsole;
-              operatorOIFound = true;
               System.out.println("Operator: eStop console");
             }
             break;
@@ -257,7 +254,7 @@ public class RobotContainer {
 
       // Look for driver controller
       firstControllerName = null;
-      boolean xboxControllerFound = false;
+      boolean xboxDriver = false;
       boolean xboxOperator = false;
       for (joystickNum = 0; joystickNum < 6; joystickNum++) {
         joystickName = joystickNames[joystickNum];
@@ -273,10 +270,9 @@ public class RobotContainer {
             if (firstControllerName == null) {
               firstControllerName = joystickName;
               firstController = joystickNum;
-              xboxControllerFound = true;
-            } else if (!operatorOIFound) {
+              xboxDriver = true;
+            } else if (operatorOI.equals(dummyOI)) {
               operatorOI = new OIOperatorHandheld(joystickNum);
-              operatorOIFound = true;
               xboxOperator = true;
               System.out.println("Operator: XBox/F310 controller");
             }
@@ -287,51 +283,37 @@ public class RobotContainer {
               firstControllerName = joystickName;
             } else if (firstControllerName.equals(joystickName)) {
               driverOI = new OIDualJoysticks(firstController, joystickNum);
-              driverOIFound = true;
               System.out.println("Driver: Dual Attack 3");
             }
             break;
         }
       }
-      if (xboxControllerFound) {
-        if (operatorOIFound && !xboxOperator) {
+      if (xboxDriver) {
+        if (!operatorOI.equals(dummyOI) && !xboxOperator) {
           driverOI = new OIHandheld(firstController);
           System.out.println("Driver: XBox/F310 controller");
-          driverOIFound = true;
-        } else if (operatorOIFound) {
+        } else if (!operatorOI.equals(dummyOI)) {
           OIHandheldWithOverrides driverWithOverrides = new OIHandheldWithOverrides(firstController);
           driverOI = driverWithOverrides;
           driverOverrideOI = driverWithOverrides;
           System.out.println("Driver: XBox/F310 controller w/ overrides");
-          driverOIFound = true;
         } else {
           OIHandheldAllInOne handheldAllInOne = new OIHandheldAllInOne(firstController);
           driverOI = handheldAllInOne;
           operatorOI = handheldAllInOne;
           driverOverrideOI = handheldAllInOne;
-          operatorOIFound = true;
-          driverOIFound = true;
           System.out.println("Driver/operator: XBox/F310 controller");
         }
-        driverOIFound = true;
       }
 
-      DummyOI dummyOI = null;
-      if (!operatorOIFound) {
-        DriverStation.reportWarning("No operator controller found", false);
-        dummyOI = new DummyOI();
-        operatorOI = dummyOI;
-        // At the moment all the operator OIs also implement IDriverOverrideOI except
-        // for XBox driving which would be its own operator OI if there was not a
-        // seperate one anyway
-        driverOverrideOI = dummyOI;
-      }
-      if (!driverOIFound) {
+      if (driverOI.equals(dummyOI)) {
         DriverStation.reportWarning("No driver controller found", false);
-        if (dummyOI == null) {
-          dummyOI = new DummyOI();
-        }
-        driverOI = dummyOI;
+      }
+      if (driverOverrideOI.equals(dummyOI)) {
+        DriverStation.reportWarning("No override controller found", false);
+      }
+      if (operatorOI.equals(dummyOI)) {
+        DriverStation.reportWarning("No operator controller found", false);
       }
 
       lastJoystickNames = joystickNames;
