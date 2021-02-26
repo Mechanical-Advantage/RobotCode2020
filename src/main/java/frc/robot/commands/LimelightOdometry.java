@@ -81,8 +81,7 @@ public class LimelightOdometry extends CommandBase {
         // transform *in our drifted coordinate system*
         Pose2d driftedFieldToTargetPose = driftedFieldToVehiclePose.transformBy(vehicleToCamera)
             .transformBy(cameraToTarget);
-        Transform2d driftedFieldToTarget = new Transform2d(driftedFieldToTargetPose.getTranslation(),
-            driftedFieldToTargetPose.getRotation());
+        Transform2d driftedFieldToTarget = new Transform2d(driftedFieldToTargetPose.getTranslation(), new Rotation2d());
 
         // Select the correct target
         Pose2d fieldToTarget;
