@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
@@ -32,6 +33,7 @@ import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.ShooterRoller;
+import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.PressureSensor;
 import frckit.util.GeomUtil;
@@ -67,17 +69,21 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
     // super(new FooCommand(), new BarCommand());
     super(
         new ParallelCommandGroup(new PointAtTarget(driveTrain, limelight, ahrs),
-            new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint()))).andThen(
-                new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(1.5)),
-                new TurnToAngle(driveTrain, ahrs, 135, true, 15), new InstantCommand(intake::extend),
-                new NewRunMotionProfile(driveTrain, odometry, List.of(trenchStart, trenchEnd), 0, false, false,
-                    List.of(trenchVelocityConstraint)).deadlineWith(new RunIntakeForwards(intake)),
-                new InstantCommand(intake::retract),
-                new NewRunMotionProfile(driveTrain, odometry, 0, List.of(trenchEnd, secondShotPosition), 0, true,
-                    false),
-                new TurnToAngle(driveTrain, ahrs, -15, true, 5), new InstantCommand(intake::extend),
-                new PointAtTarget(driveTrain, limelight, ahrs),
-                new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),
+            new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint())))
+                .andThen(
+                    new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller),
+                        new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
+                            () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight),
+                        new WaitCommand(1.5)),
+                    new TurnToAngle(driveTrain, ahrs, 135, true, 15), new InstantCommand(intake::extend),
+                    new NewRunMotionProfile(driveTrain, odometry, List.of(trenchStart, trenchEnd), 0, false, false,
+                        List.of(trenchVelocityConstraint)).deadlineWith(new RunIntakeForwards(intake)),
+                    new InstantCommand(intake::retract),
+                    new NewRunMotionProfile(driveTrain, odometry, 0, List.of(trenchEnd, secondShotPosition), 0, true,
+                        false),
+                    new TurnToAngle(driveTrain, ahrs, -15, true, 5), new InstantCommand(intake::extend),
+                    new PointAtTarget(driveTrain, limelight, ahrs),
+                    new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),
         new RunShooterAtDistance(flywheel, hood, odometry, true));
   }
 }

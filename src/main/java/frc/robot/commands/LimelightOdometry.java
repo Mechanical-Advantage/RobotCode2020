@@ -108,9 +108,10 @@ public class LimelightOdometry extends CommandBase {
         double averageY = yAveraging.calculate(fieldToVehicle.getTranslation().getY());
         if (averagingTapsCurrent < averagingTapsTotal) {
           averagingTapsCurrent++;
+        } else {
+          double latency = (averagingTapsTotal * loopCycle * 0.5) + (limelight.getLatency() / 1000);
+          odometry.setPosition(averageX, averageY, Timer.getFPGATimestamp() - latency);
         }
-        double latency = (averagingTapsCurrent * loopCycle * 0.5) + (limelight.getLatency() / 1000);
-        odometry.setPosition(averageX, averageY, Timer.getFPGATimestamp() - latency);
         return; // Exit before averaging data is reset
       }
     }
