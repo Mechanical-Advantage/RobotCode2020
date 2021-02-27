@@ -12,6 +12,7 @@ import java.util.Optional;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.LinearFilter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -26,6 +27,7 @@ public class LimelightOdometry extends CommandBase {
 
   private static final boolean alwaysUseFarTarget = false; // For use on half field (means gyro doesn't have to be
                                                            // zeroed)
+  private static final double loopCycle = 0.02;
 
   private static final Transform2d vehicleToCamera = new Transform2d(new Translation2d(1.875, 0.0), new Rotation2d());
   private static final double targetHeight = 98; // to center of target area (hexagon)
@@ -42,6 +44,11 @@ public class LimelightOdometry extends CommandBase {
   private final DualCornerVisionKinematics visionKinematics = new DualCornerVisionKinematics(topCornerSupplier,
       Rotation2d.fromDegrees(cameraVertAngle), cameraHeight, targetHeight);
 
+  private static final int averagingTapsTotal = 25;
+  private int averagingTapsCurrent = 0;
+  private final LinearFilter xAveraging = LinearFilter.movingAverage(averagingTapsTotal);
+  private final LinearFilter yAveraging = LinearFilter.movingAverage(averagingTapsTotal);
+
   /**
    * Creates a new LimelightOdometry. Note that this command does not require the
    * limelight but does not expect exclusive access. It will not call any set
@@ -57,13 +64,15 @@ public class LimelightOdometry extends CommandBase {
   @Override
   public void initialize() {
     limelight.setLEDMode(LimelightLEDMode.PIPELINE);
+    xAveraging.reset();
+    yAveraging.reset();
+    averagingTapsCurrent = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if (hasUseableTarget()) {
-
       Optional<Translation2d> cameraToTargetTranslationOptional = visionKinematics.forwardKinematics();
       if (cameraToTargetTranslationOptional.isPresent()) {
         // Use vision kinematics (perspective transform) to calculate the transform
@@ -95,10 +104,21 @@ public class LimelightOdometry extends CommandBase {
         // corrected field to vehicle
         Pose2d fieldToVehicle = fieldToTarget.transformBy(driftedFieldToTarget.inverse()) // field to drifted field
             .transformBy(driftedFieldToVehicle); // field to vehicle
-        double timestamp = Timer.getFPGATimestamp() - (limelight.getLatency() / 1000);
-        odometry.setPosition(fieldToVehicle.getTranslation(), timestamp);
+        double averageX = xAveraging.calculate(fieldToVehicle.getTranslation().getX());
+        double averageY = yAveraging.calculate(fieldToVehicle.getTranslation().getY());
+        if (averagingTapsCurrent < averagingTapsTotal) {
+          averagingTapsCurrent++;
+        }
+        double latency = (averagingTapsCurrent * loopCycle * 0.5) + (limelight.getLatency() / 1000);
+        odometry.setPosition(averageX, averageY, Timer.getFPGATimestamp() - latency);
+        return; // Exit before averaging data is reset
       }
     }
+
+    // Reset if no target found
+    xAveraging.reset();
+    yAveraging.reset();
+    averagingTapsCurrent = 0;
   }
 
   // Called once the command ends or is interrupted.
