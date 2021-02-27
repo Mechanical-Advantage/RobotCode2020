@@ -22,7 +22,7 @@ import frc.robot.util.LatencyData;
 public class RobotOdometry extends SubsystemBase {
 
   // How many historical data points to keep. Multiply by 20ms to get time
-  private static final int latencyDataPoints = 20;
+  private static final int latencyDataPoints = 50;
 
   private DriveTrainBase driveTrain;
   private AHRS ahrs;
