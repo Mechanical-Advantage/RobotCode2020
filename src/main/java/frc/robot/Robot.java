@@ -32,6 +32,10 @@ public class Robot extends TimedRobot {
 
   private final Timer oiUpdateTimer = new Timer();
 
+  public Robot() {
+    super(Constants.loopPeriodSeconds);
+  }
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any initialization code.

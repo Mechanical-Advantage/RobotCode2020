@@ -19,6 +19,7 @@ package frc.robot;
  */
 public final class Constants {
     public static final boolean tuningMode = false;
+    public static final double loopPeriodSeconds = 0.02;
     public static final RobotType defaultRobot = RobotType.ROBOT_2020;
     private static RobotType robot;
 

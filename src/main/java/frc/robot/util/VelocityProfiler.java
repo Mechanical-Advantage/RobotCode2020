@@ -4,9 +4,10 @@
 
 package frc.robot.util;
 
+import frc.robot.Constants;
+
 /** Ramps up and down to setpoint for velocity closed loop control */
 public class VelocityProfiler {
-  private static final double dt = 0.02;
   private final double dv;
   private double currentSetpoint = 0;
   private double goalSetpoint = 0;
@@ -17,7 +18,7 @@ public class VelocityProfiler {
    * @param acceleration RPM per second
    */
   public VelocityProfiler(double acceleration) {
-    dv = acceleration * dt;
+    dv = acceleration * Constants.loopPeriodSeconds;
   }
 
   /**

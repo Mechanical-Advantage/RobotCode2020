@@ -27,7 +27,6 @@ public class LimelightOdometry extends CommandBase {
 
   private static final boolean alwaysUseFarTarget = false; // For use on half field (means gyro doesn't have to be
                                                            // zeroed)
-  private static final double loopCycle = 0.02;
 
   private static final Transform2d vehicleToCamera = new Transform2d(new Translation2d(1.875, 0.0), new Rotation2d());
   private static final double targetHeight = 98; // to center of target area (hexagon)
@@ -109,7 +108,7 @@ public class LimelightOdometry extends CommandBase {
         if (averagingTapsCurrent < averagingTapsTotal) {
           averagingTapsCurrent++;
         } else {
-          double latency = (averagingTapsTotal * loopCycle * 0.5) + (limelight.getLatency() / 1000);
+          double latency = (averagingTapsTotal * Constants.loopPeriodSeconds * 0.5) + (limelight.getLatency() / 1000);
           odometry.setPosition(averageX, averageY, Timer.getFPGATimestamp() - latency);
         }
         return; // Exit before averaging data is reset
