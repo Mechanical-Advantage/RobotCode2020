@@ -43,12 +43,6 @@ deploy {
     }
 }
 
-repositories {
-    maven {
-        url "http://maven.came20.net/artifactory/devel"
-    }
-}
-
 // Set this to true to enable desktop support.
 def includeDesktopSupport = false
 
