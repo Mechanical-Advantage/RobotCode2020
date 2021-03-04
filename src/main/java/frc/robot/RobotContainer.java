@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.FeedUnstick;
@@ -42,6 +44,7 @@ import frc.robot.commands.RunGalacticSearchABlue;
 import frc.robot.commands.RunGalacticSearchARed;
 import frc.robot.commands.RunGalacticSearchBBlue;
 import frc.robot.commands.RunGalacticSearchBRed;
+import frc.robot.commands.RunGalacticSearchVision;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
@@ -119,6 +122,7 @@ public class RobotContainer {
   private SendableChooser<JoystickMode> joystickModeChooser;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+  private final RunGalacticSearchVision galacticSearchCommand = new RunGalacticSearchVision(odometry, driveSubsystem);
 
   private LimelightOdometry limelightOdometry;
 
@@ -184,6 +188,7 @@ public class RobotContainer {
         new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood,
             pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
+    autoChooser.addOption("Galactic Search (Vision)", galacticSearchCommand);
     autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (A/Red)", new RunGalacticSearchARed(odometry, driveSubsystem));
     autoChooser.addOption("Galactic Search (B/Blue)", new RunGalacticSearchBBlue(odometry, driveSubsystem));
@@ -415,6 +420,19 @@ public class RobotContainer {
     operatorOI.getClimbEnableSwitch().whenInactive(climber::reset, climber);
     operatorOI.getClimbEnableSwitch()
         .whileActiveContinuous(new RunClimber(climber, operatorOI::getClimbStickY, operatorOI::getClimbStickX));
+
+    operatorOI.getGalacticSearchButton().and(new Trigger(() -> DriverStation.getInstance().isDisabled()))
+        .whenActive(new InstantCommand() {
+          @Override
+          public void initialize() {
+            galacticSearchCommand.updateVision();
+          }
+
+          @Override
+          public boolean runsWhenDisabled() {
+            return true;
+          }
+        });
 
     operatorOI.getClimbEnableSwitch()
         .whenActive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.ON, operatorOI::updateLED));

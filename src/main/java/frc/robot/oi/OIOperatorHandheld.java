@@ -40,6 +40,8 @@ public class OIOperatorHandheld implements IOperatorOI {
 
     private boolean climbEnabled;
 
+    private Trigger galacticSearchButton;
+
     public OIOperatorHandheld(int ID) {
         controller = new XboxController(ID);
 
@@ -63,6 +65,9 @@ public class OIOperatorHandheld implements IOperatorOI {
         wallButton = new POVButton(controller, 0);
         lineButton = new POVButton(controller, 270);
         trenchButton = new POVButton(controller, 180);
+
+        galacticSearchButton = new Button(() -> controller.getBumper(Hand.kLeft))
+                .and(new Button(() -> controller.getBumper(Hand.kRight)));
     }
 
     @Override
@@ -136,5 +141,10 @@ public class OIOperatorHandheld implements IOperatorOI {
     @Override
     public Trigger getManualHoodSwitch() {
         return fakeManualHoodSwitch;
+    }
+
+    @Override
+    public Trigger getGalacticSearchButton() {
+        return galacticSearchButton;
     }
 }

@@ -57,6 +57,10 @@ public interface IOperatorOI {
         return dummyTrigger;
     }
 
+    public default Trigger getGalacticSearchButton() {
+        return dummyTrigger;
+    }
+
     public default void updateTimer() {
     }
 

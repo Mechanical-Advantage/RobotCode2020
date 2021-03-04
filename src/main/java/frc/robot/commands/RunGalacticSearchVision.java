@@ -16,9 +16,14 @@ import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.GalacticSearchPipeline;
 
 public class RunGalacticSearchVision extends CommandBase {
-  private final VideoCapture video = new VideoCapture(0);
+  // Height and width approximate - will use nearest preset
+  private static final int cameraId = 0;
+  private static final int cameraWidth = 640;
+  private static final int cameraHeight = 360;
+
   private final GalacticSearchPipeline pipeline = new GalacticSearchPipeline();
-  private Mat image;
+  private VideoCapture video = new VideoCapture();
+  private Mat image = new Mat();
 
   private GalacticSearchPath path;
   private Command runGalacticSearchABlue;
@@ -78,27 +83,42 @@ public class RunGalacticSearchVision extends CommandBase {
     return false;
   }
 
+  // Updates the current path selection
   public void updateVision() {
-    // Capture an image from the camera
-    if (video.read(image)) {
-
-      // Run the GRIP pipeline
-      pipeline.process(image);
-      Mat hsvThreshold = pipeline.hsvThresholdOutput();
-
-      // Check for balls
-      if (checkForBall(hsvThreshold, 0.5, 0, 0, 3, 3)) {
-        path = GalacticSearchPath.A_BLUE;
-        SmartDashboard.putString("Path", "A BLUE");
-      } else if (checkForBall(hsvThreshold, 0.5, 3, 3, 6, 6)) {
-        path = GalacticSearchPath.A_RED;
-        SmartDashboard.putString("Path", "A RED");
-      } else if (checkForBall(hsvThreshold, 0.5, 6, 6, 9, 9)) {
-        path = GalacticSearchPath.B_BLUE;
-        SmartDashboard.putString("Path", "B BLUE");
+    // Start capture if running for the first time
+    if (!video.isOpened()) {
+      if (video.open(cameraId)) {
+        video.set(3, cameraWidth);
+        video.set(4, cameraHeight);
       } else {
-        path = GalacticSearchPath.B_RED;
-        SmartDashboard.putString("Path", "B RED");
+        DriverStation.reportWarning("Failed to connect to Galactic Search camera. Is it plugged in?", false);
+      }
+    }
+
+    // Capture an image from the camera
+    if (video.isOpened()) {
+      if (video.retrieve(image)) {
+
+        // Run the GRIP pipeline
+        pipeline.process(image);
+        Mat hsvThreshold = pipeline.hsvThresholdOutput();
+
+        // Check for balls
+        path = GalacticSearchPath.A_BLUE;
+        SmartDashboard.putString("Galactic Search Path", "A/Blue");
+        // if (searchArea(hsvThreshold, 0.5, 0, 0, 3, 3)) {
+        // path = GalacticSearchPath.A_BLUE;
+        // SmartDashboard.putString("Galactic Search Path", "A/Blue");
+        // } else if (searchArea(hsvThreshold, 0.5, 3, 3, 6, 6)) {
+        // path = GalacticSearchPath.A_RED;
+        // SmartDashboard.putString("Galactic Search Path", "A/Red");
+        // } else if (searchArea(hsvThreshold, 0.5, 6, 6, 9, 9)) {
+        // path = GalacticSearchPath.B_BLUE;
+        // SmartDashboard.putString("Galactic Search Path", "B/Blue");
+        // } else {
+        // path = GalacticSearchPath.B_RED;
+        // SmartDashboard.putString("Galactic Search Path", "B/Red");
+        // }
       }
     }
   }
@@ -114,14 +134,13 @@ public class RunGalacticSearchVision extends CommandBase {
    * @param x2             Right column
    * @param y2             Bottom row
    */
-  private boolean checkForBall(Mat source, double whiteThreshold, int x1, int y1, int x2, int y2) {
+  private boolean searchArea(Mat source, double whiteThreshold, int x1, int y1, int x2, int y2) {
     Mat submat = source.submat(y1, y2, x1, x2);
     int whiteCount = 0;
     for (int x = 0; x < submat.width(); x++) {
       for (int y = 0; y < submat.height(); y++) {
         if (source.get(y, x)[0] > 0) {
           whiteCount++;
-
         }
       }
     }
