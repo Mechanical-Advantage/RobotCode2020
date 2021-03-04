@@ -319,7 +319,7 @@ public class RunMotionProfile extends CommandBase {
    * @param input The list to modify
    */
   private void convertTranslationList(List<Translation2d> input) {
-    input.replaceAll(point -> point.rotateBy(Rotation2d.fromDegrees(90)));
+    input.replaceAll(point -> new Translation2d(point.getY(), point.getX() * -1));
   }
 
   private static class MPGenerator extends Thread {

@@ -7,12 +7,14 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
+import java.awt.Color;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frckit.tools.pathview.TrajectoryMarker;
 import frc.robot.commands.NewRunMotionProfile.CirclePath;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
@@ -24,6 +26,8 @@ import frc.robot.subsystems.RobotOdometry;
 public class RunAutoNavSlalom extends SequentialCommandGroup {
 
   NewRunMotionProfile mp;
+  private static final double markerDiameter = 4;
+  private static final Color markerColor = Color.BLACK;
 
   /** Creates a new RunAutoNavSlalom. */
   public RunAutoNavSlalom(RobotOdometry odometry, DriveTrainBase driveTrain) {
@@ -35,7 +39,7 @@ public class RunAutoNavSlalom extends SequentialCommandGroup {
             new Pose2d(180.0, 30.0, Rotation2d.fromDegrees(-180.0)),
             new Pose2d(90.0, 60.0, Rotation2d.fromDegrees(90.0 + 45.0)),
             new Pose2d(60.0, 90.0, Rotation2d.fromDegrees(90.0 + 45.0))),
-        130.0, false, false);
+        Double.MAX_VALUE, false, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))), mp,
         new InstantCommand(() -> driveTrain.stop()));
@@ -44,8 +48,16 @@ public class RunAutoNavSlalom extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunAutoNavSlalom cmd = new RunAutoNavSlalom(null, null);
-    cmd.mp.visualize(2.0, List.of(new Translation2d(30, 120), new Translation2d(60, 120), new Translation2d(30, 60),
-        new Translation2d(60, 60), new Translation2d(120, 60), new Translation2d(150, 60), new Translation2d(180, 60),
-        new Translation2d(210, 60), new Translation2d(240, 60), new Translation2d(300, 60)));
+    cmd.mp.visualize(80,
+        List.of(new TrajectoryMarker(new Translation2d(30, 120), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(60, 120), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(30, 60), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(60, 60), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(120, 60), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(150, 60), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(180, 60), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(210, 60), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(240, 60), markerDiameter, markerColor),
+            new TrajectoryMarker(new Translation2d(300, 60), markerDiameter, markerColor)));
   }
 }

@@ -36,9 +36,12 @@ public class OIOperatorHandheld implements IOperatorOI {
     private Button wallButton;
     private Button lineButton;
     private Button trenchButton;
-    private Trigger fakeManualHoodSwitch = dummyTrigger.negate();
+    private Button manualHoodButton;
+    private Button autoHoodButton;
+    private Trigger fakeManualHoodSwitch;
 
-    private boolean climbEnabled;
+    private boolean climbEnabled = false;
+    private boolean manualHood = false;
 
     private Trigger galacticSearchButton;
 
@@ -52,15 +55,21 @@ public class OIOperatorHandheld implements IOperatorOI {
 
         intakeExtendButton = new Button(() -> controller.getBumper(Hand.kRight));
         intakeRetractButton = new Button(() -> controller.getBumper(Hand.kLeft));
-        ;
         intakeForwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kRight) > 0.5);
         intakeBackwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kLeft) > 0.5);
 
-        climbEnableButton = new Button(controller::getStartButton);
-        climbEnableButton.whenPressed(() -> climbEnabled = true);
-        climbDisableButton = new Button(controller::getBackButton);
-        climbDisableButton.whenPressed(() -> climbEnabled = false);
+        // climbEnableButton = new Button(controller::getStartButton);
+        // climbEnableButton.whenPressed(() -> climbEnabled = true);
+        // climbDisableButton = new Button(controller::getBackButton);
+        // climbDisableButton.whenPressed(() -> climbEnabled = false);
+
+        manualHoodButton = new Button(controller::getStartButton);
+        manualHoodButton.whenPressed(() -> manualHood = true);
+        autoHoodButton = new Button(controller::getBackButton);
+        autoHoodButton.whenPressed(() -> manualHood = false);
+
         fakeClimbEnableSwitch = new Trigger(() -> climbEnabled);
+        fakeManualHoodSwitch = new Trigger(() -> manualHood);
 
         wallButton = new POVButton(controller, 0);
         lineButton = new POVButton(controller, 270);

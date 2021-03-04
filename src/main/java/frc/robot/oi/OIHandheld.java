@@ -70,6 +70,11 @@ public class OIHandheld implements IDriverOI {
     }
 
     @Override
+    public boolean getQuickTurn() {
+        return driverController.getBumper(Hand.kRight);
+    }
+
+    @Override
     public boolean hasDriveTriggers() {
         return true;
     }
@@ -94,40 +99,40 @@ public class OIHandheld implements IDriverOI {
         }
     }
 
-    @Override
-    public boolean getSniperMode() {
-        return getSniperHigh() || getSniperLow();
-    }
-
-    @Override
-    public double getSniperHighLevel() {
-        return sniperHighLevel;
-    }
-
-    @Override
-    public double getSniperLowLevel() {
-        return sniperLowLevel;
-    }
-
-    @Override
-    public boolean getSniperHigh() {
-        return driverController.getBumper(Hand.kRight);
-    }
-
-    @Override
-    public boolean hasDualSniperMode() {
-        return false;
-    }
-
     // @Override
-    // public Trigger getJoysticksForwardButton() {
-    // return joysticksForward;
+    // public boolean getSniperMode() {
+    // return getSniperHigh() || getSniperLow();
     // }
 
     // @Override
-    // public Trigger getJoysticksReverseButton() {
-    // return joysticksReverse;
+    // public double getSniperHighLevel() {
+    // return sniperHighLevel;
     // }
+
+    // @Override
+    // public double getSniperLowLevel() {
+    // return sniperLowLevel;
+    // }
+
+    // @Override
+    // public boolean getSniperHigh() {
+    // return driverController.getBumper(Hand.kRight);
+    // }
+
+    // @Override
+    // public boolean hasDualSniperMode() {
+    // return false;
+    // }
+
+    @Override
+    public Trigger getJoysticksForwardButton() {
+        return joysticksForward;
+    }
+
+    @Override
+    public Trigger getJoysticksReverseButton() {
+        return joysticksReverse;
+    }
 
     @Override
     public Trigger getAutoAimButton() {
@@ -151,6 +156,6 @@ public class OIHandheld implements IDriverOI {
 
     @Override
     public double getDeadband() {
-        return 0.10;
+        return 0.12;
     }
 }

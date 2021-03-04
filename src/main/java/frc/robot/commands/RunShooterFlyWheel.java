@@ -14,7 +14,7 @@ import frc.robot.util.TunableNumber;
 
 public class RunShooterFlyWheel extends CommandBase {
 
-  private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/setpoint");
+  private TunableNumber setpoint = new TunableNumber("Shooter FlyWheel/simple setpoint");
   private final ShooterFlyWheel shooterFlyWheel;
 
   /**

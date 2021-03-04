@@ -119,11 +119,11 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
     if (Constants.tuningMode) {
       SmartDashboard.putNumber("Drive L Velocity", getVelocityLeft());
       SmartDashboard.putNumber("Drive R Velocity", getVelocityRight());
+      SmartDashboard.putNumber("Drive L Radians", getRotationsLeft() * 2 * Math.PI);
+      SmartDashboard.putNumber("Drive R Radians", getRotationsRight() * 2 * Math.PI);
       SmartDashboard.putNumber("Drive L Output", leftMaster.getAppliedOutput() * 100);
       SmartDashboard.putNumber("Drive R Output", rightMaster.getAppliedOutput() * 100);
     }
-    SmartDashboard.putNumber("Drive L Radians", getRotationsLeft() * 2 * Math.PI);
-    SmartDashboard.putNumber("Drive R Radians", getRotationsRight() * 2 * Math.PI);
   }
 
   @Override

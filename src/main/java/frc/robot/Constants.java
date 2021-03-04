@@ -19,6 +19,7 @@ package frc.robot;
  */
 public final class Constants {
     public static final boolean tuningMode = false;
+    public static final double loopPeriodSeconds = 0.02;
     public static final RobotType defaultRobot = RobotType.ROBOT_2020;
     private static RobotType robot;
 
@@ -26,6 +27,10 @@ public final class Constants {
     public static final double fieldWidth = 26 * 12 + 11.25;
     public static final double initiationLine = 120; // From player station 2
     public static final double visionTargetHorizDist = 43.75 + 24; // From center of field
+    // Trench run is against both edges of the field side to side
+    public static final double trenchRunWidth = (4 * 12) + 7.5;
+    // Trench run is centered end to end on the field
+    public static final double trenchRunLength = 18 * 12;
 
     public static RobotType getRobot() {
         return robot;
