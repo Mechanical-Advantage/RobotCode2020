@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.GalacticSearchPipeline;
@@ -32,12 +33,12 @@ public class RunGalacticSearchVision extends CommandBase {
   private Command runGalacticSearchBRed;
 
   /** Creates a new RunGalacticSearchVision. */
-  public RunGalacticSearchVision(RobotOdometry odometry, DriveTrainBase driveTrain) {
+  public RunGalacticSearchVision(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
     // Use addRequirements() here to declare subsystem dependencies.
-    runGalacticSearchABlue = new RunGalacticSearchABlue(odometry, driveTrain);
-    runGalacticSearchARed = new RunGalacticSearchARed(odometry, driveTrain);
-    runGalacticSearchBBlue = new RunGalacticSearchBBlue(odometry, driveTrain);
-    runGalacticSearchBRed = new RunGalacticSearchBRed(odometry, driveTrain);
+    runGalacticSearchABlue = new RunGalacticSearchABlue(odometry, driveTrain, intake);
+    runGalacticSearchARed = new RunGalacticSearchARed(odometry, driveTrain, intake);
+    runGalacticSearchBBlue = new RunGalacticSearchBBlue(odometry, driveTrain, intake);
+    runGalacticSearchBRed = new RunGalacticSearchBRed(odometry, driveTrain, intake);
   }
 
   // Called when the command is initially scheduled.

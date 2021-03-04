@@ -126,7 +126,8 @@ public class RobotContainer {
   private SendableChooser<JoystickMode> joystickModeChooser;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
-  private final RunGalacticSearchVision galacticSearchCommand = new RunGalacticSearchVision(odometry, driveSubsystem);
+  private final RunGalacticSearchVision galacticSearchCommand = new RunGalacticSearchVision(odometry, driveSubsystem,
+      intake);
 
   private LimelightOdometry limelightOdometry;
 
@@ -196,7 +197,7 @@ public class RobotContainer {
     autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem, intake));
     autoChooser.addOption("Galactic Search (A/Red)", new RunGalacticSearchARed(odometry, driveSubsystem, intake));
     autoChooser.addOption("Galactic Search (B/Blue)", new RunGalacticSearchBBlue(odometry, driveSubsystem, intake));
-    autoChooser.addOption("Galactic Search (B/Red)", new RunGalacticSearchBRed(odometry, driveSubsystem));
+    autoChooser.addOption("Galactic Search (B/Red)", new RunGalacticSearchBRed(odometry, driveSubsystem, intake));
     autoChooser.addOption("AutoNav (Barrel Racing)", new RunAutoNavBarrelRacing(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Slalom)", new RunAutoNavSlalom(odometry, driveSubsystem));
     autoChooser.addOption("AutoNav (Bounce)", new RunAutoNavBounce(odometry, driveSubsystem, intake));
