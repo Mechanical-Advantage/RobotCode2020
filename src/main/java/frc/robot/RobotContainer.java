@@ -126,8 +126,7 @@ public class RobotContainer {
   private SendableChooser<JoystickMode> joystickModeChooser;
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
-  private final RunGalacticSearchVision galacticSearchCommand = new RunGalacticSearchVision(odometry, driveSubsystem,
-      intake);
+  private final RunGalacticSearchVision galacticSearchCommand;
 
   private LimelightOdometry limelightOdometry;
 
@@ -168,6 +167,7 @@ public class RobotContainer {
     limelight.setDefaultCommand(
         new IdleLimelightControl(limelight, () -> driverOverrideOI.getLimelightLEDDisableSwitch().get()));
     limelight.setStreamingMode(LimelightStreamingMode.PIP_SECONDARY);
+    galacticSearchCommand = new RunGalacticSearchVision(odometry, driveSubsystem, intake);
 
     setupJoystickModeChooser();
 

@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -86,40 +87,27 @@ public class RunGalacticSearchVision extends CommandBase {
 
   // Updates the current path selection
   public void updateVision() {
-    // Start capture if running for the first time
-    if (!video.isOpened()) {
-      if (video.open(cameraId)) {
-        video.set(3, cameraWidth);
-        video.set(4, cameraHeight);
-      } else {
-        DriverStation.reportWarning("Failed to connect to Galactic Search camera. Is it plugged in?", false);
-      }
-    }
+    if (!video.open(cameraId)) {
+      DriverStation.reportWarning("Failed to connect to Galactic Search camera. Is it plugged in?", false);
+    } else {
+      video.set(Videoio.CV_CAP_PROP_FRAME_WIDTH, cameraWidth);
+      video.set(Videoio.CV_CAP_PROP_FRAME_HEIGHT, cameraHeight);
 
-    // Capture an image from the camera
-    if (video.isOpened()) {
-      if (video.retrieve(image)) {
+      // Capture an image from the camera
+      if (video.read(image)) {
 
         // Run the GRIP pipeline
         pipeline.process(image);
         Mat hsvThreshold = pipeline.hsvThresholdOutput();
 
         // Check for balls
-        path = GalacticSearchPath.A_BLUE;
-        SmartDashboard.putString("Galactic Search Path", "A/Blue");
-        // if (searchArea(hsvThreshold, 0.5, 0, 0, 3, 3)) {
-        // path = GalacticSearchPath.A_BLUE;
-        // SmartDashboard.putString("Galactic Search Path", "A/Blue");
-        // } else if (searchArea(hsvThreshold, 0.5, 3, 3, 6, 6)) {
-        // path = GalacticSearchPath.A_RED;
-        // SmartDashboard.putString("Galactic Search Path", "A/Red");
-        // } else if (searchArea(hsvThreshold, 0.5, 6, 6, 9, 9)) {
-        // path = GalacticSearchPath.B_BLUE;
-        // SmartDashboard.putString("Galactic Search Path", "B/Blue");
-        // } else {
-        // path = GalacticSearchPath.B_RED;
-        // SmartDashboard.putString("Galactic Search Path", "B/Red");
-        // }
+        if (searchArea(hsvThreshold, 0.1, 300, 90, 370, 130)) {
+          path = GalacticSearchPath.B_RED;
+          SmartDashboard.putString("Galactic Search Path", "B/Red");
+        } else {
+          path = GalacticSearchPath.B_BLUE;
+          SmartDashboard.putString("Galactic Search Path", "B/Blue");
+        }
       }
     }
   }
@@ -140,12 +128,12 @@ public class RunGalacticSearchVision extends CommandBase {
     int whiteCount = 0;
     for (int x = 0; x < submat.width(); x++) {
       for (int y = 0; y < submat.height(); y++) {
-        if (source.get(y, x)[0] > 0) {
+        if (submat.get(y, x)[0] > 0) {
           whiteCount++;
         }
       }
     }
-    return whiteCount / (submat.width() * submat.height()) > whiteThreshold;
+    return (double) whiteCount / (submat.width() * submat.height()) > whiteThreshold;
   }
 
   public static enum GalacticSearchPath {
