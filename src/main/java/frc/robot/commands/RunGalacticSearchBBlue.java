@@ -40,8 +40,8 @@ public class RunGalacticSearchBBlue extends SequentialCommandGroup {
   /** Creates a new RunGalacticSearchBBlue. */
   public RunGalacticSearchBBlue(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
     // new Pose2d(30, 90, Rotation2d.fromDegrees(-20)) <- center start
-    mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(30, 30, new Rotation2d()), 0,
-        List.of(new Translation2d(180, 70), new Translation2d(240, 120)),
+    mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(48, 30, new Rotation2d()), 0,
+        List.of(new Translation2d(180, 70), new Translation2d(240, 110)),
         new Pose2d(320, 55, Rotation2d.fromDegrees(-35)), 100, false, false,
         List.of(
             new EllipticalRegionConstraint(GeomUtil.inchesToMeters(new Translation2d(155, 65)),
@@ -50,7 +50,7 @@ public class RunGalacticSearchBBlue extends SequentialCommandGroup {
                 Units.inchesToMeters(20), Units.inchesToMeters(20), new Rotation2d(), pickupConstraint)));
     // Add your addCommands(new FooCommand(), new BarCommand());
     if (intake != null) {
-      addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))),
+      addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(48, 30, new Rotation2d()))),
           new InstantCommand(() -> intake.extend()), mp.deadlineWith(new RunIntakeForwards(intake)),
           new InstantCommand(() -> driveTrain.stop()));
     }
