@@ -8,6 +8,8 @@ import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
+import edu.wpi.cscore.CvSource;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +28,7 @@ public class RunGalacticSearchVision extends CommandBase {
   private final GalacticSearchPipeline pipeline = new GalacticSearchPipeline();
   private VideoCapture video = new VideoCapture();
   private Mat image = new Mat();
+  private CvSource output = CameraServer.getInstance().putVideo("Galactic Search", cameraWidth, cameraHeight);
 
   private GalacticSearchPath path;
   private Command runGalacticSearchABlue;
@@ -99,14 +102,25 @@ public class RunGalacticSearchVision extends CommandBase {
         // Run the GRIP pipeline
         pipeline.process(image);
         Mat hsvThreshold = pipeline.hsvThresholdOutput();
+        output.putFrame(hsvThreshold);
 
         // Check for balls
-        if (searchArea(hsvThreshold, 0.1, 300, 90, 370, 130)) {
-          path = GalacticSearchPath.B_RED;
-          SmartDashboard.putString("Galactic Search Path", "B/Red");
-        } else {
-          path = GalacticSearchPath.B_BLUE;
-          SmartDashboard.putString("Galactic Search Path", "B/Blue");
+        if (searchArea(hsvThreshold, 0.1, 315, 90, 355, 125)) { // Red path
+          if (searchArea(hsvThreshold, 0.05, 290, 65, 315, 85)) {
+            path = GalacticSearchPath.A_RED;
+            SmartDashboard.putString("Galactic Search Path", "A/Red");
+          } else {
+            path = GalacticSearchPath.B_RED;
+            SmartDashboard.putString("Galactic Search Path", "B/Red");
+          }
+        } else { // Blue path
+          if (searchArea(hsvThreshold, 0.05, 255, 65, 280, 85)) {
+            path = GalacticSearchPath.B_BLUE;
+            SmartDashboard.putString("Galactic Search Path", "B/Blue");
+          } else {
+            path = GalacticSearchPath.A_BLUE;
+            SmartDashboard.putString("Galactic Search Path", "A/Blue");
+          }
         }
       }
     }
