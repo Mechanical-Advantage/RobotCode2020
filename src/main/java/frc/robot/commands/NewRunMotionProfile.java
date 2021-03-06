@@ -382,7 +382,6 @@ public class NewRunMotionProfile extends CommandBase {
         Transform2d transform = getCurrentPoseMeters().minus(baseTrajectory.getInitialPose());
         // For this use case, transformBy is correct, not relativeTo
         trajectory = baseTrajectory.transformBy(transform);
-        followerCommand = null;
       }
       startProfile();
     }
@@ -435,7 +434,6 @@ public class NewRunMotionProfile extends CommandBase {
    */
   private void startGeneration(Pose2d initialPosition, double initialVelocity) {
     trajectory = null;
-    followerCommand = null; // The old command can't be reused if the profile is changed.
     config.setStartVelocity(initialVelocity);
     if (useQuintic) {
       List<Pose2d> fullWaypointPoses = new ArrayList<>();
@@ -453,10 +451,8 @@ public class NewRunMotionProfile extends CommandBase {
    * Start the profile follower command.
    */
   private void startProfile() {
-    if (followerCommand == null) {
-      followerCommand = new RamseteCommand(trajectory, this::getCurrentPoseMeters,
-          new RamseteController(kRamseteB, kRamseteZeta), driveKinematics, this::driveMetersPerSecond);
-    }
+    followerCommand = new RamseteCommand(trajectory, this::getCurrentPoseMeters,
+        new RamseteController(kRamseteB, kRamseteZeta), driveKinematics, this::driveMetersPerSecond);
     followerCommand.schedule();
     followerStarted = true;
     startTime = Timer.getFPGATimestamp();
