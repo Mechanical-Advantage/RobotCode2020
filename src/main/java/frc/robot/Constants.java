@@ -28,6 +28,7 @@ public final class Constants {
     public static final double initiationLine = 120; // From player station 2
     public static final double visionTargetHorizDist = 43.75 + 24; // From center of field
     // Trench run is against both edges of the field side to side
+    public static final double innerPortDepth = 29.26; // From outer port X to inner port X
     public static final double trenchRunWidth = (4 * 12) + 7.5;
     // Trench run is centered end to end on the field
     public static final double trenchRunLength = 18 * 12;

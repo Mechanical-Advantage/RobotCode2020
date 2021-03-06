@@ -34,12 +34,12 @@ import frc.robot.commands.FeedUnstick;
 import frc.robot.commands.IdleLimelightControl;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
-import frc.robot.commands.PointAtTarget;
 import frc.robot.commands.PointAtTargetAndShoot;
 import frc.robot.commands.RunAutoNavBarrelRacing;
 import frc.robot.commands.RunAutoNavBounce;
 import frc.robot.commands.RunAutoNavSlalom;
 import frc.robot.commands.PointAtTargetAndShootTrenchRun;
+import frc.robot.commands.PointAtTargetWithOdometry;
 import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunGalacticSearchABlue;
 import frc.robot.commands.RunGalacticSearchARed;
@@ -451,7 +451,7 @@ public class RobotContainer {
     operatorOI.updateLED(OILED.LIMELIGHT_DISABLE,
         driverOverrideOI.getLimelightLEDDisableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
 
-    PointAtTarget autoAimCommand = new PointAtTarget(driveSubsystem, limelight, ahrs);
+    PointAtTargetWithOdometry autoAimCommand = new PointAtTargetWithOdometry(driveSubsystem, odometry, limelight);
     driverOI.getAutoAimButton().whenActive(autoAimCommand);
     driverOI.getAutoAimButton().whenInactive(autoAimCommand::cancel);
     RunMotionProfile autoDriveCommand = new RunMotionProfile(driveSubsystem, odometry, List.of(),
