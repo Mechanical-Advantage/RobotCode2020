@@ -16,7 +16,6 @@ import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.subsystems.drive.DriveTrainBase;
-import frckit.util.GeomUtil;
 
 public class PointAtTargetWithOdometry extends CommandBase {
   private static final Transform2d fieldToInnerPort = new Transform2d(
@@ -34,6 +33,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
   private final double kP;
   private final double kI;
   private final double kD;
+  private final double minVelocity;
   private final double toleranceDegrees;
   private final double toleranceTime;
 
@@ -51,9 +51,10 @@ public class PointAtTargetWithOdometry extends CommandBase {
     switch (Constants.getRobot()) {
       case ROBOT_2020:
       case ROBOT_2020_DRIVE:
-        kP = 0.012;
+        kP = 0.01;
         kI = 0;
         kD = 0.0003;
+        minVelocity = 0.04;
         toleranceDegrees = 1;
         toleranceTime = 0.25;
         break;
@@ -61,6 +62,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
         kP = 0;
         kI = 0;
         kD = 0;
+        minVelocity = 0;
         toleranceDegrees = 1;
         toleranceTime = 0.25;
         break;
@@ -86,15 +88,14 @@ public class PointAtTargetWithOdometry extends CommandBase {
   public void execute() {
     // Update setpoint
     Pose2d fieldToVehicle = odometry.getCurrentPose();
-    Pose2d vehicleToField = GeomUtil.poseInverse(fieldToVehicle);
 
-    Translation2d vehicleToInnerPort = vehicleToField.transformBy(fieldToInnerPort).getTranslation();
+    Translation2d vehicleToInnerPort = fieldToInnerPort.getTranslation().minus(fieldToVehicle.getTranslation());
     Rotation2d vehicleToInnerPortRotation = new Rotation2d(vehicleToInnerPort.getX(), vehicleToInnerPort.getY());
 
     if (Math.abs(vehicleToInnerPortRotation.getDegrees()) < innerPortMaxDegrees) {
       turnController.setSetpoint(vehicleToInnerPortRotation.getDegrees());
     } else {
-      Translation2d vehicleToOuterPort = vehicleToField.transformBy(fieldToOuterPort).getTranslation();
+      Translation2d vehicleToOuterPort = fieldToOuterPort.getTranslation().minus(fieldToVehicle.getTranslation());
       Rotation2d vehicleToOuterPortRotation = new Rotation2d(vehicleToOuterPort.getX(), vehicleToOuterPort.getY());
       turnController.setSetpoint(vehicleToOuterPortRotation.getDegrees());
     }
@@ -106,8 +107,10 @@ public class PointAtTargetWithOdometry extends CommandBase {
 
     // Update output speeds
     double output = turnController.calculate(fieldToVehicle.getRotation().getDegrees());
-    driveTrain.drive(output, output * -1);
-
+    if (Math.abs(output) < minVelocity) {
+      output = Math.copySign(minVelocity, output);
+    }
+    driveTrain.drive(output * -1, output);
   }
 
   // Called once the command ends or is interrupted.
