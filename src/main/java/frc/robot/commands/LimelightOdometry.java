@@ -24,10 +24,6 @@ import frckit.vision.DualCornerVisionKinematics;
 import frckit.vision.corner.*;
 
 public class LimelightOdometry extends CommandBase {
-
-  private static final boolean alwaysUseFarTarget = false; // For use on half field (means gyro doesn't have to be
-                                                           // zeroed)
-
   private static final Transform2d vehicleToCamera = new Transform2d(new Translation2d(1.875, 0.0), new Rotation2d());
   private static final double targetHeight = 98; // to center of target area (hexagon)
   private static final double cameraHeight = 19.75;
@@ -93,7 +89,7 @@ public class LimelightOdometry extends CommandBase {
 
         // Select the correct target
         Pose2d fieldToTarget;
-        if (Math.abs(driftedFieldToVehicle.getRotation().getDegrees()) < 90 || alwaysUseFarTarget) {
+        if (Math.abs(driftedFieldToVehicle.getRotation().getDegrees()) < 90 || Constants.halfField) {
           fieldToTarget = new Pose2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1, new Rotation2d());
         } else {
           fieldToTarget = new Pose2d(0, Constants.visionTargetHorizDist, new Rotation2d());

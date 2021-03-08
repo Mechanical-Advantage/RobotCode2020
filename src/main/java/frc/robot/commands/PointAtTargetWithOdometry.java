@@ -92,7 +92,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
     Translation2d vehicleToInnerPort = fieldToInnerPort.getTranslation().minus(fieldToVehicle.getTranslation());
     Rotation2d vehicleToInnerPortRotation = new Rotation2d(vehicleToInnerPort.getX(), vehicleToInnerPort.getY());
 
-    if (Math.abs(vehicleToInnerPortRotation.getDegrees()) < innerPortMaxDegrees) {
+    if (Math.abs(vehicleToInnerPortRotation.getDegrees()) < innerPortMaxDegrees && !Constants.flatTarget) {
       turnController.setSetpoint(vehicleToInnerPortRotation.getDegrees());
     } else {
       Translation2d vehicleToOuterPort = fieldToOuterPort.getTranslation().minus(fieldToVehicle.getTranslation());

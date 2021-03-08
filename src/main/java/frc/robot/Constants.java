@@ -23,6 +23,10 @@ public final class Constants {
     public static final RobotType defaultRobot = RobotType.ROBOT_2020;
     private static RobotType robot;
 
+    public static final boolean halfField = true; // Limits Limelight odometry to single target (reduces need to
+                                                  // properly zero gyro)
+    public static final boolean flatTarget = false; // Adjusts auto aim behavior
+
     public static final double fieldLength = 52 * 12 + 5.25;
     public static final double fieldWidth = 26 * 12 + 11.25;
     public static final double initiationLine = 120; // From player station 2
