@@ -78,8 +78,13 @@ public class RunShooterAtDistance extends CommandBase {
   }
 
   private void update(Translation2d position) {
+    // NOTE: This distance calculation should be based on the distance to the inner
+    // port
     double distance = position
         .getDistance(new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1));
+    if (Constants.flatTarget) {
+      distance -= Constants.innerPortDepth;
+    }
 
     // Update hood position
     if (autoHood) {
