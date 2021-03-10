@@ -90,7 +90,7 @@ public class RunGalacticSearchVision extends CommandBase {
 
   // Updates the current path selection
   public void updateVision() {
-    if (!video.open(cameraId)) {
+    if (!video.open(cameraId)) { // Reconnect each time to ensure we get a new frame
       DriverStation.reportWarning("Failed to connect to Galactic Search camera. Is it plugged in?", false);
     } else {
       video.set(Videoio.CV_CAP_PROP_FRAME_WIDTH, cameraWidth);
