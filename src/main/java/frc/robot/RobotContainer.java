@@ -40,6 +40,7 @@ import frc.robot.commands.RunAutoNavBounce;
 import frc.robot.commands.RunAutoNavSlalom;
 import frc.robot.commands.PointAtTargetAndShootTrenchRun;
 import frc.robot.commands.PointAtTargetWithOdometry;
+import frc.robot.commands.PowerPortChallengeAuto;
 import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunGalacticSearchABlue;
 import frc.robot.commands.RunGalacticSearchARed;
@@ -140,16 +141,16 @@ public class RobotContainer {
     BooleanSupplier driveDisableSwitchAccess = () -> driverOverrideOI.getDriveDisableSwitch().get();
     BooleanSupplier shiftLockSwitchAccess = () -> driverOverrideOI.getShiftLockSwitch().get();
     switch (Constants.getRobot()) {
-      case ROBOT_2020:
-      case ROBOT_2020_DRIVE:
-        driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
-        break;
-      case ROBOT_2019:
-      case ORIGINAL_ROBOT_2018:
-      case REBOT:
-      case NOTBOT:
-        driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
-        break;
+    case ROBOT_2020:
+    case ROBOT_2020_DRIVE:
+      driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
+      break;
+    case ROBOT_2019:
+    case ORIGINAL_ROBOT_2018:
+    case REBOT:
+    case NOTBOT:
+      driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
+      break;
     }
     // Odometry must be instantiated after drive and AHRS and after the NavX
     // initializes
@@ -232,28 +233,28 @@ public class RobotContainer {
       for (joystickNum = 0; joystickNum < 6; joystickNum++) {
         joystickName = joystickNames[joystickNum];
         switch (joystickName) {
-          case "Arduino Leonardo":
-            if (firstControllerName == null) {
-              firstController = joystickNum;
-              firstControllerName = joystickName;
-            } else if (firstControllerName.equals(joystickName)) {
-              OIArduinoConsole arduinoConsole = new OIArduinoConsole(firstController, joystickNum);
-              operatorOI = arduinoConsole;
-              driverOverrideOI = arduinoConsole;
-              System.out.println("Operator: Arduino console");
-            }
-            break;
-          case "eStop Robotics HID":
-            if (firstControllerName == null) {
-              firstController = joystickNum;
-              firstControllerName = joystickName;
-            } else if (firstControllerName.equals(joystickName)) {
-              OIeStopConsole eStopConsole = new OIeStopConsole(firstController, joystickNum);
-              operatorOI = eStopConsole;
-              driverOverrideOI = eStopConsole;
-              System.out.println("Operator: eStop console");
-            }
-            break;
+        case "Arduino Leonardo":
+          if (firstControllerName == null) {
+            firstController = joystickNum;
+            firstControllerName = joystickName;
+          } else if (firstControllerName.equals(joystickName)) {
+            OIArduinoConsole arduinoConsole = new OIArduinoConsole(firstController, joystickNum);
+            operatorOI = arduinoConsole;
+            driverOverrideOI = arduinoConsole;
+            System.out.println("Operator: Arduino console");
+          }
+          break;
+        case "eStop Robotics HID":
+          if (firstControllerName == null) {
+            firstController = joystickNum;
+            firstControllerName = joystickName;
+          } else if (firstControllerName.equals(joystickName)) {
+            OIeStopConsole eStopConsole = new OIeStopConsole(firstController, joystickNum);
+            operatorOI = eStopConsole;
+            driverOverrideOI = eStopConsole;
+            System.out.println("Operator: eStop console");
+          }
+          break;
         }
       }
 
@@ -264,35 +265,35 @@ public class RobotContainer {
       for (joystickNum = 0; joystickNum < 6; joystickNum++) {
         joystickName = joystickNames[joystickNum];
         switch (joystickName) {
-          case "Controller (XBOX 360 For Windows)":
-          case "Controller (Gamepad F310)":
-          case "Controller (Gamepad for Xbox 360)":
-          case "Controller (Afterglow Gamepad for Xbox 360)":
-          case "Controller (Xbox One For Windows)":
-          case "XBOX 360 For Windows (Controller)":
-          case "Gamepad F310 (Controller)":
-          case "Gamepad for Xbox 360 (Controller)":
-          case "Afterglow Gamepad for Xbox 360 (Controller)":
-          case "Xbox One For Windows (Controller)":
-            if (firstControllerName == null) {
-              firstControllerName = joystickName;
-              firstController = joystickNum;
-              xboxDriver = true;
-            } else if (operatorOI.equals(dummyOI)) {
-              operatorOI = new OIOperatorHandheld(joystickNum);
-              xboxOperator = true;
-              System.out.println("Operator: XBox/F310 controller");
-            }
-            break;
-          case "Logitech Attack 3":
-            if (firstControllerName == null) {
-              firstController = joystickNum;
-              firstControllerName = joystickName;
-            } else if (firstControllerName.equals(joystickName)) {
-              driverOI = new OIDualJoysticks(firstController, joystickNum);
-              System.out.println("Driver: Dual Attack 3");
-            }
-            break;
+        case "Controller (XBOX 360 For Windows)":
+        case "Controller (Gamepad F310)":
+        case "Controller (Gamepad for Xbox 360)":
+        case "Controller (Afterglow Gamepad for Xbox 360)":
+        case "Controller (Xbox One For Windows)":
+        case "XBOX 360 For Windows (Controller)":
+        case "Gamepad F310 (Controller)":
+        case "Gamepad for Xbox 360 (Controller)":
+        case "Afterglow Gamepad for Xbox 360 (Controller)":
+        case "Xbox One For Windows (Controller)":
+          if (firstControllerName == null) {
+            firstControllerName = joystickName;
+            firstController = joystickNum;
+            xboxDriver = true;
+          } else if (operatorOI.equals(dummyOI)) {
+            operatorOI = new OIOperatorHandheld(joystickNum);
+            xboxOperator = true;
+            System.out.println("Operator: XBox/F310 controller");
+          }
+          break;
+        case "Logitech Attack 3":
+          if (firstControllerName == null) {
+            firstController = joystickNum;
+            firstControllerName = joystickName;
+          } else if (firstControllerName.equals(joystickName)) {
+            driverOI = new OIDualJoysticks(firstController, joystickNum);
+            System.out.println("Driver: Dual Attack 3");
+          }
+          break;
         }
       }
       if (xboxDriver) {
@@ -432,6 +433,9 @@ public class RobotContainer {
           }
         });
 
+    operatorOI.getPowerPortAutoButton().whileActiveOnce(new PowerPortChallengeAuto(driveSubsystem, odometry, intake,
+        hopper, shooterRoller, shooterFlyWheel, shooterHood, limelight));
+
     operatorOI.getClimbEnableSwitch()
         .whenActive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.ON, operatorOI::updateLED));
     operatorOI.getClimbEnableSwitch()
@@ -451,9 +455,7 @@ public class RobotContainer {
     operatorOI.updateLED(OILED.LIMELIGHT_DISABLE,
         driverOverrideOI.getLimelightLEDDisableSwitch().get() ? OILEDState.ON : OILEDState.OFF);
 
-    PointAtTargetWithOdometry autoAimCommand = new PointAtTargetWithOdometry(driveSubsystem, odometry, limelight);
-    driverOI.getAutoAimButton().whenActive(autoAimCommand);
-    driverOI.getAutoAimButton().whenInactive(autoAimCommand::cancel);
+    driverOI.getAutoAimButton().whileActiveOnce(new PointAtTargetWithOdometry(driveSubsystem, odometry, limelight));
     RunMotionProfile autoDriveCommand = new RunMotionProfile(driveSubsystem, odometry, List.of(),
         new Pose2d(Constants.visionTargetHorizDist, Constants.fieldLength - Constants.initiationLine,
             Rotation2d.fromDegrees(0)),

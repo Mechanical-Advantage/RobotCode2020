@@ -61,6 +61,10 @@ public interface IOperatorOI {
         return dummyTrigger;
     }
 
+    public default Trigger getPowerPortAutoButton() {
+        return dummyTrigger;
+    }
+
     public default void updateTimer() {
     }
 

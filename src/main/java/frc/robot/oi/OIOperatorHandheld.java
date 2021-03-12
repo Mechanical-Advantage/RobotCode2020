@@ -44,6 +44,7 @@ public class OIOperatorHandheld implements IOperatorOI {
     private boolean manualHood = false;
 
     private Trigger galacticSearchButton;
+    private Trigger powerPortAutoButton;
 
     public OIOperatorHandheld(int ID) {
         controller = new XboxController(ID);
@@ -77,6 +78,7 @@ public class OIOperatorHandheld implements IOperatorOI {
 
         galacticSearchButton = new Button(() -> controller.getBumper(Hand.kLeft))
                 .and(new Button(() -> controller.getBumper(Hand.kRight)));
+        powerPortAutoButton = new Trigger(() -> controller.getY(Hand.kLeft) < -0.5);
     }
 
     @Override
@@ -155,5 +157,10 @@ public class OIOperatorHandheld implements IOperatorOI {
     @Override
     public Trigger getGalacticSearchButton() {
         return galacticSearchButton;
+    }
+
+    @Override
+    public Trigger getPowerPortAutoButton() {
+        return powerPortAutoButton;
     }
 }
