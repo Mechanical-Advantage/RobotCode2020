@@ -28,12 +28,12 @@ public class DriveToTarget extends CommandBase {
 
   private final DriveTrainBase driveTrain;
   private final RobotOdometry odometry;
-  private final TunableNumber linearKp = new TunableNumber("DriveToTarget/linearKp");
-  private final TunableNumber linearKi = new TunableNumber("DriveToTarget/linearKi");
-  private final TunableNumber linearKd = new TunableNumber("DriveToTarget/linearKd");
-  private final TunableNumber angularKp = new TunableNumber("DriveToTarget/angularKp");
-  private final TunableNumber angularKi = new TunableNumber("DriveToTarget/angularKi");
-  private final TunableNumber angularKd = new TunableNumber("DriveToTarget/angularKd");
+  private final TunableNumber linearKp = new TunableNumber("DriveToTarget/LinearKp");
+  private final TunableNumber linearKi = new TunableNumber("DriveToTarget/LinearKi");
+  private final TunableNumber linearKd = new TunableNumber("DriveToTarget/LinearKd");
+  private final TunableNumber angularKp = new TunableNumber("DriveToTarget/AngularKp");
+  private final TunableNumber angularKi = new TunableNumber("DriveToTarget/AngularKi");
+  private final TunableNumber angularKd = new TunableNumber("DriveToTarget/AngularKd");
   private final PIDController linearController;
   private final PIDController angularController;
   private final Timer toleranceTimer = new Timer();
@@ -85,6 +85,8 @@ public class DriveToTarget extends CommandBase {
   @Override
   public void execute() {
     if (Constants.tuningMode) {
+      SmartDashboard.putNumber("DriveToTarget/LinearError", linearController.getPositionError());
+      SmartDashboard.putNumber("DriveToTarget/AngularError", angularController.getPositionError());
       linearController.setPID(linearKp.get(), linearKi.get(), linearKd.get());
       angularController.setPID(angularKp.get(), angularKi.get(), angularKd.get());
     }
@@ -107,8 +109,6 @@ public class DriveToTarget extends CommandBase {
     if (!linearController.atSetpoint() || !angularController.atSetpoint()) {
       toleranceTimer.reset();
     }
-    SmartDashboard.putNumber("DriveToTarget/LinearError", linearController.getPositionError());
-    SmartDashboard.putNumber("DriveToTarget/AngularError", angularController.getPositionError());
   }
 
   // Called once the command ends or is interrupted.
