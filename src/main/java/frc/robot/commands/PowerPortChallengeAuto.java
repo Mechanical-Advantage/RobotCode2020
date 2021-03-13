@@ -35,25 +35,17 @@ public class PowerPortChallengeAuto extends ParallelDeadlineGroup {
 
   private static final Pose2d shootPosition = new Pose2d(Constants.fieldLength - 153,
       Constants.visionTargetHorizDist * -1, new Rotation2d());
-  private static final Pose2d alignStart = shootPosition
-      .transformBy(new Transform2d(new Translation2d(-60, 0), new Rotation2d()));
-  private static final RectangularRegionConstraint alignConstraint = new RectangularRegionConstraint(
-      GeomUtil.inchesToMeters(new Translation2d(alignStart.getX(), alignStart.getY() - 6)),
-      GeomUtil.inchesToMeters(new Translation2d(shootPosition.getX(), shootPosition.getY() + 6)),
-      new MaxVelocityConstraint(Units.inchesToMeters(30)));
 
   /** Creates a new PowerPortChallengeAuto. */
   public PowerPortChallengeAuto(DriveTrainBase driveTrain, RobotOdometry odometry, Intake intake, Hopper hopper,
       ShooterRoller roller, ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, LimelightInterface limelight) {
     // Add the deadline command in the super() call. Add other commands using
     // addCommands().
-    super(new SequentialCommandGroup(
-        new NewRunMotionProfile(driveTrain, odometry, List.of(shootPosition), 0, false, false, List.of())
-            .deadlineWith(new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
-                () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight)),
-        new PointAtTargetWithOdometry(driveTrain, odometry, limelight),
+    super(new SequentialCommandGroup(new DriveToPoint(driveTrain, odometry, shootPosition),
         new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(1.5)));
     addCommands(new RunShooterAtDistance(shooterFlyWheel, shooterHood, shootPosition.getTranslation(), true),
-        new StartEndCommand(intake::retract, intake::extend, intake));
+        new StartEndCommand(intake::retract, intake::extend, intake),
+        new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
+            () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight));
   }
 }
