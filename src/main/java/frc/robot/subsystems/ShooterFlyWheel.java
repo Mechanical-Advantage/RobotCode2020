@@ -15,6 +15,7 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,11 +37,10 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final double defaultOpenLoopRampRate = 2;
   private static final boolean invertFlywheel = true;
   private static final int currentLimit = 30;
-  private static final double MULTIPLIER = 1.5;
+  private static final double gearMultiplier = 1.5;
   private static final double LEDSlowPulseThreshold = 0.5; // percent of setpoint rpm
   private static final double atSetpointThreshold = 0.95; // percent of setpoint rpm
   private static final double safeFeedThreshold = 2500; // min rpm to feed balls where they won't get stuck
-  private double setpoint = 0;
 
   CANSparkMax flywheelMaster;
   CANSparkMax flywheelFollower;
@@ -48,11 +48,6 @@ public class ShooterFlyWheel extends SubsystemBase {
   CANEncoder flywheelEncoder;
   public double kP, kI, kD, kMaxOutput, kMinOutput, maxRPM;
   private SimpleMotorFeedforward feedForwardModel;
-  private boolean openLoopControl = true;
-
-  private Double lastOpenLoopRampRate = null; // Force this to be updated once
-  private VelocityProfiler closedLoopVelocityProfiler = new VelocityProfiler(3000);
-  private OILEDState lastShooterLEDState = OILEDState.OFF;
 
   private TunableNumber P = new TunableNumber("Shooter FlyWheel PID/P");
   private TunableNumber I = new TunableNumber("Shooter FlyWheel PID/I");
@@ -61,7 +56,20 @@ public class ShooterFlyWheel extends SubsystemBase {
   private TunableNumber maxOutput = new TunableNumber("Shooter FlyWheel/Max Output");
   private TunableNumber minOutput = new TunableNumber("Shooter FlyWheel/Min Output");
 
+  private boolean openLoopControl = true;
+  private Double lastOpenLoopRampRate = null; // Force this to be updated once
+  private VelocityProfiler closedLoopVelocityProfiler = new VelocityProfiler(3000);
+
+  private int shotCounter = 0;
+  private Timer shotTimer = new Timer();
+  private boolean lastOverShotError = false;
+  private static final double shotRpmError = 150;
+  private static final double maxShotTime = 1.5; // secs, ignore continuous error after this time
+  private static final double minShotTime = 0.1; // secs, used as baseline for counting # of shots
+  private static final double shotTimeDiff = 0.4; // secs, between min and max one shot counted every x secs
+
   private UpdateLEDInterface updateLED;
+  private OILEDState lastShooterLEDState = OILEDState.OFF;
   private SetFlyWheelSpeedInterface setFlyWheelSpeed;
 
   /**
@@ -69,23 +77,22 @@ public class ShooterFlyWheel extends SubsystemBase {
    */
   public ShooterFlyWheel(UpdateLEDInterface updateLED, SetFlyWheelSpeedInterface setFlyWheelSpeed) {
     this.updateLED = updateLED;
+    this.setFlyWheelSpeed = setFlyWheelSpeed;
 
     switch (Constants.getRobot()) {
-      case ROBOT_2020:
-        flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        feedForwardModel = new SimpleMotorFeedforward(0.133, 0.00142, 0.000489);
-        break;
-      case ROBOT_2020_DRIVE:
-        flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        feedForwardModel = new SimpleMotorFeedforward(0, 0, 0);
-        break;
-      default:
-        return;
+    case ROBOT_2020:
+      flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      feedForwardModel = new SimpleMotorFeedforward(0.133, 0.00142, 0.000489);
+      break;
+    case ROBOT_2020_DRIVE:
+      flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      feedForwardModel = new SimpleMotorFeedforward(0, 0, 0);
+      break;
+    default:
+      return;
     }
-
-    this.setFlyWheelSpeed = setFlyWheelSpeed;
 
     flywheelMaster.restoreFactoryDefaults();
     flywheelFollower.restoreFactoryDefaults();
@@ -203,12 +210,31 @@ public class ShooterFlyWheel extends SubsystemBase {
       lastShooterLEDState = shooterLEDState;
     }
 
-    // Update setpoint
+    // Update setpoint & count balls
     if (!openLoopControl) {
       double rpmSetpoint = closedLoopVelocityProfiler.getSetpoint();
       double ffVolts = feedForwardModel.calculate(rpmSetpoint);
-      setpoint = rpmSetpoint / MULTIPLIER;
+      double setpoint = rpmSetpoint / gearMultiplier;
       flywheel_pidController.setReference(setpoint, ControlType.kVelocity, 0, ffVolts);
+
+      if (rpmSetpoint - getSpeed() > shotRpmError) {
+        if (!lastOverShotError) {
+          shotTimer.reset();
+          shotTimer.start();
+        }
+        lastOverShotError = true;
+      } else {
+        if (lastOverShotError) { // Need to count shots
+          shotTimer.stop();
+          double shotTime = shotTimer.get();
+          if (shotTime > minShotTime && shotTime < maxShotTime) {
+            shotCounter += Math.ceil((shotTime - minShotTime) / shotTimeDiff);
+          }
+        }
+        lastOverShotError = false;
+      }
+    } else {
+      lastOverShotError = false;
     }
   }
 
@@ -249,7 +275,7 @@ public class ShooterFlyWheel extends SubsystemBase {
     if (flywheelMaster == null) {
       return 0;
     }
-    return flywheelEncoder.getVelocity() * MULTIPLIER;
+    return flywheelEncoder.getVelocity() * gearMultiplier;
   }
 
   public boolean atSetpoint() {
@@ -262,6 +288,10 @@ public class ShooterFlyWheel extends SubsystemBase {
 
   public boolean safeToFeed() {
     return getSpeed() > safeFeedThreshold;
+  }
+
+  public int getShotCounter() {
+    return shotCounter;
   }
 
   private void updateRunningLEDs(boolean running) {
