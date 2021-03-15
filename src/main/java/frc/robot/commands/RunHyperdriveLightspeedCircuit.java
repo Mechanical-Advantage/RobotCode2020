@@ -57,7 +57,7 @@ public class RunHyperdriveLightspeedCircuit extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunHyperdriveLightspeedCircuit cmd = new RunHyperdriveLightspeedCircuit(null, null);
-    cmd.mp.visualize(80,
+    NewRunMotionProfile.runVisualizer(List.of(cmd.mp.visualizerGetTrajectory()), cmd.mp.visualizerGetTrackWidth(), 80,
         List.of(new TrajectoryMarker(new Translation2d(30, 60), markerDiameter, markerColorEnd),
             new TrajectoryMarker(new Translation2d(90, 60), markerDiameter, markerColorEnd),
             new TrajectoryMarker(new Translation2d(120, 60), markerDiameter, markerColorMain),

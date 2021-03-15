@@ -474,53 +474,42 @@ public class NewRunMotionProfile extends CommandBase {
   }
 
   /**
-   * Runs the trajectory visualizer on this command. This should not be called
-   * from robot code, but instead used only when testing on development machines.
-   * It can be used by putting a main method in the command file of the profile,
-   * and then running that main method from within VSCode - this ensures it is
-   * never called on the robot on accident.
+   * Retrieves the current trajectory for use in the visualizer. This should not
+   * be called from robot code, but instead used only when testing on development
+   * machines. It can be used by putting a main method in the command file of the
+   * profile, and then running that main method from within VSCode - this ensures
+   * it is never called on the robot on accident.
    *
    * This version of the method should be used for profiles that have a starting
    * position which is determined by the current position of the robot. Since
    * there is no real robot in the visualization, a fake initial robot position
    * must be provided
    * 
-   * @param ppm                  The number of pixels which should represent one
-   *                             meter. 80 is a good starting value
-   * @param markersInches        A list of markers to draw on the path (inches).
    * @param initialRobotPosition The starting position of the robot to test with
    */
-  public void visualize(double ppm, List<TrajectoryMarker> markersInches, Pose2d initialRobotPosition) {
+  public Trajectory visualizerGetTrajectory(Pose2d initialRobotPosition) {
     if (initialRobotPosition != null) {
       startGeneration(GeomUtil.inchesToMeters(initialRobotPosition), 0.0);
     }
     // Busy-wait for trajectory to finish generating
-    Trajectory t = null;
-    while (t == null) {
+    Trajectory trajectory = null;
+    while (trajectory == null) {
       try {
         Thread.sleep(10); // Blocking busy-wait
       } catch (InterruptedException e) {
-        return; // We got interrupted (probably user hit stop), so just exit
+        return new Trajectory(); // We got interrupted (probably user hit stop), so just exit
       }
-      t = generator.getTrajectory(); // Attempt to grab new path
+      trajectory = generator.getTrajectory(); // Attempt to grab new path
     }
-    t = adjustCircleTrajectories(t);
-    List<TrajectoryMarker> markersMeters = new ArrayList<>();
-    for (var i = 0; i < markersInches.size(); i++) {
-      TrajectoryMarker marker = markersInches.get(i);
-      markersMeters.add(new TrajectoryMarker(GeomUtil.inchesToMeters(marker.getPosition()),
-          Units.inchesToMeters(marker.getDiameterMeters()), marker.getColor()));
-    }
-    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppm, List.of(t), trackWidth, markersMeters);
-    viz.start();
+    return adjustCircleTrajectories(trajectory);
   }
 
   /**
-   * Runs the trajectory visualizer on this command. This should not be called
-   * from robot code, but instead used only when testing on development machines.
-   * It can be used by putting a main method in the command file of the profile,
-   * and then running that main method from within VSCode - this ensures it is
-   * never called on the robot on accident.
+   * Retrieves the current trajectory for use in the visualizer. This should not
+   * be called from robot code, but instead used only when testing on development
+   * machines. It can be used by putting a main method in the command file of the
+   * profile, and then running that main method from within VSCode - this ensures
+   * it is never called on the robot on accident.
    *
    * This version of the method should be used for profiles that have a defined
    * starting position, i.e. not in dynamic mode.
@@ -529,8 +518,45 @@ public class NewRunMotionProfile extends CommandBase {
    *                      80 is a good starting value
    * @param markersInches A list of markers to draw on the path (inches).
    */
-  public void visualize(double ppm, List<TrajectoryMarker> markersInches) {
-    visualize(ppm, markersInches, null);
+  public Trajectory visualizerGetTrajectory() {
+    return visualizerGetTrajectory(null);
+  }
+
+  /**
+   * Gets the track width for the current robot, which is necessary to run the
+   * visualizer.
+   * 
+   * @return Track width in meters
+   */
+  public double visualizerGetTrackWidth() {
+    return trackWidth;
+  }
+
+  /**
+   * Runs the visualizer using a set of trajectories. This should not be called
+   * from robot code, but instead used only when testing on development machines.
+   * It can be used by putting a main method in the command file of the profile,
+   * and then running that main method from within VSCode - this ensures it is
+   * never called on the robot on accident.
+   * 
+   * @param trajectories  A list of trajectories to visualize (retrieve using
+   *                      visualizerGetTrajectory)
+   * @param trackWidth    Track width in meters (retrieve using
+   *                      visualizerGetTrackWidth)
+   * @param ppm           The number of pixels which should represent one meter.
+   *                      80 is a good starting value
+   * @param markersInches A list of markers to draw on the path (inches).
+   */
+  public static void runVisualizer(List<Trajectory> trajectories, double trackWidth, double ppm,
+      List<TrajectoryMarker> markersInches) {
+    List<TrajectoryMarker> markersMeters = new ArrayList<>();
+    for (var i = 0; i < markersInches.size(); i++) {
+      TrajectoryMarker marker = markersInches.get(i);
+      markersMeters.add(new TrajectoryMarker(GeomUtil.inchesToMeters(marker.getPosition()),
+          Units.inchesToMeters(marker.getDiameterMeters()), marker.getColor()));
+    }
+    TrajectoryVisualizer viz = new TrajectoryVisualizer(ppm, trajectories, trackWidth, markersMeters);
+    viz.start();
   }
 
   /**

@@ -59,7 +59,7 @@ public class RunGalacticSearchBBlue extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunGalacticSearchBBlue cmd = new RunGalacticSearchBBlue(null, null, null);
-    cmd.mp.visualize(80.0,
+    NewRunMotionProfile.runVisualizer(List.of(cmd.mp.visualizerGetTrajectory()), cmd.mp.visualizerGetTrackWidth(), 80.0,
         List.of(new TrajectoryMarker(new Translation2d(30, 60), markerDiameterZones, markerColorZones),
             new TrajectoryMarker(new Translation2d(30, 120), markerDiameterZones, markerColorZones),
             new TrajectoryMarker(new Translation2d(330, 60), markerDiameterZones, markerColorZones),

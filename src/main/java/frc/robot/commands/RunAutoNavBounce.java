@@ -62,26 +62,30 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunAutoNavBounce cmd = new RunAutoNavBounce(null, null, null);
-    cmd.mp2.visualize(80,
-        List.of(new TrajectoryMarker(new Translation2d(90, 150), markerDiameterCrates, markerColorCrates),
-            new TrajectoryMarker(new Translation2d(180, 150), markerDiameterCrates, markerColorCrates),
-            new TrajectoryMarker(new Translation2d(270, 150), markerDiameterCrates, markerColorCrates),
-            new TrajectoryMarker(new Translation2d(30, 120), markerDiameter, markerColorStart),
-            new TrajectoryMarker(new Translation2d(60, 120), markerDiameter, markerColorStart),
-            new TrajectoryMarker(new Translation2d(120, 120), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(150, 120), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(210, 120), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(240, 120), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(300, 120), markerDiameter, markerColorEnd),
-            new TrajectoryMarker(new Translation2d(330, 120), markerDiameter, markerColorEnd),
-            new TrajectoryMarker(new Translation2d(30, 60), markerDiameter, markerColorStart),
-            new TrajectoryMarker(new Translation2d(60, 60), markerDiameter, markerColorStart),
-            new TrajectoryMarker(new Translation2d(90, 60), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(150, 60), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(210, 60), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(240, 60), markerDiameter, markerColorMain),
-            new TrajectoryMarker(new Translation2d(300, 60), markerDiameter, markerColorEnd),
-            new TrajectoryMarker(new Translation2d(330, 60), markerDiameter, markerColorEnd),
-            new TrajectoryMarker(new Translation2d(90, 30), markerDiameter, markerColorMain)));
+    NewRunMotionProfile
+        .runVisualizer(
+            List.of(cmd.mp1.visualizerGetTrajectory(), cmd.mp2.visualizerGetTrajectory(),
+                cmd.mp3.visualizerGetTrajectory(), cmd.mp4.visualizerGetTrajectory()),
+            cmd.mp1.visualizerGetTrackWidth(), 80,
+            List.of(new TrajectoryMarker(new Translation2d(90, 150), markerDiameterCrates, markerColorCrates),
+                new TrajectoryMarker(new Translation2d(180, 150), markerDiameterCrates, markerColorCrates),
+                new TrajectoryMarker(new Translation2d(270, 150), markerDiameterCrates, markerColorCrates),
+                new TrajectoryMarker(new Translation2d(30, 120), markerDiameter, markerColorStart),
+                new TrajectoryMarker(new Translation2d(60, 120), markerDiameter, markerColorStart),
+                new TrajectoryMarker(new Translation2d(120, 120), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(150, 120), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(210, 120), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(240, 120), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(300, 120), markerDiameter, markerColorEnd),
+                new TrajectoryMarker(new Translation2d(330, 120), markerDiameter, markerColorEnd),
+                new TrajectoryMarker(new Translation2d(30, 60), markerDiameter, markerColorStart),
+                new TrajectoryMarker(new Translation2d(60, 60), markerDiameter, markerColorStart),
+                new TrajectoryMarker(new Translation2d(90, 60), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(150, 60), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(210, 60), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(240, 60), markerDiameter, markerColorMain),
+                new TrajectoryMarker(new Translation2d(300, 60), markerDiameter, markerColorEnd),
+                new TrajectoryMarker(new Translation2d(330, 60), markerDiameter, markerColorEnd),
+                new TrajectoryMarker(new Translation2d(90, 30), markerDiameter, markerColorMain)));
   }
 }
