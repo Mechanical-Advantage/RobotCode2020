@@ -40,19 +40,19 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
   /** Creates a new RunAutoNavBounce. */
   public RunAutoNavBounce(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
     mp1 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(30, 90, new Rotation2d()), new Pose2d(90, 140, Rotation2d.fromDegrees(90))), 0, false,
+        List.of(new Pose2d(30, 90, new Rotation2d()), new Pose2d(90, 118, Rotation2d.fromDegrees(100))), 0, false,
         false);
     mp2 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(90, 140, Rotation2d.fromDegrees(90)),
+        List.of(new Pose2d(90, 118, Rotation2d.fromDegrees(100)),
             new CirclePath(new Translation2d(150, 60), 30, Rotation2d.fromDegrees(-160), new Rotation2d(), false),
-            new Pose2d(180, 140, Rotation2d.fromDegrees(-90))),
+            new Pose2d(180, 130, Rotation2d.fromDegrees(-90))),
         0, true, false);
     mp3 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(180, 140, Rotation2d.fromDegrees(-90)), new Pose2d(180, 60, Rotation2d.fromDegrees(-90)),
-            new Pose2d(270, 60, Rotation2d.fromDegrees(90)), new Pose2d(270, 140, Rotation2d.fromDegrees(90))),
+        List.of(new Pose2d(180, 130, Rotation2d.fromDegrees(-90)), new Pose2d(180, 60, Rotation2d.fromDegrees(-90)),
+            new Pose2d(270, 60, Rotation2d.fromDegrees(90)), new Pose2d(270, 118, Rotation2d.fromDegrees(90))),
         0, false, false);
     mp4 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(270, 140, Rotation2d.fromDegrees(90)), new Pose2d(300, 90, Rotation2d.fromDegrees(145))),
+        List.of(new Pose2d(270, 118, Rotation2d.fromDegrees(90)), new Pose2d(285, 90, Rotation2d.fromDegrees(145))),
         Double.MAX_VALUE, true, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))),
