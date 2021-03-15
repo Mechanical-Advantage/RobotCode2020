@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.trajectory.constraint.CentripetalAccelerationConstraint;
+import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveKinematicsConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.util.Units;
@@ -272,33 +273,33 @@ public class NewRunMotionProfile extends CommandBase {
 
     // All constants defined in inches
     switch (Constants.getRobot()) {
-      case ROBOT_2019:
-        kS = 1.21;
-        kV = 0.0591;
-        kA = 0.0182;
-        trackWidth = 27.5932064868814;
-        maxVelocity = 150;
-        maxAcceleration = 50;
-        maxCentripetalAcceleration = 200;
-        break;
-      case ROBOT_2020_DRIVE:
-        kS = 0.14;
-        kV = 0.0758;
-        kA = 0.0128;
-        trackWidth = 24.890470780033485;
-        maxVelocity = 120;
-        maxAcceleration = 50;
-        maxCentripetalAcceleration = 200;
-        break;
-      case ROBOT_2020:
-        kS = 0.124;
-        kV = 0.0722;
-        kA = 0.00475;
-        trackWidth = 25.934;
-        maxVelocity = 130;
-        maxAcceleration = 130;
-        maxCentripetalAcceleration = 120;
-        break;
+    case ROBOT_2019:
+      kS = 1.21;
+      kV = 0.0591;
+      kA = 0.0182;
+      trackWidth = 27.5932064868814;
+      maxVelocity = 150;
+      maxAcceleration = 50;
+      maxCentripetalAcceleration = 200;
+      break;
+    case ROBOT_2020_DRIVE:
+      kS = 0.14;
+      kV = 0.0758;
+      kA = 0.0128;
+      trackWidth = 24.890470780033485;
+      maxVelocity = 120;
+      maxAcceleration = 50;
+      maxCentripetalAcceleration = 200;
+      break;
+    case ROBOT_2020:
+      kS = 0.124;
+      kV = 0.0722;
+      kA = 0.00475;
+      trackWidth = 25.934;
+      maxVelocity = 130;
+      maxAcceleration = 130;
+      maxCentripetalAcceleration = 120;
+      break;
     }
 
     // Convert to meters
@@ -750,41 +751,20 @@ public class NewRunMotionProfile extends CommandBase {
    */
   private static class CirclePathConstraint implements TrajectoryConstraint {
     private final CirclePath circlePath;
-    private final double calculatedMaxVelocity; // The calculated maximum velocity for the robot which doesn't exceed
-                                                // the maximum velocity for the outer wheel
     private final List<TrajectoryConstraint> constraints;
 
     public CirclePathConstraint(CirclePath circlePath, DifferentialDriveKinematics driveKinematics, double maxVelocity,
         List<TrajectoryConstraint> constraints) {
       this.circlePath = circlePath;
       this.constraints = constraints;
-
-      // Calculate maximum velocity using drive kinematics
-      Rotation2d circleLengthRotation;
-      if (circlePath.clockwise) {
-        circleLengthRotation = circlePath.startingRotation.minus(circlePath.endingRotation);
-      } else {
-        circleLengthRotation = circlePath.endingRotation.minus(circlePath.startingRotation);
-      }
-
-      double circleLengthDegrees = circleLengthRotation.getDegrees();
-      if (circleLengthDegrees < 0) {
-        circleLengthDegrees += 360;
-      }
-
-      double circleLengthMetersOuter = (circleLengthDegrees / 360)
-          * ((circlePath.radius + (driveKinematics.trackWidthMeters / 2)) * 2 * Math.PI);
-      double maxDuration = circleLengthMetersOuter / maxVelocity;
-
-      double circleLengthMetersCenter = (circleLengthDegrees / 360) * (circlePath.radius * 2 * Math.PI);
-      calculatedMaxVelocity = circleLengthMetersCenter / maxDuration;
+      this.constraints.add(new DifferentialDriveKinematicsConstraint(driveKinematics, maxVelocity));
     }
 
     @Override
     public double getMaxVelocityMetersPerSecond(Pose2d poseMeters, double curvatureRadPerMeter,
         double velocityMetersPerSecond) {
       if (circlePath.contains(poseMeters)) {
-        double result = calculatedMaxVelocity;
+        double result = Double.MAX_VALUE;
         for (var i = 0; i < constraints.size(); i++) {
           double constraintResult = constraints.get(i).getMaxVelocityMetersPerSecond(poseMeters,
               circlePath.getCurvature(), velocityMetersPerSecond);
