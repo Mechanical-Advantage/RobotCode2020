@@ -14,6 +14,7 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -66,16 +67,16 @@ public class ShooterFlyWheel extends SubsystemBase {
     this.updateLED = updateLED;
 
     switch (Constants.getRobot()) {
-      case ROBOT_2020:
-        flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        break;
-      case ROBOT_2020_DRIVE:
-        flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        break;
-      default:
-        return;
+    case ROBOT_2020:
+      flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      break;
+    case ROBOT_2020_DRIVE:
+      flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      break;
+    default:
+      return;
     }
 
     this.setFlyWheelSpeed = setFlyWheelSpeed;
@@ -86,6 +87,9 @@ public class ShooterFlyWheel extends SubsystemBase {
 
     flywheel_pidController = flywheelMaster.getPIDController();
     flywheelEncoder = flywheelMaster.getEncoder();
+
+    flywheelMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 5);
+    flywheelMaster.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 5);
 
     flywheelMaster.setSmartCurrentLimit(currentLimit);
     flywheelFollower.setSmartCurrentLimit(currentLimit);
