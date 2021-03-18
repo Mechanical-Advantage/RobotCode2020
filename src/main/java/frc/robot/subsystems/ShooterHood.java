@@ -61,21 +61,18 @@ public class ShooterHood extends SubsystemBase {
       if (currentPosition != targetPosition && targetPosition != HoodPosition.UNKNOWN && moveTimer.hasElapsed(moveWait)
           && pressureSensor.getPressure() > minPressure) { // We need to move and are able to
         switch (currentPosition) {
-          case WALL:
-            stopSolenoid.set(targetPosition == HoodPosition.LINE);
-            liftSolenoid.set(true);
-            currentPosition = targetPosition;
-            break;
-          case LINE:
-            liftSolenoid.set(false);
-            currentPosition = HoodPosition.WALL;
-            break;
-          case TRENCH:
-          case UNKNOWN:
-            stopSolenoid.set(false);
-            liftSolenoid.set(false);
-            currentPosition = HoodPosition.WALL;
-            break;
+        case WALL:
+          stopSolenoid.set(targetPosition == HoodPosition.LINE);
+          liftSolenoid.set(true);
+          currentPosition = targetPosition;
+          break;
+        case LINE:
+        case TRENCH:
+        case UNKNOWN:
+          stopSolenoid.set(false);
+          liftSolenoid.set(false);
+          currentPosition = HoodPosition.WALL;
+          break;
         }
         moveTimer.reset();
       }

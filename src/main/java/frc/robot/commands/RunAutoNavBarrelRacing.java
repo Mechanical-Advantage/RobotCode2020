@@ -48,7 +48,7 @@ public class RunAutoNavBarrelRacing extends SequentialCommandGroup {
   public static void main(String[] args) {
     Constants.setRobot(RobotType.ROBOT_2020);
     RunAutoNavBarrelRacing cmd = new RunAutoNavBarrelRacing(null, null);
-    cmd.mp.visualize(80,
+    NewRunMotionProfile.runVisualizer(List.of(cmd.mp.visualizerGetTrajectory()), cmd.mp.visualizerGetTrackWidth(), 80,
         List.of(new TrajectoryMarker(new Translation2d(30, 120), markerDiameter, markerColorStart),
             new TrajectoryMarker(new Translation2d(60, 120), markerDiameter, markerColorStart),
             new TrajectoryMarker(new Translation2d(30, 60), markerDiameter, markerColorStart),
