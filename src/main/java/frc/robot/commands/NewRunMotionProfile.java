@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.controller.RamseteController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
@@ -22,9 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
-import edu.wpi.first.wpilibj.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.trajectory.constraint.CentripetalAccelerationConstraint;
-import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveKinematicsConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
 import edu.wpi.first.wpilibj.util.Units;
@@ -91,10 +88,10 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        change to the robot position as
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
-   *                                        trajectory (must be metric)
+   *                                        trajectory
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
-   *                                        of the default.
+   *                                        of the default
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
       List<Object> waypointData, double endVelocity, boolean reversed, boolean relative,
@@ -125,8 +122,7 @@ public class NewRunMotionProfile extends CommandBase {
    * @param reversed         Whether the robot drives backwards during the profile
    * @param relative         Whether the profile is a relative change to the robot
    *                         position as opposed to field coordinates
-   * @param extraConstraints Extra constrints to apply to the trajectory (must be
-   *                         metric)
+   * @param extraConstraints Extra constrints to apply to the trajectory
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
       List<Object> waypointData, double endVelocity, boolean reversed, boolean relative,
@@ -155,10 +151,10 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        change to the robot position as
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
-   *                                        trajectory (must be metric)
+   *                                        trajectory
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
-   *                                        of the default.
+   *                                        of the default
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
       double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
@@ -193,8 +189,7 @@ public class NewRunMotionProfile extends CommandBase {
    *                           profile
    * @param relative           Whether the profile is a relative change to the
    *                           robot position as opposed to field coordinates
-   * @param extraConstraints   Extra constrints to apply to the trajectory (must
-   *                           be metric)
+   * @param extraConstraints   Extra constrints to apply to the trajectory
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
       double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
@@ -219,10 +214,10 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        change to the robot position as
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
-   *                                        trajectory (must be metric)
+   *                                        trajectory
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
-   *                                        of the default.
+   *                                        of the default
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Object> waypointData,
       double endVelocity, boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints,
@@ -245,8 +240,7 @@ public class NewRunMotionProfile extends CommandBase {
    * @param reversed         Whether the robot drives backwards during theprofile
    * @param relative         Whether the profile is a relative change to the robot
    *                         position as opposed to field coordinates
-   * @param extraConstraints Extra constrints to apply to the trajectory (must be
-   *                         metric)
+   * @param extraConstraints Extra constrints to apply to the trajectory
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Object> waypointData,
       double endVelocity, boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints) {
@@ -271,10 +265,10 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        change to the robot position as
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
-   *                                        trajectory (must be metric)
+   *                                        trajectory
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
-   *                                        of the default.
+   *                                        of the default
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative,
@@ -372,7 +366,7 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        change to the robot position as
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
-   *                                        trajectory (must be metric)
+   *                                        trajectory
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (meters/second^2) to be used instead
    *                                        of the default. Negative to use
@@ -390,6 +384,7 @@ public class NewRunMotionProfile extends CommandBase {
     this.endPosition = endPosition;
     dynamicTrajectory = true;
 
+    // Set up basic contraints
     driveKinematics = new DifferentialDriveKinematics(trackWidth);
     DifferentialDriveVoltageConstraint voltageConstraint = new DifferentialDriveVoltageConstraint(
         new SimpleMotorFeedforward(kS, kV, kA), driveKinematics, maxVoltage);
@@ -401,14 +396,19 @@ public class NewRunMotionProfile extends CommandBase {
     for (int i = 0; i < extraConstraints.size(); i++) {
       config.addConstraint(new InchesToMetersConstraint(extraConstraints.get(i)));
     }
-    for (int i = 0; i < circlePaths.size(); i++) {
-      for (int x = 0; x < config.getConstraints().size(); x++) {
-        // Retrieving constraints from the config ensures the kinematics constraint is
-        // included
-        config.addConstraint(new CirclePathConstraint(circlePaths.get(i), config.getConstraints().get(x)));
+
+    // Apply circle constraints
+    List<TrajectoryConstraint> constraints = config.getConstraints(); // Retrieving constraints from the config ensures
+                                                                      // the kinematics constraint is included
+    List<TrajectoryConstraint> circleConstraints = new ArrayList<>();
+    for (int circleIndex = 0; circleIndex < circlePaths.size(); circleIndex++) {
+      for (int constraintIndex = 0; constraintIndex < constraints.size(); constraintIndex++) {
+        circleConstraints.add(new CirclePathConstraint(circlePaths.get(circleIndex), constraints.get(constraintIndex)));
       }
     }
+    config.addConstraints(circleConstraints);
 
+    // Start generation
     if (relative) {
       relativeTrajectory = true;
       dynamicTrajectory = false;

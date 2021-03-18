@@ -7,6 +7,7 @@
 
 package frc.robot.commands;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -16,7 +17,6 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.trajectory.constraint.MaxVelocityConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.RectangularRegionConstraint;
-import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -36,7 +36,6 @@ import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.PressureSensor;
-import frckit.util.GeomUtil;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -56,8 +55,7 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
   private static final Translation2d trenchVelocityConstraintTopRight = new Translation2d(
       Constants.fieldLength / 2 + Constants.trenchRunLength / 2, Constants.fieldWidth / -2 + Constants.trenchRunWidth);
   private static final RectangularRegionConstraint trenchVelocityConstraint = new RectangularRegionConstraint(
-      GeomUtil.inchesToMeters(trenchVelocityConstraintBottomLeft),
-      GeomUtil.inchesToMeters(trenchVelocityConstraintTopRight), new MaxVelocityConstraint(Units.inchesToMeters(80)));
+      trenchVelocityConstraintBottomLeft, trenchVelocityConstraintTopRight, new MaxVelocityConstraint(80));
 
   /**
    * Creates a new PointAtTargetAndShootTrenchRun.
@@ -80,7 +78,7 @@ public class PointAtTargetAndShootTrenchRun extends ParallelDeadlineGroup {
                         List.of(trenchVelocityConstraint)).deadlineWith(new RunIntakeForwards(intake)),
                     new InstantCommand(intake::retract),
                     new NewRunMotionProfile(driveTrain, odometry, 0, List.of(trenchEnd, secondShotPosition), 0, true,
-                        false),
+                        false, new ArrayList<>()),
                     new TurnToAngle(driveTrain, ahrs, -15, true, 5), new InstantCommand(intake::extend),
                     new PointAtTarget(driveTrain, limelight, ahrs),
                     new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(5))),

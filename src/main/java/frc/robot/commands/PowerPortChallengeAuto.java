@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -46,6 +47,6 @@ public class PowerPortChallengeAuto extends SequentialCommandGroup {
             new StartEndCommand(intake::retract, intake::extend, intake),
             new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
                 () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight)),
-        new NewRunMotionProfile(driveTrain, odometry, List.of(loadPosition), 0, true, false));
+        new NewRunMotionProfile(driveTrain, odometry, List.of(loadPosition), 0, true, false, new ArrayList<>()));
   }
 }
