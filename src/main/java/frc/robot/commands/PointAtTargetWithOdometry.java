@@ -17,9 +17,9 @@ import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.subsystems.drive.DriveTrainBase;
 
 public class PointAtTargetWithOdometry extends CommandBase {
-  private static final Translation2d innerPortTranslation = new Translation2d(
+  public static final Translation2d innerPortTranslation = new Translation2d(
       Constants.fieldLength + Constants.innerPortDepth, Constants.visionTargetHorizDist * -1);
-  private static final Translation2d outerPortTranslation = new Translation2d(Constants.fieldLength,
+  public static final Translation2d outerPortTranslation = new Translation2d(Constants.fieldLength,
       Constants.visionTargetHorizDist * -1);
   private static final double innerPortMaxDegrees = 20; // If angle outside this value, aim at outer
   private static final double minTime = 0.75; // Do not exit until this many seconds have passed (allows Limelight to
@@ -87,7 +87,8 @@ public class PointAtTargetWithOdometry extends CommandBase {
     // Update setpoint
     Pose2d fieldToVehicle = odometry.getCurrentPose();
 
-    Translation2d targetPosition = getTargetPosition(fieldToVehicle.getTranslation());
+    Translation2d targetPosition = useInnerPort(fieldToVehicle.getTranslation()) ? innerPortTranslation
+        : outerPortTranslation;
     Translation2d targetRelative = targetPosition.minus(fieldToVehicle.getTranslation());
     Rotation2d targetRotation = new Rotation2d(targetRelative.getX(), targetRelative.getY());
     turnController.setSetpoint(targetRotation.getDegrees());
@@ -106,18 +107,14 @@ public class PointAtTargetWithOdometry extends CommandBase {
   }
 
   /**
-   * Get the position of the target (inner or outer) that should current be used
-   * for aiming.
+   * Determines whether to aim at the inner or outer port depending on angle and
+   * type of port
    */
-  public static Translation2d getTargetPosition(Translation2d currentPosition) {
+  public static boolean useInnerPort(Translation2d currentPosition) {
     Translation2d innerPortRelative = innerPortTranslation.minus(currentPosition);
     Rotation2d innerPortRotation = new Rotation2d(innerPortRelative.getX(), innerPortRelative.getY());
 
-    if (Math.abs(innerPortRotation.getDegrees()) < innerPortMaxDegrees && !Constants.flatTarget) {
-      return innerPortTranslation;
-    } else {
-      return outerPortTranslation;
-    }
+    return Math.abs(innerPortRotation.getDegrees()) < innerPortMaxDegrees && !Constants.flatTarget;
   }
 
   // Called once the command ends or is interrupted.

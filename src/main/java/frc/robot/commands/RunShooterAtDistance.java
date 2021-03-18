@@ -21,12 +21,21 @@ public class RunShooterAtDistance extends CommandBase {
   private static final double maxFlywheelSpeed = 6500; // RPM
 
   private static final PolynomialRegression wallRegression = new PolynomialRegression(
-      new double[] { 31 + Constants.innerPortDepth, 42 + Constants.innerPortDepth, 56 + Constants.innerPortDepth, 75 + Constants.innerPortDepth, 90 + Constants.innerPortDepth }, new double[] { 6000, 4700, 3400, 3200, 3300 }, 2);
+      new double[] { 31 + Constants.innerPortDepth, 42 + Constants.innerPortDepth, 56 + Constants.innerPortDepth,
+          75 + Constants.innerPortDepth, 90 + Constants.innerPortDepth },
+      new double[] { 6000, 4700, 3400, 3200, 3300 }, 2);
   private static final PolynomialRegression lineRegression = new PolynomialRegression(
-      new double[] { 75 + Constants.innerPortDepth, 81 + Constants.innerPortDepth, 87 + Constants.innerPortDepth, 93 + Constants.innerPortDepth, 99 + Constants.innerPortDepth, 105 + Constants.innerPortDepth, 111 + Constants.innerPortDepth, 117 + Constants.innerPortDepth, 123 + Constants.innerPortDepth, 129 + Constants.innerPortDepth, 132.5 + Constants.innerPortDepth, 135 + Constants.innerPortDepth, 138 + Constants.innerPortDepth, 144 + Constants.innerPortDepth, 147 + Constants.innerPortDepth },
+      new double[] { 75 + Constants.innerPortDepth, 81 + Constants.innerPortDepth, 87 + Constants.innerPortDepth,
+          93 + Constants.innerPortDepth, 99 + Constants.innerPortDepth, 105 + Constants.innerPortDepth,
+          111 + Constants.innerPortDepth, 117 + Constants.innerPortDepth, 123 + Constants.innerPortDepth,
+          129 + Constants.innerPortDepth, 132.5 + Constants.innerPortDepth, 135 + Constants.innerPortDepth,
+          138 + Constants.innerPortDepth, 144 + Constants.innerPortDepth, 147 + Constants.innerPortDepth },
       new double[] { 3625, 3600, 3600, 3625, 3650, 3675, 3700, 3750, 3750, 3800, 3800, 3825, 3875, 3925, 3925 }, 2);
   private static final PolynomialRegression trenchRegression = new PolynomialRegression(
-      new double[] { 172 + Constants.innerPortDepth, 181 + Constants.innerPortDepth, 203 + Constants.innerPortDepth, 226 + Constants.innerPortDepth, 244 + Constants.innerPortDepth, 263 + Constants.innerPortDepth, 286 + Constants.innerPortDepth }, new double[] { 6300, 6100, 6000, 6000, 5900, 6050, 6050 }, 2);
+      new double[] { 172 + Constants.innerPortDepth, 181 + Constants.innerPortDepth, 203 + Constants.innerPortDepth,
+          226 + Constants.innerPortDepth, 244 + Constants.innerPortDepth, 263 + Constants.innerPortDepth,
+          286 + Constants.innerPortDepth },
+      new double[] { 6300, 6100, 6000, 6000, 5900, 6050, 6050 }, 2);
 
   private final ShooterFlyWheel shooterFlyWheel;
   private final ShooterHood shooterHood;
@@ -79,10 +88,9 @@ public class RunShooterAtDistance extends CommandBase {
   }
 
   private void update(Translation2d position) {
-    // NOTE: This distance calculation should be based on the distance to the inner
-    // port
-    double distance = position
-        .getDistance(PointAtTargetWithOdometry.getTargetPosition(position));
+    boolean useInnerPort = PointAtTargetWithOdometry.useInnerPort(position);
+    double distance = position.getDistance(
+        useInnerPort ? PointAtTargetWithOdometry.innerPortTranslation : PointAtTargetWithOdometry.outerPortTranslation);
 
     // Update hood position
     if (autoHood) {
