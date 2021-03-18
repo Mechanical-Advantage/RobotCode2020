@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Transform2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
@@ -18,11 +17,10 @@ import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.subsystems.drive.DriveTrainBase;
 
 public class PointAtTargetWithOdometry extends CommandBase {
-  private static final Transform2d fieldToInnerPort = new Transform2d(
-      new Translation2d(Constants.fieldLength + Constants.innerPortDepth, Constants.visionTargetHorizDist * -1),
-      new Rotation2d());
-  private static final Transform2d fieldToOuterPort = new Transform2d(
-      new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1), new Rotation2d());
+  private static final Translation2d innerPortTranslation = new Translation2d(
+      Constants.fieldLength + Constants.innerPortDepth, Constants.visionTargetHorizDist * -1);
+  private static final Translation2d outerPortTranslation = new Translation2d(Constants.fieldLength,
+      Constants.visionTargetHorizDist * -1);
   private static final double innerPortMaxDegrees = 20; // If angle outside this value, aim at outer
   private static final double minTime = 0.75; // Do not exit until this many seconds have passed (allows Limelight to
                                               // begin writing data)
@@ -49,23 +47,23 @@ public class PointAtTargetWithOdometry extends CommandBase {
     this.odometry = odometry;
     this.limelight = limelight;
     switch (Constants.getRobot()) {
-      case ROBOT_2020:
-      case ROBOT_2020_DRIVE:
-        kP = 0.01;
-        kI = 0;
-        kD = 0.0003;
-        minVelocity = 0.04;
-        toleranceDegrees = 1;
-        toleranceTime = 0.25;
-        break;
-      default:
-        kP = 0;
-        kI = 0;
-        kD = 0;
-        minVelocity = 0;
-        toleranceDegrees = 1;
-        toleranceTime = 0.25;
-        break;
+    case ROBOT_2020:
+    case ROBOT_2020_DRIVE:
+      kP = 0.01;
+      kI = 0;
+      kD = 0.0003;
+      minVelocity = 0.04;
+      toleranceDegrees = 1;
+      toleranceTime = 0.25;
+      break;
+    default:
+      kP = 0;
+      kI = 0;
+      kD = 0;
+      minVelocity = 0;
+      toleranceDegrees = 1;
+      toleranceTime = 0.25;
+      break;
     }
     turnController = new PIDController(kP, kI, kD);
     turnController.setTolerance(toleranceDegrees);
@@ -89,16 +87,10 @@ public class PointAtTargetWithOdometry extends CommandBase {
     // Update setpoint
     Pose2d fieldToVehicle = odometry.getCurrentPose();
 
-    Translation2d vehicleToInnerPort = fieldToInnerPort.getTranslation().minus(fieldToVehicle.getTranslation());
-    Rotation2d vehicleToInnerPortRotation = new Rotation2d(vehicleToInnerPort.getX(), vehicleToInnerPort.getY());
-
-    if (Math.abs(vehicleToInnerPortRotation.getDegrees()) < innerPortMaxDegrees && !Constants.flatTarget) {
-      turnController.setSetpoint(vehicleToInnerPortRotation.getDegrees());
-    } else {
-      Translation2d vehicleToOuterPort = fieldToOuterPort.getTranslation().minus(fieldToVehicle.getTranslation());
-      Rotation2d vehicleToOuterPortRotation = new Rotation2d(vehicleToOuterPort.getX(), vehicleToOuterPort.getY());
-      turnController.setSetpoint(vehicleToOuterPortRotation.getDegrees());
-    }
+    Translation2d targetPosition = getTargetPosition(fieldToVehicle.getTranslation());
+    Translation2d targetRelative = targetPosition.minus(fieldToVehicle.getTranslation());
+    Rotation2d targetRotation = new Rotation2d(targetRelative.getX(), targetRelative.getY());
+    turnController.setSetpoint(targetRotation.getDegrees());
 
     // Check if in tolerance
     if (!turnController.atSetpoint()) {
@@ -111,6 +103,21 @@ public class PointAtTargetWithOdometry extends CommandBase {
       output = Math.copySign(minVelocity, output);
     }
     driveTrain.drive(output * -1, output);
+  }
+
+  /**
+   * Get the position of the target (inner or outer) that should current be used
+   * for aiming.
+   */
+  public static Translation2d getTargetPosition(Translation2d currentPosition) {
+    Translation2d innerPortRelative = innerPortTranslation.minus(currentPosition);
+    Rotation2d innerPortRotation = new Rotation2d(innerPortRelative.getX(), innerPortRelative.getY());
+
+    if (Math.abs(innerPortRotation.getDegrees()) < innerPortMaxDegrees && !Constants.flatTarget) {
+      return innerPortTranslation;
+    } else {
+      return outerPortTranslation;
+    }
   }
 
   // Called once the command ends or is interrupted.
