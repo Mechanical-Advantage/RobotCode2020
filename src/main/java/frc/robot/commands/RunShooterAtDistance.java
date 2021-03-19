@@ -14,16 +14,18 @@ import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.util.PolynomialRegression;
 
 public class RunShooterAtDistance extends CommandBase {
-  private static final double maxWallDistance = 114; // inches to center of robot
+  private static final double maxWallDistance = 110; // inches to center of robot
   private static final double minLineDistance = 104; // inches to center of robot
   private static final double maxLineDistance = 199; // inches to center of robot
   private static final double minTrenchDistance = 194; // inches to center of robot
   private static final double maxFlywheelSpeed = 6500; // RPM
 
-  private static final PolynomialRegression wallRegression = new PolynomialRegression(
+  private static final PolynomialRegression wallInnerRegression = new PolynomialRegression(
       new double[] { 31 + Constants.innerPortDepth, 42 + Constants.innerPortDepth, 56 + Constants.innerPortDepth,
           75 + Constants.innerPortDepth, 90 + Constants.innerPortDepth },
       new double[] { 6000, 4700, 3400, 3200, 3300 }, 2);
+  private static final PolynomialRegression wallOuterRegression = new PolynomialRegression(
+      new double[] { 33.5, 36.5, 42.5, 48.5, 54.5, 60.5 }, new double[] { 6500, 4300, 4100, 3100, 3000, 3100 }, 2);
   private static final PolynomialRegression lineRegression = new PolynomialRegression(
       new double[] { 75 + Constants.innerPortDepth, 81 + Constants.innerPortDepth, 87 + Constants.innerPortDepth,
           93 + Constants.innerPortDepth, 99 + Constants.innerPortDepth, 105 + Constants.innerPortDepth,
@@ -127,7 +129,11 @@ public class RunShooterAtDistance extends CommandBase {
     double predictedSpeed;
     switch (shooterHood.getTargetPosition()) {
     case WALL:
-      predictedSpeed = wallRegression.predict(distance);
+      if (useInnerPort) {
+        predictedSpeed = wallInnerRegression.predict(distance);
+      } else {
+        predictedSpeed = wallOuterRegression.predict(distance);
+      }
       break;
     case LINE:
       predictedSpeed = lineRegression.predict(distance);
