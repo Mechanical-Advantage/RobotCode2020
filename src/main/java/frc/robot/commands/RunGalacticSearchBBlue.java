@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.trajectory.constraint.EllipticalRegionConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.MaxVelocityConstraint;
 import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
-import edu.wpi.first.wpilibj.util.Units;
 
 import java.awt.Color;
 import java.util.List;
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frckit.tools.pathview.TrajectoryMarker;
-import frckit.util.GeomUtil;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.Intake;
@@ -35,7 +33,7 @@ public class RunGalacticSearchBBlue extends SequentialCommandGroup {
   private static final double markerDiameterBalls = 7;
   private static final Color markerColorZones = Color.BLACK;
   private static final Color markerColorBalls = Color.BLUE;
-  private static final TrajectoryConstraint pickupConstraint = new MaxVelocityConstraint(Units.inchesToMeters(80));
+  private static final TrajectoryConstraint pickupConstraint = new MaxVelocityConstraint(80);
 
   /** Creates a new RunGalacticSearchBBlue. */
   public RunGalacticSearchBBlue(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
@@ -43,11 +41,8 @@ public class RunGalacticSearchBBlue extends SequentialCommandGroup {
     mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(48, 30, new Rotation2d()), 0,
         List.of(new Translation2d(180, 70), new Translation2d(240, 110)),
         new Pose2d(320, 55, Rotation2d.fromDegrees(-35)), 100, false, false,
-        List.of(
-            new EllipticalRegionConstraint(GeomUtil.inchesToMeters(new Translation2d(155, 65)),
-                Units.inchesToMeters(20), Units.inchesToMeters(20), new Rotation2d(), pickupConstraint),
-            new EllipticalRegionConstraint(GeomUtil.inchesToMeters(new Translation2d(290, 70)),
-                Units.inchesToMeters(20), Units.inchesToMeters(20), new Rotation2d(), pickupConstraint)));
+        List.of(new EllipticalRegionConstraint(new Translation2d(155, 65), 20, 20, new Rotation2d(), pickupConstraint),
+            new EllipticalRegionConstraint(new Translation2d(290, 70), 20, 20, new Rotation2d(), pickupConstraint)));
     // Add your addCommands(new FooCommand(), new BarCommand());
     if (intake != null) {
       addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(48, 30, new Rotation2d()))),

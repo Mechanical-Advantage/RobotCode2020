@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frckit.tools.pathview.TrajectoryMarker;
-import frc.robot.commands.NewRunMotionProfile.CirclePath;
+import frc.robot.util.trajectory.CirclePath;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.RobotOdometry;
@@ -48,7 +48,8 @@ public class RunHyperdriveLightspeedCircuit extends SequentialCommandGroup {
         new CirclePath(new Translation2d(90, 120), 30, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90), true));
     waypoints.addAll(lap);
     waypoints.add(new Pose2d(55, 60, Rotation2d.fromDegrees(-135)));
-    mp = new NewRunMotionProfile(driveTrain, odometry, 0.0, waypoints, Double.MAX_VALUE, false, false);
+    mp = new NewRunMotionProfile(driveTrain, odometry, 0.0, waypoints, Double.MAX_VALUE, false, false,
+        new ArrayList<>());
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(60, 90, Rotation2d.fromDegrees(90)))), mp,
         new InstantCommand(() -> driveTrain.stop()));

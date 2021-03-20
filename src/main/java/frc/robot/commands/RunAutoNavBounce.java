@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -15,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frckit.tools.pathview.TrajectoryMarker;
-import frc.robot.commands.NewRunMotionProfile.CirclePath;
+import frc.robot.util.trajectory.CirclePath;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.subsystems.Intake;
@@ -41,19 +42,19 @@ public class RunAutoNavBounce extends SequentialCommandGroup {
   public RunAutoNavBounce(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
     mp1 = new NewRunMotionProfile(driveTrain, odometry, 0,
         List.of(new Pose2d(30, 90, new Rotation2d()), new Pose2d(90, 118, Rotation2d.fromDegrees(100))), 0, false,
-        false);
+        false, new ArrayList<>());
     mp2 = new NewRunMotionProfile(driveTrain, odometry, 0,
         List.of(new Pose2d(90, 118, Rotation2d.fromDegrees(100)),
             new CirclePath(new Translation2d(150, 60), 30, Rotation2d.fromDegrees(-160), new Rotation2d(), false),
             new Pose2d(180, 130, Rotation2d.fromDegrees(-90))),
-        0, true, false);
+        0, true, false, new ArrayList<>());
     mp3 = new NewRunMotionProfile(driveTrain, odometry, 0,
         List.of(new Pose2d(180, 130, Rotation2d.fromDegrees(-90)), new Pose2d(180, 60, Rotation2d.fromDegrees(-90)),
             new Pose2d(270, 60, Rotation2d.fromDegrees(90)), new Pose2d(270, 118, Rotation2d.fromDegrees(90))),
-        0, false, false);
+        0, false, false, new ArrayList<>());
     mp4 = new NewRunMotionProfile(driveTrain, odometry, 0,
         List.of(new Pose2d(270, 118, Rotation2d.fromDegrees(90)), new Pose2d(285, 90, Rotation2d.fromDegrees(145))),
-        Double.MAX_VALUE, true, false);
+        Double.MAX_VALUE, true, false, new ArrayList<>());
     // Add your addCommands(new FooCommand(), new BarCommand());
     addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 90, new Rotation2d()))),
         new InstantCommand(() -> intake.extend()), mp1, mp2, mp3, mp4, new InstantCommand(() -> driveTrain.stop()));
