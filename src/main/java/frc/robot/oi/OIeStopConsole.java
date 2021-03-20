@@ -162,7 +162,7 @@ public class OIeStopConsole implements IDriverOverrideOI, IOperatorOI {
   }
 
   @Override
-  public Trigger getHoodLineButton() {
+  public Trigger getHoodFrontLineButton() {
     return hoodLineButton;
   }
 

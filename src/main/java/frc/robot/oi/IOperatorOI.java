@@ -49,7 +49,11 @@ public interface IOperatorOI {
         return dummyTrigger;
     }
 
-    public default Trigger getHoodLineButton() {
+    public default Trigger getHoodFrontLineButton() {
+        return dummyTrigger;
+    }
+
+    public default Trigger getHoodBackLineButton() {
         return dummyTrigger;
     }
 
@@ -81,9 +85,9 @@ public interface IOperatorOI {
     }
 
     public static enum OILED {
-        OPEN_LOOP, DRIVE_DISABLE, LIMELIGHT_DISABLE, MANUAL_HOOD, BUDDY_CLIMB, CLIMB_ENABLE, HOOD_BOTTOM, HOOD_MIDDLE,
-        HOOD_TOP, INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD, INTAKE_BACKWARD, SHOOTER_RUN, SHOOTER_STOP,
-        SHOOTER_SHOOT, SHOOTER_UNSTICK
+        OPEN_LOOP, DRIVE_DISABLE, LIMELIGHT_DISABLE, MANUAL_HOOD, BUDDY_CLIMB, CLIMB_ENABLE, HOOD_WALL, HOOD_FRONT_LINE,
+        HOOD_BACK_LINE, HOOD_TRENCH, INTAKE_EXTEND, INTAKE_RETRACT, INTAKE_FORWARD, INTAKE_BACKWARD, SHOOTER_RUN,
+        SHOOTER_STOP, SHOOTER_SHOOT, SHOOTER_UNSTICK
     }
 
     public static enum OILEDState {

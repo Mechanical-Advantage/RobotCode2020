@@ -37,7 +37,7 @@ public class PointAtTargetAndShoot extends ParallelDeadlineGroup {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(new PointAtTarget(driveTrain, limelight, ahrs)
-        .alongWith(new InstantCommand(() -> hood.setTargetPosition(HoodPosition.LINE)))
+        .alongWith(new InstantCommand(() -> hood.setTargetPosition(HoodPosition.FRONT_LINE)))
         .alongWith(new WaitCommand(7).withInterrupt(() -> flywheel.getSpeed() > 6000)).andThen(new WaitCommand(0.5))
         .andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(5))
         .andThen(new DriveDistanceOnHeading(driveTrain, ahrs, -60)), new RunShooterFlyWheel(flywheel));
