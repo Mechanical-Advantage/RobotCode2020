@@ -15,8 +15,10 @@ import java.util.List;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.util.RequireCommand;
 import frckit.tools.pathview.TrajectoryMarker;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
@@ -26,7 +28,7 @@ import frc.robot.subsystems.RobotOdometry;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class RunGalacticSearchBBlue extends SequentialCommandGroup {
+public class RunGalacticSearchBBlue extends ParallelRaceGroup {
 
   NewRunMotionProfile mp;
   private static final double markerDiameterZones = 4;
@@ -45,9 +47,10 @@ public class RunGalacticSearchBBlue extends SequentialCommandGroup {
             new EllipticalRegionConstraint(new Translation2d(290, 70), 20, 20, new Rotation2d(), pickupConstraint)));
     // Add your addCommands(new FooCommand(), new BarCommand());
     if (intake != null) {
-      addCommands(new InstantCommand(() -> odometry.setPosition(new Pose2d(48, 30, new Rotation2d()))),
+      addCommands(new SequentialCommandGroup(
+          new InstantCommand(() -> odometry.setPosition(new Pose2d(48, 30, new Rotation2d()))),
           new InstantCommand(() -> intake.extend()), mp.deadlineWith(new RunIntakeForwards(intake)),
-          new InstantCommand(() -> driveTrain.stop()));
+          new InstantCommand(() -> driveTrain.stop())), new RequireCommand(odometry));
     }
   }
 
