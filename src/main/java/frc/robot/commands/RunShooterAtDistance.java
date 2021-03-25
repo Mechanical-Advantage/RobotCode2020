@@ -107,20 +107,20 @@ public class RunShooterAtDistance extends CommandBase {
       case WALL:
         wallFrontLineTransition = maxWallDistance;
         frontLineBackLineTransition = maxFrontLineDistance;
-        backLineTrenchTransition = maxBackLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
         break;
       case FRONT_LINE:
         wallFrontLineTransition = minFrontLineDistance;
         frontLineBackLineTransition = maxFrontLineDistance;
-        backLineTrenchTransition = maxBackLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
         break;
       case BACK_LINE:
-        wallFrontLineTransition = minFrontLineDistance;
+        wallFrontLineTransition = maxWallDistance;
         frontLineBackLineTransition = minBackLineDistance;
         backLineTrenchTransition = maxBackLineDistance;
         break;
       case TRENCH:
-        wallFrontLineTransition = minFrontLineDistance;
+        wallFrontLineTransition = maxWallDistance;
         frontLineBackLineTransition = minBackLineDistance;
         backLineTrenchTransition = minTrenchDistance;
         break;
