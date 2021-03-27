@@ -21,10 +21,12 @@ public class DriveToTarget extends CommandBase {
   private static final Transform2d fieldToInnerPort = new Transform2d(
       new Translation2d(Constants.fieldLength + Constants.innerPortDepth, Constants.visionTargetHorizDist * -1),
       new Rotation2d());
+  private static final Transform2d fieldToOuterPort = new Transform2d(
+      new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1), new Rotation2d());
 
   private static final double linearTolerance = 1.5;
   private static final double angularTolerance = 1;
-  private static final double toleranceTime = 0.25;
+  private static final double toleranceTime = 0.15;
 
   private final DriveTrainBase driveTrain;
   private final RobotOdometry odometry;
@@ -94,8 +96,9 @@ public class DriveToTarget extends CommandBase {
     Pose2d fieldToVehicle = odometry.getCurrentPose();
     double linearSpeed = linearController.calculate(fieldToVehicle.getX());
 
-    Translation2d vehicleToInnerPort = fieldToInnerPort.getTranslation().minus(fieldToVehicle.getTranslation());
-    Rotation2d vehicleToInnerPortRotation = new Rotation2d(vehicleToInnerPort.getX(), vehicleToInnerPort.getY());
+    Translation2d vehicleToTarget = (Constants.flatTarget ? fieldToOuterPort : fieldToInnerPort).getTranslation()
+        .minus(fieldToVehicle.getTranslation());
+    Rotation2d vehicleToInnerPortRotation = new Rotation2d(vehicleToTarget.getX(), vehicleToTarget.getY());
     angularController.setSetpoint(vehicleToInnerPortRotation.getDegrees());
     double angularSpeed = angularController.calculate(fieldToVehicle.getRotation().getDegrees());
 
