@@ -72,7 +72,7 @@ public class NewRunMotionProfile extends CommandBase {
 
   /**
    * Creates a new RunMotionProfile that starts from a fixed position, using a
-   * quintic spline
+   * quintic spline (includes constraint overrides)
    * 
    * @param driveTrain                      The drive train
    * @param odometry                        The robot odometry
@@ -89,13 +89,22 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
    *                                        trajectory
+   * @param velocityOverride                Max velocity (inches/second) to be
+   *                                        used instead of the default
+   * @param accelerationOverride            Max acceleration (inches/second^2) to
+   *                                        be used instead of the default
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
    *                                        of the default
+   * @param includeVoltageConstraint        Whether to include the default
+   *                                        differential voltage constraint
+   *                                        (disabling this is sometimes useful
+   *                                        when overriding acceleration)
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
       List<Object> waypointData, double endVelocity, boolean reversed, boolean relative,
-      List<TrajectoryConstraint> extraConstraints, double centripetalAccelerationOverride) {
+      List<TrajectoryConstraint> extraConstraints, Double velocityOverride, Double accelerationOverride,
+      Double centripetalAccelerationOverride, boolean includeVoltageConstraint) {
     updateConstants();
     this.waypointPoses = processWaypointData(waypointData, reversed);
     Pose2d initialPosition = this.waypointPoses.remove(0);
@@ -103,7 +112,8 @@ public class NewRunMotionProfile extends CommandBase {
 
     // Identical to constructor for fixed position & cubic
     setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, false, extraConstraints,
-        Units.inchesToMeters(centripetalAccelerationOverride));
+        inchesToMetersIfNotNull(velocityOverride), inchesToMetersIfNotNull(accelerationOverride),
+        inchesToMetersIfNotNull(centripetalAccelerationOverride), includeVoltageConstraint);
     dynamicTrajectory = false;
     relativeTrajectory = relative;
     startGeneration(initialPosition, Units.inchesToMeters(initialVelocity));
@@ -127,12 +137,13 @@ public class NewRunMotionProfile extends CommandBase {
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, double initialVelocity,
       List<Object> waypointData, double endVelocity, boolean reversed, boolean relative,
       List<TrajectoryConstraint> extraConstraints) {
-    this(driveTrain, odometry, initialVelocity, waypointData, endVelocity, reversed, relative, extraConstraints, -1);
+    this(driveTrain, odometry, initialVelocity, waypointData, endVelocity, reversed, relative, extraConstraints, null,
+        null, null, true);
   }
 
   /**
    * Creates a new RunMotionProfile that starts from a fixed position, using a
-   * cubic spline
+   * cubic spline (includes constraint overrides)
    * 
    * @param driveTrain                      The drive train
    * @param odometry                        The robot odometry
@@ -152,21 +163,30 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
    *                                        trajectory
+   * @param velocityOverride                Max velocity (inches/second) to be
+   *                                        used instead of the default
+   * @param accelerationOverride            Max acceleration (inches/second^2) to
+   *                                        be used instead of the default
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
    *                                        of the default
+   * @param includeVoltageConstraint        Whether to include the default
+   *                                        differential voltage constraint
+   *                                        (disabling this is sometimes useful
+   *                                        when overriding acceleration)
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, Pose2d initialPosition,
       double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
-      boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints,
-      double centripetalAccelerationOverride) {
+      boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints, Double velocityOverride,
+      Double accelerationOverride, Double centripetalAccelerationOverride, boolean includeVoltageConstraint) {
     // The setup function's relative trajectory handling is unneccessary with a
     // defined start point so always pass false and do the other neccessary logic
     // here
     updateConstants();
     setup(driveTrain, odometry, convertTranslationListToMeters(intermediatePoints),
         GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, false, extraConstraints,
-        Units.inchesToMeters(centripetalAccelerationOverride));
+        inchesToMetersIfNotNull(velocityOverride), inchesToMetersIfNotNull(accelerationOverride),
+        inchesToMetersIfNotNull(centripetalAccelerationOverride), includeVoltageConstraint);
     dynamicTrajectory = false;
     relativeTrajectory = relative;
     startGeneration(GeomUtil.inchesToMeters(initialPosition), Units.inchesToMeters(initialVelocity));
@@ -195,12 +215,12 @@ public class NewRunMotionProfile extends CommandBase {
       double initialVelocity, List<Translation2d> intermediatePoints, Pose2d endPosition, double endVelocity,
       boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints) {
     this(driveTrain, odometry, initialPosition, initialVelocity, intermediatePoints, endPosition, endVelocity, reversed,
-        relative, extraConstraints, -1);
+        relative, extraConstraints, null, null, null, true);
   }
 
   /**
    * Creates a new RunMotionProfile that starts from the robot's current position,
-   * using a quintic spline
+   * using a quintic spline (includes constraint overrides)
    * 
    * @param driveTrain                      The drive train
    * @param odometry                        The robot odometry
@@ -215,18 +235,28 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
    *                                        trajectory
+   * @param velocityOverride                Max velocity (inches/second) to be
+   *                                        used instead of the default
+   * @param accelerationOverride            Max acceleration (inches/second^2) to
+   *                                        be used instead of the default
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
    *                                        of the default
+   * @param includeVoltageConstraint        Whether to include the default
+   *                                        differential voltage constraint
+   *                                        (disabling this is sometimes useful
+   *                                        when overriding acceleration)
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Object> waypointData,
       double endVelocity, boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints,
-      double centripetalAccelerationOverride) {
+      Double velocityOverride, Double accelerationOverride, Double centripetalAccelerationOverride,
+      boolean includeVoltageConstraint) {
     updateConstants();
     this.waypointPoses = processWaypointData(waypointData, reversed);
     useQuintic = true;
     setup(driveTrain, odometry, null, null, Units.inchesToMeters(endVelocity), reversed, relative, extraConstraints,
-        Units.inchesToMeters(centripetalAccelerationOverride));
+        inchesToMetersIfNotNull(velocityOverride), inchesToMetersIfNotNull(accelerationOverride),
+        inchesToMetersIfNotNull(centripetalAccelerationOverride), includeVoltageConstraint);
   }
 
   /**
@@ -244,12 +274,12 @@ public class NewRunMotionProfile extends CommandBase {
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Object> waypointData,
       double endVelocity, boolean reversed, boolean relative, List<TrajectoryConstraint> extraConstraints) {
-    this(driveTrain, odometry, waypointData, endVelocity, reversed, relative, extraConstraints, -1);
+    this(driveTrain, odometry, waypointData, endVelocity, reversed, relative, extraConstraints, null, null, null, true);
   }
 
   /**
    * Creates a new RunMotionProfile that starts from the robot's current position,
-   * using a cubic spline
+   * using a cubic spline (includes constraint overrides)
    * 
    * @param driveTrain                      The drive train
    * @param odometry                        The robot odometry
@@ -266,17 +296,27 @@ public class NewRunMotionProfile extends CommandBase {
    *                                        opposed to field coordinates
    * @param extraConstraints                Extra constrints to apply to the
    *                                        trajectory
+   * @param velocityOverride                Max velocity (inches/second) to be
+   *                                        used instead of the default
+   * @param accelerationOverride            Max acceleration (inches/second^2) to
+   *                                        be used instead of the default
    * @param centripetalAccelerationOverride Max centripetal acceleration
    *                                        (inches/second^2) to be used instead
    *                                        of the default
+   * @param includeVoltageConstraint        Whether to include the default
+   *                                        differential voltage constraint
+   *                                        (disabling this is sometimes useful
+   *                                        when overriding acceleration)
    */
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative,
-      List<TrajectoryConstraint> extraConstraints, double centripetalAccelerationOverride) {
+      List<TrajectoryConstraint> extraConstraints, Double velocityOverride, Double accelerationOverride,
+      Double centripetalAccelerationOverride, boolean includeVoltageConstraint) {
     updateConstants();
     setup(driveTrain, odometry, convertTranslationListToMeters(intermediatePoints),
         GeomUtil.inchesToMeters(endPosition), Units.inchesToMeters(endVelocity), reversed, relative, extraConstraints,
-        Units.inchesToMeters(centripetalAccelerationOverride));
+        inchesToMetersIfNotNull(velocityOverride), inchesToMetersIfNotNull(accelerationOverride),
+        inchesToMetersIfNotNull(centripetalAccelerationOverride), includeVoltageConstraint);
   }
 
   /**
@@ -300,7 +340,8 @@ public class NewRunMotionProfile extends CommandBase {
   public NewRunMotionProfile(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative,
       List<TrajectoryConstraint> extraConstraints) {
-    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, relative, extraConstraints, -1);
+    this(driveTrain, odometry, intermediatePoints, endPosition, endVelocity, reversed, relative, extraConstraints, null,
+        null, null, true);
   }
 
   /**
@@ -374,7 +415,8 @@ public class NewRunMotionProfile extends CommandBase {
    */
   private void setup(DriveTrainBase driveTrain, RobotOdometry odometry, List<Translation2d> intermediatePoints,
       Pose2d endPosition, double endVelocity, boolean reversed, boolean relative,
-      List<TrajectoryConstraint> extraConstraints, double centripetalAccelerationOverride) {
+      List<TrajectoryConstraint> extraConstraints, Double velocityOverride, Double accelerationOverride,
+      Double centripetalAccelerationOverride, boolean includeVoltageConstraint) {
     this.driveTrain = driveTrain;
     if (driveTrain != null) {
       addRequirements(driveTrain);
@@ -389,10 +431,13 @@ public class NewRunMotionProfile extends CommandBase {
     DifferentialDriveVoltageConstraint voltageConstraint = new DifferentialDriveVoltageConstraint(
         new SimpleMotorFeedforward(kS, kV, kA), driveKinematics, maxVoltage);
     CentripetalAccelerationConstraint centripetalAccelerationConstraint = new CentripetalAccelerationConstraint(
-        centripetalAccelerationOverride < 0 ? maxCentripetalAcceleration : centripetalAccelerationOverride);
-    config = new TrajectoryConfig(maxVelocity, maxAcceleration).setKinematics(driveKinematics)
-        .addConstraint(voltageConstraint).addConstraint(centripetalAccelerationConstraint).setEndVelocity(endVelocity)
-        .setReversed(reversed);
+        centripetalAccelerationOverride == null ? maxCentripetalAcceleration : centripetalAccelerationOverride);
+    config = new TrajectoryConfig((velocityOverride == null ? maxVelocity : velocityOverride),
+        (accelerationOverride == null ? maxAcceleration : accelerationOverride)).setKinematics(driveKinematics)
+            .addConstraint(centripetalAccelerationConstraint).setEndVelocity(endVelocity).setReversed(reversed);
+    if (includeVoltageConstraint) {
+      config.addConstraint(voltageConstraint);
+    }
     for (int i = 0; i < extraConstraints.size(); i++) {
       config.addConstraint(new InchesToMetersConstraint(extraConstraints.get(i)));
     }
@@ -640,6 +685,17 @@ public class NewRunMotionProfile extends CommandBase {
       output.add(GeomUtil.inchesToMeters(translations.get(i)));
     }
     return output;
+  }
+
+  /**
+   * Converts a Double from inches to meters, returning null if the input is null.
+   */
+  private static Double inchesToMetersIfNotNull(Double input) {
+    if (input == null) {
+      return null;
+    } else {
+      return Units.inchesToMeters(input);
+    }
   }
 
   /**

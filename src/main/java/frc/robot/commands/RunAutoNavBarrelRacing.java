@@ -41,7 +41,7 @@ public class RunAutoNavBarrelRacing extends ParallelRaceGroup {
             false),
         new CirclePath(new Translation2d(300, 60), 30, Rotation2d.fromDegrees(-135), Rotation2d.fromDegrees(90), false),
         new Pose2d(150.0, 90, Rotation2d.fromDegrees(180)), new Pose2d(42.0, 90.0, Rotation2d.fromDegrees(180))),
-        Double.MAX_VALUE, false, false, new ArrayList<>(), Double.MAX_VALUE);
+        Double.MAX_VALUE, false, false, new ArrayList<>(), null, null, Double.MAX_VALUE, true);
     // Add your addCommands(new FooCommand(), new BarCommand());
     if (odometry != null && driveTrain != null) {
       addCommands(new SequentialCommandGroup(
