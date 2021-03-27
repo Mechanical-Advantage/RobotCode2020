@@ -59,11 +59,12 @@ public class RunAutoNavBounce extends ParallelRaceGroup {
         List.of(new Pose2d(242, 147, Rotation2d.fromDegrees(90)), new Pose2d(285, 107, Rotation2d.fromDegrees(145))),
         Double.MAX_VALUE, true, false, new ArrayList<>(), centripetalAccelerationOverride);
     // Add your addCommands(new FooCommand(), new BarCommand());
-    addCommands(
-        new SequentialCommandGroup(
-            new InstantCommand(() -> odometry.setPosition(new Pose2d(41.5, 90, new Rotation2d()))),
-            new InstantCommand(() -> intake.extend()), mp1, mp2, mp3, mp4, new InstantCommand(() -> driveTrain.stop())),
-        new RequireCommand(odometry));
+    if (odometry != null && driveTrain != null && intake != null) {
+      addCommands(new SequentialCommandGroup(
+          new InstantCommand(() -> odometry.setPosition(new Pose2d(41.5, 90, new Rotation2d()))),
+          new InstantCommand(() -> intake.extend()), mp1, mp2, mp3, mp4, new InstantCommand(() -> driveTrain.stop())),
+          new RequireCommand(odometry));
+    }
   }
 
   public static void main(String[] args) {

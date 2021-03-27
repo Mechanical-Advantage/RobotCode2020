@@ -47,7 +47,7 @@ public class RunGalacticSearchABlue extends ParallelRaceGroup {
             new EllipticalRegionConstraint(new Translation2d(220, 100), 20, 20, new Rotation2d(), pickupConstraint),
             new EllipticalRegionConstraint(new Translation2d(260, 100), 20, 20, new Rotation2d(), pickupConstraint)));
     // Add your addCommands(new FooCommand(), new BarCommand());
-    if (intake != null) {
+    if (odometry != null && driveTrain != null && intake != null) {
       addCommands(new SequentialCommandGroup(
           new InstantCommand(() -> odometry.setPosition(new Pose2d(48, 30, new Rotation2d()))),
           new InstantCommand(() -> intake.extend()), mp.deadlineWith(new RunIntakeForwards(intake)),

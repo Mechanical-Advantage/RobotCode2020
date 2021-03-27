@@ -44,10 +44,11 @@ public class RunAutoNavSlalom extends ParallelRaceGroup {
             new Pose2d(60.0, 90.0, Rotation2d.fromDegrees(90.0 + 45.0))),
         Double.MAX_VALUE, false, false, new ArrayList<>());
     // Add your addCommands(new FooCommand(), new BarCommand());
-    addCommands(
-        new SequentialCommandGroup(new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))),
-            mp, new InstantCommand(() -> driveTrain.stop())),
-        new RequireCommand(odometry));
+    if (odometry != null && driveTrain != null) {
+      addCommands(new SequentialCommandGroup(
+          new InstantCommand(() -> odometry.setPosition(new Pose2d(30, 30, new Rotation2d()))), mp,
+          new InstantCommand(() -> driveTrain.stop())), new RequireCommand(odometry));
+    }
   }
 
   public static void main(String[] args) {

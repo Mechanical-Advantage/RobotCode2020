@@ -41,7 +41,7 @@ public class RunGalacticSearchBRed extends ParallelRaceGroup {
         List.of(new Translation2d(90, 120), new Translation2d(150, 65), new Translation2d(210, 110)),
         new Pose2d(320, 125, Rotation2d.fromDegrees(0)), 100, false, false, new ArrayList<>());
     // Add your addCommands(new FooCommand(), new BarCommand());
-    if (intake != null) {
+    if (odometry != null && driveTrain != null && intake != null) {
       addCommands(new SequentialCommandGroup(
           new InstantCommand(() -> odometry.setPosition(new Pose2d(49, 150, Rotation2d.fromDegrees(-35)))),
           new InstantCommand(() -> intake.extend()), mp.deadlineWith(new RunIntakeForwards(intake)),
