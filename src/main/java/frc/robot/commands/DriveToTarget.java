@@ -24,9 +24,9 @@ public class DriveToTarget extends CommandBase {
   private static final Transform2d fieldToOuterPort = new Transform2d(
       new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1), new Rotation2d());
 
-  private static final double linearTolerance = 1.5;
+  private static final double linearTolerance = 6;
   private static final double angularTolerance = 1;
-  private static final double toleranceTime = 0.15;
+  private static final double toleranceTime = 0.25;
 
   private final DriveTrainBase driveTrain;
   private final RobotOdometry odometry;
