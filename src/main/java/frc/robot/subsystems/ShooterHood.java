@@ -23,7 +23,8 @@ public class ShooterHood extends SubsystemBase {
 
   private static final int liftSolenoidChannel = 0;
   private static final int stopSolenoidChannel = 1;
-  private static final double moveWait = 0.5; // Max secs to finishing raising or lowering lift
+  private static final double liftMoveWait = 0.3; // Max secs to finishing raising or lowering lift
+  private static final double stopMoveWait = 0.15; // Max secs for stops to move when in trench
   private static final double minPressure = 40; // Min pressure to move
 
   private final PressureSensor pressureSensor;
@@ -32,8 +33,9 @@ public class ShooterHood extends SubsystemBase {
   private Solenoid liftSolenoid;
   private Solenoid stopSolenoid;
   private HoodPosition currentPosition = HoodPosition.UNKNOWN;
-  private HoodPosition targetPosition = HoodPosition.WALL; // Forces reset to known position
+  private HoodPosition targetPosition = HoodPosition.UNKNOWN; // Forces reset to known position
   private Timer moveTimer = new Timer();
+  private double currentMoveWait = liftMoveWait;
 
   /**
    * Creates a new ShooterHood.
@@ -58,34 +60,63 @@ public class ShooterHood extends SubsystemBase {
     }
 
     if (DriverStation.getInstance().isEnabled()) {
-      if (currentPosition != targetPosition && targetPosition != HoodPosition.UNKNOWN && moveTimer.hasElapsed(moveWait)
-          && pressureSensor.getPressure() > minPressure) { // We need to move and are able to
+      if (currentPosition != targetPosition && targetPosition != HoodPosition.UNKNOWN
+          && moveTimer.hasElapsed(currentMoveWait) && pressureSensor.getPressure() > minPressure) { // We need to move
+                                                                                                    // and are able to
+        currentMoveWait = liftMoveWait; // Wait for lift by default
         switch (currentPosition) {
-        case WALL:
-          stopSolenoid.set(targetPosition == HoodPosition.LINE);
-          liftSolenoid.set(true);
-          currentPosition = targetPosition;
-          break;
-        case LINE:
-        case TRENCH:
-        case UNKNOWN:
+        case FRONT_LINE:
           stopSolenoid.set(false);
           liftSolenoid.set(false);
           currentPosition = HoodPosition.WALL;
+          break;
+        case WALL:
+          stopSolenoid.set(targetPosition == HoodPosition.FRONT_LINE);
+          liftSolenoid.set(true);
+          currentPosition = targetPosition == HoodPosition.FRONT_LINE ? HoodPosition.FRONT_LINE : HoodPosition.TRENCH;
+          break;
+        case TRENCH:
+          if (stopSolenoid.get() != (targetPosition == HoodPosition.BACK_LINE)) {
+            stopSolenoid.set(targetPosition == HoodPosition.BACK_LINE);
+            currentMoveWait = stopMoveWait; // We don't need to wait as long for the stops
+          } else {
+            liftSolenoid.set(false);
+            currentPosition = targetPosition == HoodPosition.BACK_LINE ? HoodPosition.BACK_LINE : HoodPosition.WALL;
+          }
+          break;
+        case BACK_LINE:
+          liftSolenoid.set(true);
+          stopSolenoid.set(targetPosition == HoodPosition.TRENCH);
+          currentPosition = HoodPosition.TRENCH;
+          break;
+        case UNKNOWN:
+          liftSolenoid.set(true);
+          stopSolenoid.set(false);
+          currentPosition = HoodPosition.TRENCH;
           break;
         }
         moveTimer.reset();
       }
     } else {
-      currentPosition = HoodPosition.UNKNOWN; // Always reset hood position when enabling
+      if (currentPosition != HoodPosition.UNKNOWN) {
+        if (currentPosition == HoodPosition.BACK_LINE) {
+          currentPosition = HoodPosition.UNKNOWN;
+        } else {
+          currentPosition = HoodPosition.WALL;
+        }
+      }
     }
-    updateLED.update(OILED.HOOD_BOTTOM,
+
+    updateLED.update(OILED.HOOD_WALL,
         targetPosition == HoodPosition.WALL ? (atTargetPosition() ? OILEDState.ON : OILEDState.PULSE_FAST)
             : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_MIDDLE,
-        targetPosition == HoodPosition.LINE ? (atTargetPosition() ? OILEDState.ON : OILEDState.PULSE_FAST)
+    updateLED.update(OILED.HOOD_FRONT_LINE,
+        targetPosition == HoodPosition.FRONT_LINE ? (atTargetPosition() ? OILEDState.ON : OILEDState.PULSE_FAST)
             : OILEDState.OFF);
-    updateLED.update(OILED.HOOD_TOP,
+    updateLED.update(OILED.HOOD_BACK_LINE,
+        targetPosition == HoodPosition.BACK_LINE ? (atTargetPosition() ? OILEDState.ON : OILEDState.PULSE_FAST)
+            : OILEDState.OFF);
+    updateLED.update(OILED.HOOD_TRENCH,
         targetPosition == HoodPosition.TRENCH ? (atTargetPosition() ? OILEDState.ON : OILEDState.PULSE_FAST)
             : OILEDState.OFF);
   }
@@ -112,10 +143,10 @@ public class ShooterHood extends SubsystemBase {
    */
   public boolean atTargetPosition() {
     return (currentPosition == targetPosition || targetPosition == HoodPosition.UNKNOWN)
-        && moveTimer.hasElapsed(moveWait);
+        && moveTimer.hasElapsed(currentMoveWait);
   }
 
   public static enum HoodPosition {
-    UNKNOWN, WALL, LINE, TRENCH
+    UNKNOWN, WALL, FRONT_LINE, BACK_LINE, TRENCH
   }
 }

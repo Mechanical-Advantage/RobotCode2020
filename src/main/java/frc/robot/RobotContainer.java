@@ -410,8 +410,10 @@ public class RobotContainer {
 
     operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
         .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.WALL));
-    operatorOI.getHoodLineButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.LINE));
+    operatorOI.getHoodFrontLineButton().and(operatorOI.getManualHoodSwitch())
+        .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.FRONT_LINE));
+    operatorOI.getHoodBackLineButton().and(operatorOI.getManualHoodSwitch())
+        .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.BACK_LINE));
     operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
         .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.TRENCH));
 

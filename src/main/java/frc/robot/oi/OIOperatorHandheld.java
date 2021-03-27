@@ -34,7 +34,8 @@ public class OIOperatorHandheld implements IOperatorOI {
     private Trigger fakeClimbEnableSwitch;
 
     private Button wallButton;
-    private Button lineButton;
+    private Button frontLineButton;
+    private Button backLineButton;
     private Button trenchButton;
     private Button manualHoodButton;
     private Button autoHoodButton;
@@ -73,7 +74,8 @@ public class OIOperatorHandheld implements IOperatorOI {
         fakeManualHoodSwitch = new Trigger(() -> manualHood);
 
         wallButton = new POVButton(controller, 0);
-        lineButton = new POVButton(controller, 270);
+        frontLineButton = new POVButton(controller, 270);
+        backLineButton = new POVButton(controller, 90);
         trenchButton = new POVButton(controller, 180);
 
         galacticSearchButton = new Button(() -> controller.getBumper(Hand.kLeft))
@@ -140,8 +142,13 @@ public class OIOperatorHandheld implements IOperatorOI {
     }
 
     @Override
-    public Trigger getHoodLineButton() {
-        return lineButton;
+    public Trigger getHoodFrontLineButton() {
+        return frontLineButton;
+    }
+
+    @Override
+    public Trigger getHoodBackLineButton() {
+        return backLineButton;
     }
 
     @Override

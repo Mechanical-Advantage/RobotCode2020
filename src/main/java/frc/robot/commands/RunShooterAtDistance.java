@@ -15,9 +15,11 @@ import frc.robot.util.PolynomialRegression;
 
 public class RunShooterAtDistance extends CommandBase {
   private static final double maxWallDistance = 110; // inches to center of robot
-  private static final double minLineDistance = 104; // inches to center of robot
-  private static final double maxLineDistance = 199; // inches to center of robot
-  private static final double minTrenchDistance = 194; // inches to center of robot
+  private static final double minFrontLineDistance = 104; // inches to center of robot
+  private static final double maxFrontLineDistance = 169; // inches to center of robot
+  private static final double minBackLineDistance = 155; // inches to center of robot
+  private static final double maxBackLineDistance = 239; // inches to center of robot
+  private static final double minTrenchDistance = 219; // inches to center of robot
   private static final double maxFlywheelSpeed = 6500; // RPM
 
   private static final PolynomialRegression wallInnerRegression = new PolynomialRegression(
@@ -26,13 +28,17 @@ public class RunShooterAtDistance extends CommandBase {
       new double[] { 6000, 4700, 3400, 3200, 3300 }, 2);
   private static final PolynomialRegression wallOuterRegression = new PolynomialRegression(
       new double[] { 33.5, 36.5, 42.5, 48.5, 54.5, 60.5 }, new double[] { 6500, 4300, 4100, 3100, 3000, 3100 }, 2);
-  private static final PolynomialRegression lineRegression = new PolynomialRegression(
+  private static final PolynomialRegression frontLineRegression = new PolynomialRegression(
       new double[] { 75 + Constants.innerPortDepth, 81 + Constants.innerPortDepth, 87 + Constants.innerPortDepth,
           93 + Constants.innerPortDepth, 99 + Constants.innerPortDepth, 105 + Constants.innerPortDepth,
           111 + Constants.innerPortDepth, 117 + Constants.innerPortDepth, 123 + Constants.innerPortDepth,
           129 + Constants.innerPortDepth, 132.5 + Constants.innerPortDepth, 135 + Constants.innerPortDepth,
           138 + Constants.innerPortDepth, 144 + Constants.innerPortDepth, 147 + Constants.innerPortDepth },
       new double[] { 3625, 3600, 3600, 3625, 3650, 3675, 3700, 3750, 3750, 3800, 3800, 3825, 3875, 3925, 3925 }, 2);
+  private static final PolynomialRegression backLineRegression = new PolynomialRegression(
+      new double[] { 123 + Constants.innerPortDepth, 145 + Constants.innerPortDepth, 169 + Constants.innerPortDepth,
+          195 + Constants.innerPortDepth, 226 + Constants.innerPortDepth },
+      new double[] { 5700, 5500, 5100, 5100, 5100 }, 2);
   private static final PolynomialRegression trenchRegression = new PolynomialRegression(
       new double[] { 172 + Constants.innerPortDepth, 181 + Constants.innerPortDepth, 203 + Constants.innerPortDepth,
           226 + Constants.innerPortDepth, 244 + Constants.innerPortDepth, 263 + Constants.innerPortDepth,
@@ -96,30 +102,41 @@ public class RunShooterAtDistance extends CommandBase {
 
     // Update hood position
     if (autoHood) {
-      double wallLineTransition, lineTrenchTransition;
+      double wallFrontLineTransition, frontLineBackLineTransition, backLineTrenchTransition;
       switch (shooterHood.getTargetPosition()) {
       case WALL:
-        wallLineTransition = maxWallDistance;
-        lineTrenchTransition = maxLineDistance;
+        wallFrontLineTransition = maxWallDistance;
+        frontLineBackLineTransition = maxFrontLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
         break;
-      case LINE:
-        wallLineTransition = minLineDistance;
-        lineTrenchTransition = maxLineDistance;
+      case FRONT_LINE:
+        wallFrontLineTransition = minFrontLineDistance;
+        frontLineBackLineTransition = maxFrontLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
+        break;
+      case BACK_LINE:
+        wallFrontLineTransition = maxWallDistance;
+        frontLineBackLineTransition = minBackLineDistance;
+        backLineTrenchTransition = maxBackLineDistance;
         break;
       case TRENCH:
-        wallLineTransition = minLineDistance;
-        lineTrenchTransition = minTrenchDistance;
+        wallFrontLineTransition = maxWallDistance;
+        frontLineBackLineTransition = minBackLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
         break;
       case UNKNOWN:
       default:
-        wallLineTransition = (maxWallDistance + minLineDistance) / 2;
-        lineTrenchTransition = (maxLineDistance + minTrenchDistance) / 2;
+        wallFrontLineTransition = (maxWallDistance + minFrontLineDistance) / 2;
+        frontLineBackLineTransition = (maxFrontLineDistance + minBackLineDistance) / 2;
+        backLineTrenchTransition = (maxBackLineDistance + minTrenchDistance) / 2;
         break;
       }
-      if (distance < wallLineTransition) {
+      if (distance < wallFrontLineTransition) {
         shooterHood.setTargetPosition(HoodPosition.WALL);
-      } else if (distance < lineTrenchTransition) {
-        shooterHood.setTargetPosition(HoodPosition.LINE);
+      } else if (distance < frontLineBackLineTransition) {
+        shooterHood.setTargetPosition(HoodPosition.FRONT_LINE);
+      } else if (distance < backLineTrenchTransition) {
+        shooterHood.setTargetPosition(HoodPosition.BACK_LINE);
       } else {
         shooterHood.setTargetPosition(HoodPosition.TRENCH);
       }
@@ -135,8 +152,11 @@ public class RunShooterAtDistance extends CommandBase {
         predictedSpeed = wallOuterRegression.predict(distance);
       }
       break;
-    case LINE:
-      predictedSpeed = lineRegression.predict(distance);
+    case FRONT_LINE:
+      predictedSpeed = frontLineRegression.predict(distance);
+      break;
+    case BACK_LINE:
+      predictedSpeed = backLineRegression.predict(distance);
       break;
     case TRENCH:
       predictedSpeed = trenchRegression.predict(distance);
