@@ -33,7 +33,9 @@ public class RunAutoNavBounce extends ParallelRaceGroup {
   NewRunMotionProfile mp2;
   NewRunMotionProfile mp3;
   NewRunMotionProfile mp4;
-  private static final double centripetalAccelerationOverride = Double.MAX_VALUE;
+  private static final Double velocityOverride = 150.0;
+  private static final Double accelerationOverride = 250.0;
+  private static final Double centripetalAccelerationOverride = Double.MAX_VALUE;
   private static final double markerDiameter = 4;
   private static final double markerDiameterCrates = 12;
   private static final Color markerColorMain = Color.BLACK;
@@ -44,20 +46,23 @@ public class RunAutoNavBounce extends ParallelRaceGroup {
   /** Creates a new RunAutoNavBounce. */
   public RunAutoNavBounce(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
     mp1 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(41.5, 90, new Rotation2d()), new Pose2d(90, 130, Rotation2d.fromDegrees(100))), 0, false,
-        false, new ArrayList<>(), null, null, centripetalAccelerationOverride, true);
+        List.of(new Pose2d(41.5, 90, new Rotation2d()), new Pose2d(78, 145, Rotation2d.fromDegrees(100))), 0, false,
+        false, new ArrayList<>(), velocityOverride, accelerationOverride, centripetalAccelerationOverride, false);
     mp2 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(90, 130, Rotation2d.fromDegrees(100)),
-            new CirclePath(new Translation2d(142, 72), 30, Rotation2d.fromDegrees(-160), new Rotation2d(), false),
-            new Pose2d(180, 140, Rotation2d.fromDegrees(-90))),
-        0, true, false, new ArrayList<>(), null, null, centripetalAccelerationOverride, true);
+        List.of(new Pose2d(78, 145, Rotation2d.fromDegrees(100)),
+            new CirclePath(new Translation2d(145, 57), 22.5, Rotation2d.fromDegrees(-180), new Rotation2d(), false),
+            new Pose2d(150, 155, Rotation2d.fromDegrees(-90))),
+        0, true, false, new ArrayList<>(), velocityOverride, accelerationOverride, centripetalAccelerationOverride,
+        false);
     mp3 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(180, 140, Rotation2d.fromDegrees(-90)), new Pose2d(176, 96, Rotation2d.fromDegrees(-90)),
-            new Pose2d(260, 85, Rotation2d.fromDegrees(90)), new Pose2d(242, 147, Rotation2d.fromDegrees(90))),
-        0, false, false, new ArrayList<>(), null, null, centripetalAccelerationOverride, true);
+        List.of(new Pose2d(150, 155, Rotation2d.fromDegrees(-90)), new Pose2d(176, 96, Rotation2d.fromDegrees(-90)),
+            new Pose2d(260, 85, Rotation2d.fromDegrees(90)), new Pose2d(225, 147, Rotation2d.fromDegrees(90))),
+        0, false, false, new ArrayList<>(), velocityOverride, accelerationOverride, centripetalAccelerationOverride,
+        false);
     mp4 = new NewRunMotionProfile(driveTrain, odometry, 0,
-        List.of(new Pose2d(242, 147, Rotation2d.fromDegrees(90)), new Pose2d(285, 107, Rotation2d.fromDegrees(145))),
-        Double.MAX_VALUE, true, false, new ArrayList<>(), null, null, centripetalAccelerationOverride, true);
+        List.of(new Pose2d(225, 147, Rotation2d.fromDegrees(90)), new Pose2d(285, 90, Rotation2d.fromDegrees(145))),
+        Double.MAX_VALUE, true, false, new ArrayList<>(), velocityOverride, accelerationOverride,
+        centripetalAccelerationOverride, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     if (odometry != null && driveTrain != null && intake != null) {
       addCommands(new SequentialCommandGroup(

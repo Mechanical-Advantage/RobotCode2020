@@ -108,6 +108,16 @@ public class RobotOdometry extends SubsystemBase {
   }
 
   /**
+   * Sets the robot's current position to the given Translation2d.
+   * 
+   * @param position The position (translation only)
+   */
+  public void setPosition(Translation2d position) {
+    driveOdometry.resetPosition(new Pose2d(position, getCurrentPose().getRotation()), getCurrentRotation());
+    resetBaseDistances();
+  }
+
+  /**
    * Adjusts the robot's position using the provided translation at the timestamp
    * given. The data since then is kept and the rotation component of the pose is
    * unchanged.
