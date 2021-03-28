@@ -49,24 +49,24 @@ public class RunAutoNavBarrelRacing extends ParallelRaceGroup {
         Double.MAX_VALUE, false, false, new ArrayList<>(), velocityOverride, accelerationOverride,
         centripetalAccelerationOverride, false);
     mp2 = new NewRunMotionProfile(driveTrain, odometry, velocityOverride,
-        List.of(new Pose2d(118, 40, Rotation2d.fromDegrees(45)), new Pose2d(195, 90, new Rotation2d()),
-            new CirclePath(new Translation2d(218, 121), 38, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(-135),
+        List.of(new Pose2d(118, 40, Rotation2d.fromDegrees(45)), new Pose2d(190, 80, new Rotation2d()),
+            new CirclePath(new Translation2d(218, 114), 38, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(-135),
                 false)),
         Double.MAX_VALUE, false, false, new ArrayList<>(), velocityOverride, accelerationOverride,
         centripetalAccelerationOverride, false);
     mp3 = new NewRunMotionProfile(driveTrain, odometry, velocityOverride,
-        List.of(new Pose2d(213, 135, Rotation2d.fromDegrees(-110)), new Pose2d(310, 62, new Rotation2d())),
+        List.of(new Pose2d(213, 135, Rotation2d.fromDegrees(-110)), new Pose2d(305, 63, new Rotation2d())),
         Double.MAX_VALUE, false, false, new ArrayList<>(), velocityOverride, accelerationOverride,
         centripetalAccelerationOverride, false);
     mp4 = new NewRunMotionProfile(driveTrain, odometry, velocityOverride,
         List.of(new Pose2d(270, 40, Rotation2d.fromDegrees(-35)),
-            new CirclePath(new Translation2d(308, 64), 28.5, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90),
+            new CirclePath(new Translation2d(304, 64), 28.5, Rotation2d.fromDegrees(-90), Rotation2d.fromDegrees(90),
                 false)),
         Double.MAX_VALUE, false, false, new ArrayList<>(), velocityOverride, accelerationOverride,
         centripetalAccelerationOverride, false);
     mp5 = new NewRunMotionProfile(driveTrain, odometry, velocityOverride,
         List.of(new Pose2d(315, 82, Rotation2d.fromDegrees(165)), new Pose2d(240, 80, Rotation2d.fromDegrees(180)),
-            new Pose2d(35, 55, Rotation2d.fromDegrees(180))),
+            new Pose2d(35, 60, Rotation2d.fromDegrees(180))),
         Double.MAX_VALUE, false, false, new ArrayList<>(), velocityOverride, accelerationOverride,
         centripetalAccelerationOverride, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
