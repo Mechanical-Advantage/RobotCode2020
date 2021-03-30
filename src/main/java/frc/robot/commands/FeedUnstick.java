@@ -24,14 +24,16 @@ public class FeedUnstick extends CommandBase {
   private final TunableNumber hopperRightSetpoint = new TunableNumber("Hopper/unstickSetpointRight");
   private final TunableNumber rollerSetpoint = new TunableNumber("Shooter Roller/unstickSetpoint");
   private final UpdateLEDInterface updateLED;
+  private final boolean rollerOnly;
 
   /**
    * Creates a new FeedUnstick.
    */
-  public FeedUnstick(ShooterRoller roller, Hopper hopper, UpdateLEDInterface updateLED) {
+  public FeedUnstick(ShooterRoller roller, Hopper hopper, UpdateLEDInterface updateLED, boolean rollerOnly) {
     this.roller = roller;
     this.hopper = hopper;
     this.updateLED = updateLED;
+    this.rollerOnly = rollerOnly;
     addRequirements(roller, hopper);
     hopperLeftSetpoint.setDefault(-0.5);
     hopperRightSetpoint.setDefault(-0.4);
@@ -69,6 +71,10 @@ public class FeedUnstick extends CommandBase {
 
   private void updateSetpoints() {
     roller.run(rollerSetpoint.get());
-    hopper.run(hopperLeftSetpoint.get(), hopperRightSetpoint.get());
+    if (rollerOnly) {
+      hopper.run(0, 0);
+    } else {
+      hopper.run(hopperLeftSetpoint.get(), hopperRightSetpoint.get());
+    }
   }
 }
