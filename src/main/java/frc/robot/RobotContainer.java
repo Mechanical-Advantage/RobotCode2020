@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AccurateFeed;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
@@ -382,15 +383,10 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    Trigger hoodReady = new Trigger(shooterHood::atTargetPosition);
-    Trigger flywheelReady = new Trigger(shooterFlyWheel::readyForAccurateFeed);
-    driverOI.getShooterRollerButton().and(hoodReady).and(flywheelReady)
-        .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
-    driverOI.getShooterRollerButton().and(flywheelReady.negate())
-        .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED, false));
-
+    driverOI.getShooterRollerButton()
+        .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood));
     driverOI.getShooterUnstickButton()
-        .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED, false));
+        .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
     operatorOI.getIntakeExtendButton().whenActive(intake::extend, intake);
     operatorOI.getIntakeRetractButton().whenActive(intake::retract, intake);
