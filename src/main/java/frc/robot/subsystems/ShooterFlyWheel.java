@@ -71,18 +71,18 @@ public class ShooterFlyWheel extends SubsystemBase {
     this.updateLED = updateLED;
 
     switch (Constants.getRobot()) {
-      case ROBOT_2020:
-        flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        feedForwardModel = new SimpleMotorFeedforward(0.133, 0.00142, 0.000489);
-        break;
-      case ROBOT_2020_DRIVE:
-        flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        feedForwardModel = new SimpleMotorFeedforward(0, 0, 0);
-        break;
-      default:
-        return;
+    case ROBOT_2020:
+      flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      feedForwardModel = new SimpleMotorFeedforward(0.133, 0.00142, 0.000489);
+      break;
+    case ROBOT_2020_DRIVE:
+      flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      feedForwardModel = new SimpleMotorFeedforward(0, 0, 0);
+      break;
+    default:
+      return;
     }
 
     this.setFlyWheelSpeed = setFlyWheelSpeed;
@@ -203,12 +203,16 @@ public class ShooterFlyWheel extends SubsystemBase {
       lastShooterLEDState = shooterLEDState;
     }
 
-    // Update setpoint
+    // Update setpoint & log closed loop setpoints
     if (!openLoopControl) {
       double rpmSetpoint = closedLoopVelocityProfiler.getSetpoint();
       double ffVolts = feedForwardModel.calculate(rpmSetpoint);
       setpoint = rpmSetpoint / MULTIPLIER;
       flywheel_pidController.setReference(setpoint, ControlType.kVelocity, 0, ffVolts);
+      if (Constants.tuningMode) {
+        SmartDashboard.putNumber("Shooter FlyWheel/target setpoint", targetRpm);
+        SmartDashboard.putNumber("Shooter FlyWheel/current setpoint", rpmSetpoint);
+      }
     }
   }
 
