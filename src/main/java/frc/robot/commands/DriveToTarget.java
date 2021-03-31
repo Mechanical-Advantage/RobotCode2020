@@ -24,51 +24,43 @@ public class DriveToTarget extends CommandBase {
   private static final Transform2d fieldToOuterPort = new Transform2d(
       new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1), new Rotation2d());
 
-  private static final double linearTolerance = 6;
+  private static final double maxVelocity = 0.85;
+  private static final double maxAcceleration = 350.0 / 150.0; // acceleration over max velocity (%/s^2)
   private static final double angularTolerance = 1;
   private static final double toleranceTime = 0.25;
 
   private final DriveTrainBase driveTrain;
   private final RobotOdometry odometry;
-  private final TunableNumber linearKp = new TunableNumber("DriveToTarget/LinearKp");
-  private final TunableNumber linearKi = new TunableNumber("DriveToTarget/LinearKi");
-  private final TunableNumber linearKd = new TunableNumber("DriveToTarget/LinearKd");
+  private final double xPosition;
   private final TunableNumber angularKp = new TunableNumber("DriveToTarget/AngularKp");
   private final TunableNumber angularKi = new TunableNumber("DriveToTarget/AngularKi");
   private final TunableNumber angularKd = new TunableNumber("DriveToTarget/AngularKd");
-  private final PIDController linearController;
   private final PIDController angularController;
+  private final Timer accelerationTimer = new Timer();
   private final Timer toleranceTimer = new Timer();
+  private boolean linearReady = false;
 
   /** Creates a new DriveToPoint. */
   public DriveToTarget(DriveTrainBase driveTrain, RobotOdometry odometry, double xPosition) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.driveTrain = driveTrain;
     this.odometry = odometry;
+    this.xPosition = xPosition;
     addRequirements(driveTrain);
 
     switch (Constants.getRobot()) {
     case ROBOT_2020:
     case ROBOT_2020_DRIVE:
-      linearKp.setDefault(0.018);
-      linearKi.setDefault(0);
-      linearKd.setDefault(0.0008);
-      angularKp.setDefault(0.015);
+      angularKp.setDefault(0.016);
       angularKi.setDefault(0);
       angularKd.setDefault(0.0003);
       break;
     default:
-      linearKp.setDefault(0);
-      linearKi.setDefault(0);
-      linearKd.setDefault(0);
       angularKp.setDefault(0);
       angularKi.setDefault(0);
       angularKd.setDefault(0);
       break;
     }
-    linearController = new PIDController(linearKp.get(), linearKi.get(), linearKd.get());
-    linearController.setTolerance(linearTolerance);
-    linearController.setSetpoint(xPosition);
     angularController = new PIDController(angularKp.get(), angularKi.get(), angularKd.get());
     angularController.setTolerance(angularTolerance);
     angularController.enableContinuousInput(-180, 180);
@@ -77,8 +69,10 @@ public class DriveToTarget extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    linearController.reset();
+    linearReady = false;
     angularController.reset();
+    accelerationTimer.reset();
+    accelerationTimer.start();
     toleranceTimer.reset();
     toleranceTimer.start();
   }
@@ -87,31 +81,33 @@ public class DriveToTarget extends CommandBase {
   @Override
   public void execute() {
     if (Constants.tuningMode) {
-      SmartDashboard.putNumber("DriveToTarget/LinearError", linearController.getPositionError());
       SmartDashboard.putNumber("DriveToTarget/AngularError", angularController.getPositionError());
-      linearController.setPID(linearKp.get(), linearKi.get(), linearKd.get());
       angularController.setPID(angularKp.get(), angularKi.get(), angularKd.get());
     }
-
     Pose2d fieldToVehicle = odometry.getCurrentPose();
-    double linearSpeed = linearController.calculate(fieldToVehicle.getX());
 
+    // Calculate linear speed
+    double linearSpeed;
+    if (fieldToVehicle.getX() < xPosition) {
+      linearSpeed = maxVelocity;
+      accelerationTimer.reset();
+    } else {
+      linearSpeed = maxVelocity - (accelerationTimer.get() * maxAcceleration);
+      linearSpeed = linearSpeed < 0 ? 0 : linearSpeed;
+    }
+    linearReady = linearSpeed == 0;
+
+    // Calculate angular speed
     Translation2d vehicleToTarget = (Constants.flatTarget ? fieldToOuterPort : fieldToInnerPort).getTranslation()
         .minus(fieldToVehicle.getTranslation());
     Rotation2d vehicleToInnerPortRotation = new Rotation2d(vehicleToTarget.getX(), vehicleToTarget.getY());
     angularController.setSetpoint(vehicleToInnerPortRotation.getDegrees());
     double angularSpeed = angularController.calculate(fieldToVehicle.getRotation().getDegrees());
-
-    double linearPower = 1 - (Math.abs(angularController.getPositionError()) / 45);
-    if (linearPower < 0) {
-      linearPower = 0;
-    }
-    linearSpeed *= linearPower;
-    driveTrain.drive(linearSpeed - angularSpeed, linearSpeed + angularSpeed);
-
-    if (!linearController.atSetpoint() || !angularController.atSetpoint()) {
+    if (!angularController.atSetpoint()) {
       toleranceTimer.reset();
     }
+
+    driveTrain.drive(linearSpeed - angularSpeed, linearSpeed + angularSpeed);
   }
 
   // Called once the command ends or is interrupted.
@@ -124,6 +120,6 @@ public class DriveToTarget extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return toleranceTimer.hasElapsed(toleranceTime);
+    return linearReady && toleranceTimer.hasElapsed(toleranceTime);
   }
 }
