@@ -59,7 +59,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   private boolean openLoopControl = true;
 
   private Double lastOpenLoopRampRate = null; // Force this to be updated once
-  private VelocityProfiler closedLoopVelocityProfiler = new VelocityProfiler(3000);
+  private VelocityProfiler closedLoopVelocityProfiler = new VelocityProfiler(6000);
   private OILEDState lastShooterLEDState = OILEDState.OFF;
 
   private TunableNumber P = new TunableNumber("Shooter FlyWheel PID/P");
@@ -223,6 +223,10 @@ public class ShooterFlyWheel extends SubsystemBase {
       double ffVolts = feedForwardModel.calculate(rpmSetpoint);
       setpoint = rpmSetpoint / MULTIPLIER;
       flywheel_pidController.setReference(setpoint, ControlType.kVelocity, 0, ffVolts);
+      if (Constants.tuningMode) {
+        SmartDashboard.putNumber("Shooter FlyWheel/target setpoint", targetRpm);
+        SmartDashboard.putNumber("Shooter FlyWheel/current setpoint", rpmSetpoint);
+      }
 
       if (getSpeed() < closedLoopVelocityProfiler.getSetpointGoal() * accurateMinTheshold
           || getSpeed() > closedLoopVelocityProfiler.getSetpointGoal() * accurateMaxTheshold) {
