@@ -25,9 +25,9 @@ public class DriveToTarget extends CommandBase {
       new Translation2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1), new Rotation2d());
 
   private static final double maxVelocity = 0.85;
-  private static final double maxAcceleration = 350.0 / 150.0; // acceleration over max velocity (%/s^2)
+  private static final double maxAcceleration = 250.0 / 150.0; // acceleration over max velocity (%/s^2)
   private static final double angularTolerance = 1;
-  private static final double toleranceTime = 0.25;
+  private static final double toleranceTime = 0.15;
 
   private final DriveTrainBase driveTrain;
   private final RobotOdometry odometry;
@@ -110,6 +110,10 @@ public class DriveToTarget extends CommandBase {
     driveTrain.drive(linearSpeed - angularSpeed, linearSpeed + angularSpeed);
   }
 
+  public boolean angularReady() {
+    return toleranceTimer.hasElapsed(toleranceTime);
+  }
+
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
@@ -120,6 +124,6 @@ public class DriveToTarget extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return linearReady && toleranceTimer.hasElapsed(toleranceTime);
+    return linearReady && angularReady();
   }
 }

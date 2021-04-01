@@ -33,20 +33,26 @@ import frc.robot.subsystems.drive.DriveTrainBase;
 public class PowerPortChallengeAuto extends SequentialCommandGroup {
 
   private static final double stopDistance = Constants.fieldLength - 205;
-  private static final Pose2d loadPosition = new Pose2d(Constants.fieldLength - 305,
-      Constants.visionTargetHorizDist * -1 + 50, new Rotation2d());
+  private static final double shootDistance = Constants.fieldLength - 205;
+  private static final Pose2d loadPosition = new Pose2d(Constants.fieldLength - 300,
+      Constants.visionTargetHorizDist * -1 + 35, new Rotation2d());
 
   /** Creates a new PowerPortChallengeAuto. */
   public PowerPortChallengeAuto(DriveTrainBase driveTrain, RobotOdometry odometry, Intake intake, Hopper hopper,
       ShooterRoller roller, ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, LimelightInterface limelight) {
-    super(new ParallelDeadlineGroup(
-        new DriveToTarget(driveTrain, odometry, stopDistance).andThen(new WaitUntilCommand(shooterFlyWheel::atSetpoint),
-            new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(1.5)),
-        new InstantCommand(() -> shooterHood.setTargetPosition(HoodPosition.BACK_LINE))
-            .andThen(new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false)),
-        new StartEndCommand(intake::retract, intake::extend, intake),
-        new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
-            () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight)),
+    DriveToTarget driveToTarget = new DriveToTarget(driveTrain, odometry, stopDistance);
+    WaitUntilCommand readyToShoot = new WaitUntilCommand(() -> shooterFlyWheel.atSetpoint()
+        && driveToTarget.angularReady() && odometry.getCurrentPose().getX() > shootDistance);
+    addCommands(
+        new ParallelDeadlineGroup(
+            readyToShoot.andThen(new InstantCommand(intake::extend),
+                new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(1.5)),
+            driveToTarget,
+            new InstantCommand(() -> shooterHood.setTargetPosition(HoodPosition.BACK_LINE))
+                .andThen(new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false)),
+            new InstantCommand(intake::retract),
+            new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
+                () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight)),
         new NewRunMotionProfile(driveTrain, odometry, List.of(loadPosition), 0, true, false, new ArrayList<>()));
   }
 }
