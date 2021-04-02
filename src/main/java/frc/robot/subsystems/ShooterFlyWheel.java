@@ -44,7 +44,7 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final double accurateMinTheshold = 0.97;
   private static final double accurateMaxTheshold = 1.03;
   private static final double accurateInTime = 2;
-  private static final double accurateFeedGrace = 0.25;
+  private static final double accurateFeedGrace = 0.1;
   private boolean accurateReady = false;
   private Timer accurateInTimer = new Timer();
   private Timer accurateGraceTimer = new Timer();
