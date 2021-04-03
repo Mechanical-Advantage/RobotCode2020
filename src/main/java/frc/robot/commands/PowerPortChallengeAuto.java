@@ -32,8 +32,8 @@ import frc.robot.subsystems.drive.DriveTrainBase;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class PowerPortChallengeAuto extends SequentialCommandGroup {
 
-  private static final double stopDistance = Constants.fieldLength - 205;
-  private static final double shootDistance = Constants.fieldLength - 205;
+  private static final double stopDistance = Constants.fieldLength - 200;
+  private static final double shootDistance = Constants.fieldLength - 200;
   private static final Pose2d loadPosition = new Pose2d(Constants.fieldLength - 300,
       Constants.visionTargetHorizDist * -1 + 35, new Rotation2d());
 
@@ -45,12 +45,11 @@ public class PowerPortChallengeAuto extends SequentialCommandGroup {
         && driveToTarget.angularReady() && odometry.getCurrentPose().getX() > shootDistance);
     addCommands(
         new ParallelDeadlineGroup(
-            readyToShoot.andThen(new InstantCommand(intake::extend),
-                new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(1.5)),
+            readyToShoot.andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(1.5)),
             driveToTarget,
             new InstantCommand(() -> shooterHood.setTargetPosition(HoodPosition.BACK_LINE))
                 .andThen(new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false)),
-            new InstantCommand(intake::retract),
+            new StartEndCommand(intake::retract, intake::extend, intake),
             new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
                 () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight)),
         new NewRunMotionProfile(driveTrain, odometry, List.of(loadPosition), 0, true, false, new ArrayList<>()));
