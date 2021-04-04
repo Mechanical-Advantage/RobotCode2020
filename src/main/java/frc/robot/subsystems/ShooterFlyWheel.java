@@ -15,6 +15,7 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,6 +41,13 @@ public class ShooterFlyWheel extends SubsystemBase {
   private static final double LEDSlowPulseThreshold = 0.5; // percent of setpoint rpm
   private static final double atSetpointThreshold = 0.95; // percent of setpoint rpm
   private static final double safeFeedThreshold = 2500; // min rpm to feed balls where they won't get stuck
+  private static final double accurateMinTheshold = 0.97;
+  private static final double accurateMaxTheshold = 1.03;
+  private static final double accurateInTime = 2;
+  private static final double accurateFeedGrace = 0.1;
+  private boolean accurateReady = false;
+  private Timer accurateInTimer = new Timer();
+  private Timer accurateGraceTimer = new Timer();
   private double setpoint = 0;
 
   CANSparkMax flywheelMaster;
@@ -84,6 +92,11 @@ public class ShooterFlyWheel extends SubsystemBase {
     default:
       return;
     }
+
+    accurateInTimer.reset();
+    accurateInTimer.start();
+    accurateGraceTimer.reset();
+    accurateGraceTimer.start();
 
     this.setFlyWheelSpeed = setFlyWheelSpeed;
 
@@ -203,8 +216,9 @@ public class ShooterFlyWheel extends SubsystemBase {
       lastShooterLEDState = shooterLEDState;
     }
 
-    // Update setpoint & log closed loop setpoints
+    // Closed loop control logic
     if (!openLoopControl) {
+      // Update setpoint
       double rpmSetpoint = closedLoopVelocityProfiler.getSetpoint();
       double ffVolts = feedForwardModel.calculate(rpmSetpoint);
       setpoint = rpmSetpoint / MULTIPLIER;
@@ -213,6 +227,18 @@ public class ShooterFlyWheel extends SubsystemBase {
         SmartDashboard.putNumber("Shooter FlyWheel/target setpoint", targetRpm);
         SmartDashboard.putNumber("Shooter FlyWheel/current setpoint", rpmSetpoint);
       }
+
+      if (getSpeed() < closedLoopVelocityProfiler.getSetpointGoal() * accurateMinTheshold
+          || getSpeed() > closedLoopVelocityProfiler.getSetpointGoal() * accurateMaxTheshold) {
+        accurateInTimer.reset();
+      }
+
+      if (accurateInTimer.hasElapsed(accurateInTime)) {
+        accurateGraceTimer.reset();
+      }
+      accurateReady = !accurateGraceTimer.hasElapsed(accurateFeedGrace);
+    } else {
+      accurateReady = false;
     }
   }
 
@@ -258,10 +284,14 @@ public class ShooterFlyWheel extends SubsystemBase {
 
   public boolean atSetpoint() {
     if (openLoopControl) {
-      return true;
+      return false;
     } else {
       return getSpeed() > closedLoopVelocityProfiler.getSetpointGoal() * atSetpointThreshold;
     }
+  }
+
+  public boolean readyForAccurateFeed() {
+    return accurateReady;
   }
 
   public boolean safeToFeed() {

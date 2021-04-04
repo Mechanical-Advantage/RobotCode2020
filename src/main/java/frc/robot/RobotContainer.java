@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AccurateFeed;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
@@ -125,6 +126,7 @@ public class RobotContainer {
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
   private SendableChooser<JoystickMode> joystickModeChooser;
+  private SendableChooser<ShootingMode> shootingModeChooser = new SendableChooser<ShootingMode>();
 
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
   private final RunGalacticSearchVision galacticSearchCommand;
@@ -205,6 +207,10 @@ public class RobotContainer {
     autoChooser.addOption("Hyperdrive (Lightspeed Circuit)",
         new RunHyperdriveLightspeedCircuit(odometry, driveSubsystem));
     SmartDashboard.putData("Auto Mode", autoChooser);
+
+    shootingModeChooser.setDefaultOption("Normal", ShootingMode.NORMAL);
+    shootingModeChooser.addOption("Interstellar Accuracy", ShootingMode.ACCURACY);
+    SmartDashboard.putData("Shooting Mode", shootingModeChooser);
   }
 
   public void updateOIType() {
@@ -382,10 +388,10 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    Trigger hoodReady = new Trigger(shooterHood::atTargetPosition);
-    Trigger flywheelSafeToFeed = new Trigger(shooterFlyWheel::safeToFeed);
-    driverOI.getShooterRollerButton().and(hoodReady).and(flywheelSafeToFeed)
-        .whileActiveContinuous(new RunShooterRoller(shooterRoller).alongWith(new RunHopper(hopper)));
+    driverOI.getShooterRollerButton().and(new Trigger(() -> shootingModeChooser.getSelected() == ShootingMode.NORMAL))
+        .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
+    driverOI.getShooterRollerButton().and(new Trigger(() -> shootingModeChooser.getSelected() == ShootingMode.ACCURACY))
+        .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood));
     driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
@@ -514,5 +520,9 @@ public class RobotContainer {
   public void setInitialPosition() {
     ahrs.zeroYaw();
     odometry.setPosition(initialAutoPosition);
+  }
+
+  public enum ShootingMode {
+    NORMAL, ACCURACY
   }
 }
