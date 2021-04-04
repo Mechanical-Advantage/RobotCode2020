@@ -35,7 +35,7 @@ public class PowerPortChallengeAuto extends SequentialCommandGroup {
   private static final double stopDistance = Constants.fieldLength - 200;
   private static final double shootDistance = Constants.fieldLength - 200;
   private static final Pose2d loadPosition = new Pose2d(Constants.fieldLength - 300,
-      Constants.visionTargetHorizDist * -1 + 35, new Rotation2d());
+      Constants.visionTargetHorizDist * -1 + 35, Rotation2d.fromDegrees(-10));
 
   /** Creates a new PowerPortChallengeAuto. */
   public PowerPortChallengeAuto(DriveTrainBase driveTrain, RobotOdometry odometry, Intake intake, Hopper hopper,
