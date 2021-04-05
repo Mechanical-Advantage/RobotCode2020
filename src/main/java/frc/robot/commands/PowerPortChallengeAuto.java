@@ -32,8 +32,8 @@ import frc.robot.subsystems.drive.DriveTrainBase;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class PowerPortChallengeAuto extends SequentialCommandGroup {
 
-  private static final double stopDistance = Constants.fieldLength - 200;
-  private static final double shootDistance = Constants.fieldLength - 200;
+  private static final double stopDistance = Constants.fieldLength - 215;
+  private static final double shootDistance = Constants.fieldLength - 215;
   private static final Pose2d loadPosition = new Pose2d(Constants.fieldLength - 300,
       Constants.visionTargetHorizDist * -1 + 35, Rotation2d.fromDegrees(-10));
 
