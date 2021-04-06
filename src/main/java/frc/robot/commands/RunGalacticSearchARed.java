@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.RequireCommand;
 import frckit.tools.pathview.TrajectoryMarker;
@@ -29,6 +30,9 @@ import frc.robot.subsystems.RobotOdometry;
 public class RunGalacticSearchARed extends ParallelRaceGroup {
 
   NewRunMotionProfile mp;
+  private static final Double velocityOverride = 150.0;
+  private static final Double accelerationOverride = 250.0;
+  private static final Double centripetalAccelerationOverride = Double.MAX_VALUE;
   private static final double markerDiameterZones = 4;
   private static final double markerDiameterBalls = 7;
   private static final Color markerColorZones = Color.BLACK;
@@ -38,14 +42,16 @@ public class RunGalacticSearchARed extends ParallelRaceGroup {
   public RunGalacticSearchARed(RobotOdometry odometry, DriveTrainBase driveTrain, Intake intake) {
     // new Pose2d(30, 90, Rotation2d.fromDegrees(10)) <- center start
     mp = new NewRunMotionProfile(driveTrain, odometry, new Pose2d(48, 120, Rotation2d.fromDegrees(-35)), 0,
-        List.of(new Translation2d(90, 90), new Translation2d(150, 70), new Translation2d(190, 150)),
-        new Pose2d(320, 150, new Rotation2d()), Double.MAX_VALUE, false, false, new ArrayList<>());
+        List.of(new Translation2d(90, 90), new Translation2d(147, 82), new Translation2d(155, 155)),
+        new Pose2d(348, 100, new Rotation2d()), Double.MAX_VALUE, false, false, new ArrayList<>(), velocityOverride,
+        accelerationOverride, centripetalAccelerationOverride, false);
     // Add your addCommands(new FooCommand(), new BarCommand());
     if (odometry != null && driveTrain != null && intake != null) {
       addCommands(new SequentialCommandGroup(
           new InstantCommand(() -> odometry.setPosition(new Pose2d(48, 120, Rotation2d.fromDegrees(-35)))),
           new InstantCommand(() -> intake.extend()), mp.deadlineWith(new RunIntakeForwards(intake)),
-          new InstantCommand(() -> driveTrain.stop())), new RequireCommand(odometry));
+          new InstantCommand(() -> driveTrain.stop())).alongWith(new WaitCommand(2.9).andThen(() -> intake.retract())),
+          new RequireCommand(odometry));
     }
   }
 
