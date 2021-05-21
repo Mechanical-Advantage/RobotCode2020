@@ -44,6 +44,7 @@ public class DriveWithJoysticks extends CommandBase {
   private boolean oiHasDualSniperMode;
   private DriveTrainBase driveSubsystem;
   private SendableChooser<JoystickMode> joystickChooser;
+  private SendableChooser<Double> speedLimitChooser;
 
   private boolean joysticksReversed = false;
 
@@ -52,7 +53,7 @@ public class DriveWithJoysticks extends CommandBase {
       BooleanSupplier getQuickTurn, DoubleSupplier getDeadband, BooleanSupplier sniperMode, DoubleSupplier sniperLevel,
       DoubleSupplier sniperHighLevel, DoubleSupplier sniperLowLevel, BooleanSupplier sniperLow,
       BooleanSupplier sniperHigh, boolean hasDualSniperMode, SendableChooser<JoystickMode> joystickModeChooser,
-      DriveTrainBase driveSubsystem) {
+      SendableChooser<Double> speedLimitChooser, DriveTrainBase driveSubsystem) {
     // Use requires() here to declare subsystem dependencies
     // eg. requires(chassis);
     super();
@@ -73,6 +74,7 @@ public class DriveWithJoysticks extends CommandBase {
     oiSniperHigh = sniperHigh;
     oiHasDualSniperMode = hasDualSniperMode;
     joystickChooser = joystickModeChooser;
+    this.speedLimitChooser = speedLimitChooser;
     this.driveSubsystem = driveSubsystem;
   }
 
@@ -101,12 +103,12 @@ public class DriveWithJoysticks extends CommandBase {
       this.right = right;
     }
 
-    public double getLeftProcessed(boolean reversed, double multipler) {
-      return (reversed ? MathUtil.clamp(right, -1, 1) * -1 : MathUtil.clamp(left, -1, 1)) * multipler;
+    public double getLeftProcessed(boolean reversed) {
+      return reversed ? MathUtil.clamp(right, -1, 1) * -1 : MathUtil.clamp(left, -1, 1);
     }
 
-    public double getRightProcessed(boolean reversed, double multipler) {
-      return (reversed ? MathUtil.clamp(left, -1, 1) * -1 : MathUtil.clamp(right, -1, 1)) * multipler;
+    public double getRightProcessed(boolean reversed) {
+      return reversed ? MathUtil.clamp(left, -1, 1) * -1 : MathUtil.clamp(right, -1, 1);
     }
 
     public static WheelSpeeds fromArcade(double baseSpeed, double turnSpeed) {
@@ -209,9 +211,10 @@ public class DriveWithJoysticks extends CommandBase {
         break;
     }
 
-    double multiplierLevel = oiSniperMode.getAsBoolean() ? getMultiplierForSniperMode() : 1;
-    double outputLeft = outputSpeeds.getLeftProcessed(joysticksReversed, multiplierLevel);
-    double outputRight = outputSpeeds.getRightProcessed(joysticksReversed, multiplierLevel);
+    double demoLimit = speedLimitChooser.getSelected();
+    double sniperMultiplier = oiSniperMode.getAsBoolean() ? getMultiplierForSniperMode() : 1;
+    double outputLeft = outputSpeeds.getLeftProcessed(joysticksReversed) * sniperMultiplier * demoLimit;
+    double outputRight = outputSpeeds.getRightProcessed(joysticksReversed) * sniperMultiplier * demoLimit;
     driveSubsystem.drive(outputLeft, outputRight, alwaysUseHighMaxVel);
   }
 

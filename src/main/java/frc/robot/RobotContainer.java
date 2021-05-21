@@ -31,6 +31,7 @@ import frc.robot.commands.AccurateFeed;
 import frc.robot.commands.DriveDistanceOnHeading;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
+import frc.robot.commands.RunShooterPreset.ShooterPreset;
 import frc.robot.commands.FeedUnstick;
 import frc.robot.commands.IdleLimelightControl;
 import frc.robot.commands.LimelightOdometry;
@@ -54,7 +55,7 @@ import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterAtDistance;
-import frc.robot.commands.RunShooterFlyWheel;
+import frc.robot.commands.RunShooterPreset;
 import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.SetLEDOverride;
 import frc.robot.commands.TurnToAngle;
@@ -126,9 +127,11 @@ public class RobotContainer {
   private final AHRS ahrs = new AHRS(SPI.Port.kMXP);
 
   private SendableChooser<JoystickMode> joystickModeChooser;
-  private SendableChooser<ShootingMode> shootingModeChooser = new SendableChooser<ShootingMode>();
-
   private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+  private final SendableChooser<ShooterPreset> shootingPresetChooser = new SendableChooser<ShooterPreset>();
+  private final SendableChooser<FeedMode> feedModeChooser = new SendableChooser<FeedMode>();
+  private final SendableChooser<Double> speedLimitChooser = new SendableChooser<Double>();
+
   private final RunGalacticSearchVision galacticSearchCommand;
 
   private LimelightOdometry limelightOdometry;
@@ -143,16 +146,16 @@ public class RobotContainer {
     BooleanSupplier driveDisableSwitchAccess = () -> driverOverrideOI.getDriveDisableSwitch().get();
     BooleanSupplier shiftLockSwitchAccess = () -> driverOverrideOI.getShiftLockSwitch().get();
     switch (Constants.getRobot()) {
-    case ROBOT_2020:
-    case ROBOT_2020_DRIVE:
-      driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
-      break;
-    case ROBOT_2019:
-    case ORIGINAL_ROBOT_2018:
-    case REBOT:
-    case NOTBOT:
-      driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
-      break;
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        driveSubsystem = new SparkMAXDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
+        break;
+      case ROBOT_2019:
+      case ORIGINAL_ROBOT_2018:
+      case REBOT:
+      case NOTBOT:
+        driveSubsystem = new CTREDriveTrain(driveDisableSwitchAccess, openLoopSwitchAccess, shiftLockSwitchAccess);
+        break;
     }
     // Odometry must be instantiated after drive and AHRS and after the NavX
     // initializes
@@ -167,8 +170,8 @@ public class RobotContainer {
     odometry = new RobotOdometry(driveSubsystem, ahrs);
     limelightOdometry = new LimelightOdometry(limelight, odometry);
     odometry.setDefaultCommand(limelightOdometry);
-    limelight.setDefaultCommand(
-        new IdleLimelightControl(limelight, () -> driverOverrideOI.getLimelightLEDDisableSwitch().get()));
+    limelight.setDefaultCommand(new IdleLimelightControl(limelight,
+        () -> driverOverrideOI.getLimelightLEDDisableSwitch().get() || shootingPresetChooser.getSelected() != null));
     limelight.setStreamingMode(LimelightStreamingMode.PIP_SECONDARY);
     galacticSearchCommand = new RunGalacticSearchVision(odometry, driveSubsystem, intake);
 
@@ -208,9 +211,23 @@ public class RobotContainer {
         new RunHyperdriveLightspeedCircuit(odometry, driveSubsystem));
     SmartDashboard.putData("Auto Mode", autoChooser);
 
-    shootingModeChooser.setDefaultOption("Normal", ShootingMode.NORMAL);
-    shootingModeChooser.addOption("Interstellar Accuracy", ShootingMode.ACCURACY);
-    SmartDashboard.putData("Shooting Mode", shootingModeChooser);
+    // Set up demo choosers
+    shootingPresetChooser.setDefaultOption("--Competition Mode--", null);
+    shootingPresetChooser.addOption("Demo: Long Shot", new ShooterPreset(HoodPosition.TRENCH, 6000));
+    shootingPresetChooser.addOption("Demo: Play Long Catch", new ShooterPreset(HoodPosition.FRONT_LINE, 5000));
+    shootingPresetChooser.addOption("Demo: Play Short Catch", new ShooterPreset(HoodPosition.FRONT_LINE, 3000));
+    shootingPresetChooser.addOption("Demo: Tall Shot", new ShooterPreset(HoodPosition.WALL, 6000));
+    SmartDashboard.putData("Demo/Shooting Preset", shootingPresetChooser);
+
+    feedModeChooser.setDefaultOption("--Competition Mode--", FeedMode.NORMAL);
+    feedModeChooser.addOption("Interstellar Accuracy", FeedMode.ACCURACY);
+    SmartDashboard.putData("Demo/Feed Mode", feedModeChooser);
+
+    speedLimitChooser.setDefaultOption("--Competition Mode--", 1.0);
+    speedLimitChooser.addOption("Fast Speed (70%)", 0.7);
+    speedLimitChooser.addOption("Medium Speed (30%)", 0.3);
+    speedLimitChooser.addOption("Slow Speed (15%)", 0.15);
+    SmartDashboard.putData("Demo/Speed Limit", speedLimitChooser);
   }
 
   public void updateOIType() {
@@ -239,28 +256,28 @@ public class RobotContainer {
       for (joystickNum = 0; joystickNum < 6; joystickNum++) {
         joystickName = joystickNames[joystickNum];
         switch (joystickName) {
-        case "Arduino Leonardo":
-          if (firstControllerName == null) {
-            firstController = joystickNum;
-            firstControllerName = joystickName;
-          } else if (firstControllerName.equals(joystickName)) {
-            OIArduinoConsole arduinoConsole = new OIArduinoConsole(firstController, joystickNum);
-            operatorOI = arduinoConsole;
-            driverOverrideOI = arduinoConsole;
-            System.out.println("Operator: Arduino console");
-          }
-          break;
-        case "eStop Robotics HID":
-          if (firstControllerName == null) {
-            firstController = joystickNum;
-            firstControllerName = joystickName;
-          } else if (firstControllerName.equals(joystickName)) {
-            OIeStopConsole eStopConsole = new OIeStopConsole(firstController, joystickNum);
-            operatorOI = eStopConsole;
-            driverOverrideOI = eStopConsole;
-            System.out.println("Operator: eStop console");
-          }
-          break;
+          case "Arduino Leonardo":
+            if (firstControllerName == null) {
+              firstController = joystickNum;
+              firstControllerName = joystickName;
+            } else if (firstControllerName.equals(joystickName)) {
+              OIArduinoConsole arduinoConsole = new OIArduinoConsole(firstController, joystickNum);
+              operatorOI = arduinoConsole;
+              driverOverrideOI = arduinoConsole;
+              System.out.println("Operator: Arduino console");
+            }
+            break;
+          case "eStop Robotics HID":
+            if (firstControllerName == null) {
+              firstController = joystickNum;
+              firstControllerName = joystickName;
+            } else if (firstControllerName.equals(joystickName)) {
+              OIeStopConsole eStopConsole = new OIeStopConsole(firstController, joystickNum);
+              operatorOI = eStopConsole;
+              driverOverrideOI = eStopConsole;
+              System.out.println("Operator: eStop console");
+            }
+            break;
         }
       }
 
@@ -271,35 +288,35 @@ public class RobotContainer {
       for (joystickNum = 0; joystickNum < 6; joystickNum++) {
         joystickName = joystickNames[joystickNum];
         switch (joystickName) {
-        case "Controller (XBOX 360 For Windows)":
-        case "Controller (Gamepad F310)":
-        case "Controller (Gamepad for Xbox 360)":
-        case "Controller (Afterglow Gamepad for Xbox 360)":
-        case "Controller (Xbox One For Windows)":
-        case "XBOX 360 For Windows (Controller)":
-        case "Gamepad F310 (Controller)":
-        case "Gamepad for Xbox 360 (Controller)":
-        case "Afterglow Gamepad for Xbox 360 (Controller)":
-        case "Xbox One For Windows (Controller)":
-          if (firstControllerName == null) {
-            firstControllerName = joystickName;
-            firstController = joystickNum;
-            xboxDriver = true;
-          } else if (operatorOI.equals(dummyOI)) {
-            operatorOI = new OIOperatorHandheld(joystickNum);
-            xboxOperator = true;
-            System.out.println("Operator: XBox/F310 controller");
-          }
-          break;
-        case "Logitech Attack 3":
-          if (firstControllerName == null) {
-            firstController = joystickNum;
-            firstControllerName = joystickName;
-          } else if (firstControllerName.equals(joystickName)) {
-            driverOI = new OIDualJoysticks(firstController, joystickNum);
-            System.out.println("Driver: Dual Attack 3");
-          }
-          break;
+          case "Controller (XBOX 360 For Windows)":
+          case "Controller (Gamepad F310)":
+          case "Controller (Gamepad for Xbox 360)":
+          case "Controller (Afterglow Gamepad for Xbox 360)":
+          case "Controller (Xbox One For Windows)":
+          case "XBOX 360 For Windows (Controller)":
+          case "Gamepad F310 (Controller)":
+          case "Gamepad for Xbox 360 (Controller)":
+          case "Afterglow Gamepad for Xbox 360 (Controller)":
+          case "Xbox One For Windows (Controller)":
+            if (firstControllerName == null) {
+              firstControllerName = joystickName;
+              firstController = joystickNum;
+              xboxDriver = true;
+            } else if (operatorOI.equals(dummyOI)) {
+              operatorOI = new OIOperatorHandheld(joystickNum);
+              xboxOperator = true;
+              System.out.println("Operator: XBox/F310 controller");
+            }
+            break;
+          case "Logitech Attack 3":
+            if (firstControllerName == null) {
+              firstController = joystickNum;
+              firstControllerName = joystickName;
+            } else if (firstControllerName.equals(joystickName)) {
+              driverOI = new OIDualJoysticks(firstController, joystickNum);
+              System.out.println("Driver: Dual Attack 3");
+            }
+            break;
         }
       }
       if (xboxDriver) {
@@ -348,7 +365,7 @@ public class RobotContainer {
         driverOI::getLeftDriveTrigger, driverOI::getRightDriveX, driverOI::getRightDriveY,
         driverOI::getRightDriveTrigger, driverOI::getQuickTurn, driverOI::getDeadband, driverOI::getSniperMode,
         driverOI::getSniperLevel, driverOI::getSniperHighLevel, driverOI::getSniperLowLevel, driverOI::getSniperLow,
-        driverOI::getSniperHigh, driverOI.hasDualSniperMode(), joystickModeChooser, driveSubsystem);
+        driverOI::getSniperHigh, driverOI.hasDualSniperMode(), joystickModeChooser, speedLimitChooser, driveSubsystem);
     driveSubsystem.setDefaultCommand(driveCommand);
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
@@ -388,9 +405,9 @@ public class RobotContainer {
 
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
-    driverOI.getShooterRollerButton().and(new Trigger(() -> shootingModeChooser.getSelected() == ShootingMode.NORMAL))
+    driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.NORMAL))
         .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
-    driverOI.getShooterRollerButton().and(new Trigger(() -> shootingModeChooser.getSelected() == ShootingMode.ACCURACY))
+    driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.ACCURACY))
         .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood));
     driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
@@ -405,22 +422,29 @@ public class RobotContainer {
 
     intake.updateLEDs();
 
-    RunShooterAtDistance runShooterAutoHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, true);
-    RunShooterAtDistance runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
-    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch()).whenActive(runShooterManualHood);
-    operatorOI.getShooterFlywheelRunButton().and(operatorOI.getManualHoodSwitch().negate())
-        .whenActive(runShooterAutoHood);
+    // Which shooting mode? Only one should be active at a time.
+    Trigger manualHood = new Trigger(() -> shootingPresetChooser.getSelected() == null)
+        .and(operatorOI.getManualHoodSwitch());
+    Trigger autoHood = new Trigger(() -> shootingPresetChooser.getSelected() == null)
+        .and(operatorOI.getManualHoodSwitch().negate());
+    Trigger demoPreset = new Trigger(() -> shootingPresetChooser.getSelected() == null).negate();
+
+    Command runShooterAutoHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, true);
+    Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
+    Command runShooterPreset = new RunShooterPreset(shooterFlyWheel, shooterHood, shootingPresetChooser);
+    operatorOI.getShooterFlywheelRunButton().and(manualHood).whenActive(runShooterManualHood);
+    operatorOI.getShooterFlywheelRunButton().and(autoHood).whenActive(runShooterAutoHood);
+    operatorOI.getShooterFlywheelRunButton().and(demoPreset).whenActive(runShooterPreset);
     operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooterManualHood)
-        .cancelWhenActive(runShooterAutoHood);
+        .cancelWhenActive(runShooterAutoHood).cancelWhenActive(runShooterPreset);
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
-    operatorOI.getHoodWallButton().and(operatorOI.getManualHoodSwitch())
-        .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.WALL));
-    operatorOI.getHoodFrontLineButton().and(operatorOI.getManualHoodSwitch())
+    operatorOI.getHoodWallButton().and(manualHood).whenActive(() -> shooterHood.setTargetPosition(HoodPosition.WALL));
+    operatorOI.getHoodFrontLineButton().and(manualHood)
         .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.FRONT_LINE));
-    operatorOI.getHoodBackLineButton().and(operatorOI.getManualHoodSwitch())
+    operatorOI.getHoodBackLineButton().and(manualHood)
         .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.BACK_LINE));
-    operatorOI.getHoodTrenchButton().and(operatorOI.getManualHoodSwitch())
+    operatorOI.getHoodTrenchButton().and(manualHood)
         .whenActive(() -> shooterHood.setTargetPosition(HoodPosition.TRENCH));
 
     operatorOI.getClimbEnableSwitch().whenActive(climber::deploy, climber);
@@ -522,7 +546,7 @@ public class RobotContainer {
     odometry.setPosition(initialAutoPosition);
   }
 
-  public enum ShootingMode {
+  public enum FeedMode {
     NORMAL, ACCURACY
   }
 }
