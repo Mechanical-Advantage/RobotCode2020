@@ -220,6 +220,7 @@ public class RobotContainer {
     SmartDashboard.putData("Demo/Shooting Preset", shootingPresetChooser);
 
     feedModeChooser.setDefaultOption("--Competition Mode--", FeedMode.NORMAL);
+    feedModeChooser.addOption("Demo (Automatic)", FeedMode.DEMO);
     feedModeChooser.addOption("Interstellar Accuracy", FeedMode.ACCURACY);
     SmartDashboard.putData("Demo/Feed Mode", feedModeChooser);
 
@@ -406,6 +407,10 @@ public class RobotContainer {
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.NORMAL))
+        .and(new Trigger(shooterFlyWheel::safeToFeed))
+        .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
+    driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO))
+        .and(new Trigger(shooterFlyWheel::atSetpoint))
         .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.ACCURACY))
         .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood));
@@ -429,13 +434,19 @@ public class RobotContainer {
         .and(operatorOI.getManualHoodSwitch().negate());
     Trigger demoPreset = new Trigger(() -> shootingPresetChooser.getSelected() == null).negate();
 
+    Trigger demoFeed = new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO);
     Command runShooterAutoHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, true);
     Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
     Command runShooterPreset = new RunShooterPreset(shooterFlyWheel, shooterHood, shootingPresetChooser);
-    operatorOI.getShooterFlywheelRunButton().and(manualHood).whenActive(runShooterManualHood);
-    operatorOI.getShooterFlywheelRunButton().and(autoHood).whenActive(runShooterAutoHood);
-    operatorOI.getShooterFlywheelRunButton().and(demoPreset).whenActive(runShooterPreset);
-    operatorOI.getShooterFlywheelStopButton().cancelWhenActive(runShooterManualHood)
+    operatorOI.getShooterFlywheelRunButton().and(manualHood).and(demoFeed.negate()).whenActive(runShooterManualHood);
+    operatorOI.getShooterFlywheelRunButton().and(autoHood).and(demoFeed.negate()).whenActive(runShooterAutoHood);
+    operatorOI.getShooterFlywheelRunButton().and(demoPreset).and(demoFeed.negate()).whenActive(runShooterPreset);
+
+    driverOI.getShooterRollerButton().and(manualHood).and(demoFeed).whileActiveContinuous(runShooterManualHood);
+    driverOI.getShooterRollerButton().and(autoHood).and(demoFeed).whileActiveContinuous(runShooterAutoHood);
+    driverOI.getShooterRollerButton().and(demoPreset).and(demoFeed).whileActiveContinuous(runShooterPreset);
+
+    operatorOI.getShooterFlywheelStopButton().or(demoFeed).cancelWhenActive(runShooterManualHood)
         .cancelWhenActive(runShooterAutoHood).cancelWhenActive(runShooterPreset);
     operatorOI.updateLED(OILED.SHOOTER_STOP, OILEDState.ON);
 
@@ -547,6 +558,6 @@ public class RobotContainer {
   }
 
   public enum FeedMode {
-    NORMAL, ACCURACY
+    NORMAL, DEMO, ACCURACY
   }
 }
