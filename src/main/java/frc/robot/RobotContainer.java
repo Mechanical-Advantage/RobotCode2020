@@ -407,10 +407,10 @@ public class RobotContainer {
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.NORMAL))
-        .and(new Trigger(shooterFlyWheel::safeToFeed))
+        .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::safeToFeed))
         .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO))
-        .and(new Trigger(shooterFlyWheel::atSetpoint))
+        .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::atSetpoint))
         .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.ACCURACY))
         .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood));
