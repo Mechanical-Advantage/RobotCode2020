@@ -476,8 +476,10 @@ public class RobotContainer {
           }
         });
 
-    operatorOI.getPowerPortAutoButton().whileActiveOnce(new PowerPortChallengeAuto(driveSubsystem, odometry, intake,
-        hopper, shooterRoller, shooterFlyWheel, shooterHood, limelight));
+    // ----- POWER PORT AUTO FOR AT HOME CHALLENGES -----
+    // operatorOI.getPowerPortAutoButton().whileActiveOnce(new
+    // PowerPortChallengeAuto(driveSubsystem, odometry, intake, hopper,
+    // shooterRoller, shooterFlyWheel, shooterHood, limelight));
 
     operatorOI.getClimbEnableSwitch()
         .whenActive(new SetLEDOverride(OILED.CLIMB_ENABLE, OILEDState.ON, operatorOI::updateLED));
