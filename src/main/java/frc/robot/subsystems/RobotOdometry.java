@@ -7,8 +7,16 @@
 
 package frc.robot.subsystems;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -21,8 +29,11 @@ import frc.robot.util.LatencyData;
 
 public class RobotOdometry extends SubsystemBase {
 
-  // How many historical data points to keep. Multiply by 20ms to get time
-  private static final int latencyDataPoints = 50;
+  private static final int latencyDataPoints = 50; // How many historical data points to keep
+
+  private boolean enableLogging = true;
+  private static final String logFolder = "/media/sda1/";
+  private static final String logTitle = "'OdometryLog'_yy-MM-dd_HH-mm-ss'.csv'";
 
   private DriveTrainBase driveTrain;
   private AHRS ahrs;
@@ -32,6 +43,8 @@ public class RobotOdometry extends SubsystemBase {
 
   private double baseLeftDistance;
   private double baseRightDistance;
+
+  FileWriter csvWriter;
 
   /**
    * Creates a new RobotOdometry. Commands can require this subsystem to prevent
@@ -54,6 +67,36 @@ public class RobotOdometry extends SubsystemBase {
       SmartDashboard.putNumber("Pose x", pose.getTranslation().getX());
       SmartDashboard.putNumber("Pose y", pose.getTranslation().getY());
       SmartDashboard.putNumber("Pose angle", pose.getRotation().getDegrees());
+    }
+
+    if (enableLogging) {
+      if (csvWriter != null) { // Check if log file ready
+        try {
+          Pose2d currentPose = getCurrentPose();
+          csvWriter.write(String.format("%.4f", Timer.getFPGATimestamp()) + ",");
+          csvWriter.write(DriverStation.getInstance().isEnabled() ? "1," : "0,");
+          csvWriter.write(String.format("%.2f", currentPose.getX()) + ",");
+          csvWriter.write(String.format("%.2f", currentPose.getY()) + ",");
+          csvWriter.write(String.format("%.2f", currentPose.getRotation().getDegrees()) + "\n");
+        } catch (IOException e) {
+          DriverStation.reportWarning("Failed to log odometry values.", false);
+        }
+      } else {
+
+        // Open log file after time is retrieved from DS
+        if (System.currentTimeMillis() > 946702800000L) {
+          String logPath = logFolder + new SimpleDateFormat(logTitle).format(new Date());
+          try {
+            new File(logPath).createNewFile();
+            csvWriter = new FileWriter(logPath);
+            csvWriter.write("Timestamp,Enabled,X,Y,Rotation\n");
+            System.out.println("Successfully opened log file '" + logPath + "'");
+          } catch (IOException e) {
+            DriverStation.reportWarning("Failed to open log file '" + logPath + "'", false);
+            enableLogging = false;
+          }
+        }
+      }
     }
   }
 
