@@ -33,6 +33,7 @@ public class RobotOdometry extends SubsystemBase {
   private static final int latencyDataPoints = 50; // How many historical data points to keep
 
   private boolean enableLogging = true;
+  private static final double logRateSecs = 0.1;
   private static final String logFolder = "/media/sda1/";
   private static final String logTitle = "'OdometryLog'_yy-MM-dd_HH-mm-ss'.csv'";
 
@@ -46,6 +47,7 @@ public class RobotOdometry extends SubsystemBase {
   private double baseRightDistance;
 
   FileWriter csvWriter;
+  private Timer logTimer = new Timer();
 
   /**
    * Creates a new RobotOdometry. Commands can require this subsystem to prevent
@@ -72,15 +74,17 @@ public class RobotOdometry extends SubsystemBase {
 
     if (enableLogging) {
       if (csvWriter != null) { // Check if log file ready
-        try {
-          Pose2d currentPose = getCurrentPose();
-          csvWriter.write(String.format("%.4f", Timer.getFPGATimestamp()) + ",");
-          csvWriter.write(DriverStation.getInstance().isEnabled() ? "1," : "0,");
-          csvWriter.write(String.format("%.2f", currentPose.getX()) + ",");
-          csvWriter.write(String.format("%.2f", currentPose.getY()) + ",");
-          csvWriter.write(String.format("%.2f", currentPose.getRotation().getDegrees()) + "\n");
-        } catch (IOException e) {
-          DriverStation.reportWarning("Failed to log odometry values.", false);
+        if (logTimer.advanceIfElapsed(logRateSecs)) {
+          try {
+            csvWriter.write(String.format("%.4f", Timer.getFPGATimestamp()) + ",");
+            csvWriter.write(DriverStation.getInstance().isEnabled() ? "1," : "0,");
+            csvWriter.write(String.format("%.2f", pose.getX()) + ",");
+            csvWriter.write(String.format("%.2f", pose.getY()) + ",");
+            csvWriter.write(String.format("%.2f", pose.getRotation().getDegrees()) + "\n");
+            csvWriter.flush();
+          } catch (IOException e) {
+            DriverStation.reportWarning("Failed to log odometry values.", false);
+          }
         }
       } else {
 
@@ -89,10 +93,13 @@ public class RobotOdometry extends SubsystemBase {
             && System.currentTimeMillis() > 946702800000L) {
           String logPath = logFolder + new SimpleDateFormat(logTitle).format(new Date());
           try {
+            logTimer.reset();
+            logTimer.start();
             new File(logPath).createNewFile();
             csvWriter = new FileWriter(logPath);
             csvWriter.write(DriverStation.getInstance().getAlliance().name() + "\n");
             csvWriter.write("Timestamp,Enabled,X,Y,Rotation\n");
+            csvWriter.flush();
             System.out.println("Successfully opened log file '" + logPath + "'");
           } catch (IOException e) {
             DriverStation.reportWarning("Failed to open log file '" + logPath + "'", false);
