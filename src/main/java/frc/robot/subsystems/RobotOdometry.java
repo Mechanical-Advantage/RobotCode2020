@@ -89,6 +89,7 @@ public class RobotOdometry extends SubsystemBase {
           try {
             new File(logPath).createNewFile();
             csvWriter = new FileWriter(logPath);
+            csvWriter.write(DriverStation.getInstance().getAlliance().name());
             csvWriter.write("Timestamp,Enabled,X,Y,Rotation\n");
             System.out.println("Successfully opened log file '" + logPath + "'");
           } catch (IOException e) {
