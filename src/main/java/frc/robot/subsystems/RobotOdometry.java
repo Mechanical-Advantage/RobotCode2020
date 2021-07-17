@@ -16,6 +16,7 @@ import java.util.Date;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
@@ -84,12 +85,13 @@ public class RobotOdometry extends SubsystemBase {
       } else {
 
         // Open log file after time is retrieved from DS
-        if (System.currentTimeMillis() > 946702800000L) {
+        if (DriverStation.getInstance().getAlliance() != Alliance.Invalid
+            && System.currentTimeMillis() > 946702800000L) {
           String logPath = logFolder + new SimpleDateFormat(logTitle).format(new Date());
           try {
             new File(logPath).createNewFile();
             csvWriter = new FileWriter(logPath);
-            csvWriter.write(DriverStation.getInstance().getAlliance().name());
+            csvWriter.write(DriverStation.getInstance().getAlliance().name() + "\n");
             csvWriter.write("Timestamp,Enabled,X,Y,Rotation\n");
             System.out.println("Successfully opened log file '" + logPath + "'");
           } catch (IOException e) {
