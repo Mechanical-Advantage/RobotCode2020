@@ -192,8 +192,8 @@ public class RobotContainer {
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
     autoChooser.addOption("Fire loaded balls",
-        new PointAtTargetAndShoot(driveSubsystem, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood,
-            pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+        new PointAtTargetAndShoot(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel,
+            shooterHood, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
     autoChooser.addOption("Fire loaded balls & collect trench run",
         new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller,

@@ -49,7 +49,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
         kP = 0.01;
         kI = 0;
         kD = 0.0003;
-        minVelocity = 0.04;
+        minVelocity = 0.05;
         toleranceDegrees = 1;
         toleranceTime = 0.25;
         break;
