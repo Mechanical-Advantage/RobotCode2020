@@ -34,7 +34,7 @@ public class RobotOdometry extends SubsystemBase {
 
   private boolean enableLogging = true;
   private static final double logRateSecs = 0.1;
-  private static final String logFolder = "/media/sda1/";
+  private static final String logFolder = "/media/sda2/";
   private static final String logTitle = "'OdometryLog'_yy-MM-dd_HH-mm-ss'.csv'";
 
   private DriveTrainBase driveTrain;
