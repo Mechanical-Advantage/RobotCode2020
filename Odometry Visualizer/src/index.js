@@ -1,5 +1,6 @@
 const updateRateSecs = 0.01
-const trailLengthSecs = 5
+const trailLengthSecs = 3
+const maxConnectorInches = 36
 
 const originX = 519
 const originY = 719
@@ -143,13 +144,19 @@ function getPose(timestamp) {
   }
   var next = fileData[index]
   var prev = fileData[index - 1]
-  var timePortion = (timestamp - prev.timestamp) / (next.timestamp - prev.timestamp)
-  return {
-    "enabled": prev.enabled,
-    "vision": prev.vision,
-    "x": ((next.x - prev.x) * timePortion) + prev.x,
-    "y": ((next.y - prev.y) * timePortion) + prev.y,
-    "rotation": (simplifyAngle(next.rotation - prev.rotation) * timePortion) + prev.rotation
+  var dist = Math.sqrt((next.x - prev.x) * (next.x - prev.x) + (next.y - prev.y) * (next.y - prev.y))
+  if (dist <= maxConnectorInches * inchesToPixels) {
+    var timePortion = (timestamp - prev.timestamp) / (next.timestamp - prev.timestamp)
+    return {
+      "timestamp": timestamp,
+      "enabled": prev.enabled,
+      "vision": prev.vision,
+      "x": ((next.x - prev.x) * timePortion) + prev.x,
+      "y": ((next.y - prev.y) * timePortion) + prev.y,
+      "rotation": (simplifyAngle(next.rotation - prev.rotation) * timePortion) + prev.rotation
+    }
+  } else {
+    return prev
   }
 }
 
@@ -230,7 +237,7 @@ function update() {
           fieldContext.moveTo(x, y)
         } else {
           var dist = Math.sqrt((x - prevPoint[0]) * (x - prevPoint[0]) + (y - prevPoint[1]) * (y - prevPoint[1]))
-          if (dist > 36 * inchesToPixels) {
+          if (dist > maxConnectorInches * inchesToPixels) {
             fieldContext.stroke()
             fieldContext.beginPath()
             fieldContext.moveTo(x, y)
