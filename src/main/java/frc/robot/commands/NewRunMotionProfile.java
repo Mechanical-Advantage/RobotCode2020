@@ -352,33 +352,37 @@ public class NewRunMotionProfile extends CommandBase {
 
     // All constants defined in inches
     switch (Constants.getRobot()) {
-    case ROBOT_2019:
-      kS = 1.21;
-      kV = 0.0591;
-      kA = 0.0182;
-      trackWidth = 27.5932064868814;
-      maxVelocity = 150;
-      maxAcceleration = 50;
-      maxCentripetalAcceleration = 200;
-      break;
-    case ROBOT_2020_DRIVE:
-      kS = 0.14;
-      kV = 0.0758;
-      kA = 0.0128;
-      trackWidth = 24.890470780033485;
-      maxVelocity = 120;
-      maxAcceleration = 50;
-      maxCentripetalAcceleration = 200;
-      break;
-    case ROBOT_2020:
-      kS = 0.124;
-      kV = 0.0722;
-      kA = 0.00475;
-      trackWidth = 25.934;
-      maxVelocity = 130;
-      maxAcceleration = 130;
-      maxCentripetalAcceleration = 120;
-      break;
+      case ROBOT_2019:
+        kS = 1.21;
+        kV = 0.0591;
+        kA = 0.0182;
+        trackWidth = 27.5932064868814;
+        maxVelocity = 150;
+        maxAcceleration = 50;
+        maxCentripetalAcceleration = 200;
+        break;
+      case ROBOT_2020_DRIVE:
+        kS = 0.14;
+        kV = 0.0758;
+        kA = 0.0128;
+        trackWidth = 24.890470780033485;
+        maxVelocity = 120;
+        maxAcceleration = 50;
+        maxCentripetalAcceleration = 200;
+        break;
+      case ROBOT_2020:
+        // Data from blue wheels:
+        // kS = 0.124;
+        // kV = 0.0722;
+        // kA = 0.00475;
+        kS = 0.165;
+        kV = 0.0801;
+        kA = 0.0118;
+        trackWidth = 25.934;
+        maxVelocity = 130;
+        maxAcceleration = 130;
+        maxCentripetalAcceleration = 120;
+        break;
     }
 
     // Convert to meters
