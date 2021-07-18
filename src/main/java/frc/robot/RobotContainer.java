@@ -99,8 +99,8 @@ import frc.robot.util.PressureSensor;
  */
 public class RobotContainer {
   private static final double navXWaitTime = 5; // Maximum number of seconds to wait for the navX to initialize
-  private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine - 16, 0,
-      Rotation2d.fromDegrees(0));
+  private static final Pose2d initialAutoPosition = new Pose2d(Constants.fieldLength - Constants.initiationLine - 16,
+      -Constants.visionTargetHorizDist, Rotation2d.fromDegrees(0));
 
   private static final DummyOI dummyOI = new DummyOI();
   private IDriverOI driverOI = dummyOI;
