@@ -1,5 +1,5 @@
 const updateRateSecs = 0.01
-const trailLengthSecs = 15
+const trailLengthSecs = 5
 
 const originX = 519
 const originY = 719
