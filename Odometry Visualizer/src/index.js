@@ -1,9 +1,12 @@
 const updateRateSecs = 0.01
+const trailLengthSecs = 15
+
 const originX = 519
 const originY = 719
 const inchesToPixels = 1291 / 323.25 // Field height (px) divided by field height (inches)
 const robotWidthPixels = 30 * inchesToPixels
-const trailLengthSecs = 15
+const fieldLengthInches = 629.25
+const visionTargetHorizDistInches = 67.75
 
 var filePicker = document.getElementById("filePicker")
 var field = document.getElementById("field")
@@ -55,13 +58,14 @@ filePicker.addEventListener("change", function () {
         alliance = lines[i]
       } else if (i > 1) {
         var values = lines[i].split(",")
-        if (values.length == 5) {
+        if (values.length == 6) {
           fileData.push({
             "timestamp": +(values[0]),
             "enabled": values[1] == "1",
-            "x": +(values[2]),
-            "y": +(values[3]),
-            "rotation": +(values[4])
+            "vision": values[2] == "1",
+            "x": +(values[3]),
+            "y": +(values[4]),
+            "rotation": +(values[5])
           })
         }
       }
@@ -118,6 +122,16 @@ filePicker.addEventListener("change", function () {
   reader.readAsText(this.files[0])
 })
 
+function simplifyAngle(angle) {
+  while (angle > 180) {
+    angle -= 360
+  }
+  while (angle < -180) {
+    angle += 360
+  }
+  return angle
+}
+
 function getPose(timestamp) {
   var index = 0
   while (index < fileData.length - 1) {
@@ -130,18 +144,12 @@ function getPose(timestamp) {
   var next = fileData[index]
   var prev = fileData[index - 1]
   var timePortion = (timestamp - prev.timestamp) / (next.timestamp - prev.timestamp)
-  var rotationDiff = next.rotation - prev.rotation;
-  while (rotationDiff > 180) {
-    rotationDiff -= 360
-  }
-  while (rotationDiff < -180) {
-    rotationDiff += 360
-  }
   return {
     "enabled": prev.enabled,
+    "vision": prev.vision,
     "x": ((next.x - prev.x) * timePortion) + prev.x,
     "y": ((next.y - prev.y) * timePortion) + prev.y,
-    "rotation": (rotationDiff * timePortion) + prev.rotation
+    "rotation": (simplifyAngle(next.rotation - prev.rotation) * timePortion) + prev.rotation
   }
 }
 
@@ -242,11 +250,23 @@ function update() {
       }
       fieldContext.stroke()
 
-      // Render robot
+      // Render vision line
       var pose = getPose(timeline.value)
       var centerX = originX + (pose.x * inchesToPixels)
       var centerY = originY - (pose.y * inchesToPixels)
+      if (pose.vision) {
+        fieldContext.strokeStyle = "lightgreen"
+        fieldContext.beginPath()
+        fieldContext.moveTo(centerX, centerY)
+        if (Math.abs(simplifyAngle(pose.rotation)) < 90) {
+          fieldContext.lineTo(originX + (fieldLengthInches * inchesToPixels), originY + (visionTargetHorizDistInches * inchesToPixels))
+        } else {
+          fieldContext.lineTo(originX, originY - (visionTargetHorizDistInches * inchesToPixels))
+        }
+        fieldContext.stroke()
+      }
 
+      // Render robot
       fieldContext.fillStyle = "#222222"
       fieldContext.strokeStyle = isRed ? "red" : "blue"
       fieldContext.lineWidth = 3 * inchesToPixels

@@ -103,9 +103,11 @@ public class LimelightOdometry extends CommandBase {
         double averageY = yAveraging.calculate(fieldToVehicle.getTranslation().getY());
         if (averagingTapsCurrent < averagingTapsTotal) {
           averagingTapsCurrent++;
+          odometry.setUsingVision(false);
         } else {
           double latency = (averagingTapsTotal * Constants.loopPeriodSeconds * 0.5) + (limelight.getLatency() / 1000);
           odometry.setPosition(averageX, averageY, Timer.getFPGATimestamp() - latency);
+          odometry.setUsingVision(true);
         }
         return; // Exit before averaging data is reset
       }
@@ -115,12 +117,14 @@ public class LimelightOdometry extends CommandBase {
     xAveraging.reset();
     yAveraging.reset();
     averagingTapsCurrent = 0;
+    odometry.setUsingVision(false);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     limelight.setLEDMode(LimelightLEDMode.OFF);
+    odometry.setUsingVision(false);
   }
 
   // Returns true when the command should end.

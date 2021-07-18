@@ -22,8 +22,6 @@ public class PointAtTargetWithOdometry extends CommandBase {
   public static final Translation2d outerPortTranslation = new Translation2d(Constants.fieldLength,
       Constants.visionTargetHorizDist * -1);
   private static final double innerPortMaxDegrees = 20; // If angle outside this value, aim at outer
-  private static final double minTime = 0.75; // Do not exit until this many seconds have passed (allows Limelight to
-                                              // begin writing data)
 
   private final RobotOdometry odometry;
   private final LimelightInterface limelight;
@@ -37,7 +35,6 @@ public class PointAtTargetWithOdometry extends CommandBase {
 
   private PIDController turnController;
   private Timer toleranceTimer = new Timer();
-  private Timer minTimer = new Timer();
 
   /** Creates a new PointAtTargetWithOdometry. */
   public PointAtTargetWithOdometry(DriveTrainBase driveTrain, RobotOdometry odometry, LimelightInterface limelight) {
@@ -47,23 +44,23 @@ public class PointAtTargetWithOdometry extends CommandBase {
     this.odometry = odometry;
     this.limelight = limelight;
     switch (Constants.getRobot()) {
-    case ROBOT_2020:
-    case ROBOT_2020_DRIVE:
-      kP = 0.01;
-      kI = 0;
-      kD = 0.0003;
-      minVelocity = 0.04;
-      toleranceDegrees = 1;
-      toleranceTime = 0.25;
-      break;
-    default:
-      kP = 0;
-      kI = 0;
-      kD = 0;
-      minVelocity = 0;
-      toleranceDegrees = 1;
-      toleranceTime = 0.25;
-      break;
+      case ROBOT_2020:
+      case ROBOT_2020_DRIVE:
+        kP = 0.01;
+        kI = 0;
+        kD = 0.0003;
+        minVelocity = 0.04;
+        toleranceDegrees = 1;
+        toleranceTime = 0.25;
+        break;
+      default:
+        kP = 0;
+        kI = 0;
+        kD = 0;
+        minVelocity = 0;
+        toleranceDegrees = 1;
+        toleranceTime = 0.25;
+        break;
     }
     turnController = new PIDController(kP, kI, kD);
     turnController.setTolerance(toleranceDegrees);
@@ -77,8 +74,6 @@ public class PointAtTargetWithOdometry extends CommandBase {
     limelight.setLEDMode(LimelightLEDMode.ON);
     toleranceTimer.reset();
     toleranceTimer.start();
-    minTimer.reset();
-    minTimer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -123,12 +118,11 @@ public class PointAtTargetWithOdometry extends CommandBase {
     driveTrain.stop();
     limelight.setLEDMode(LimelightLEDMode.OFF);
     toleranceTimer.stop();
-    minTimer.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return toleranceTimer.hasElapsed(toleranceTime) && minTimer.hasElapsed(minTime);
+    return toleranceTimer.hasElapsed(toleranceTime) && odometry.isUsingVision();
   }
 }

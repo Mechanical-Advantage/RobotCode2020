@@ -42,6 +42,7 @@ public class RobotOdometry extends SubsystemBase {
   private DifferentialDriveOdometry driveOdometry;
   private LatencyData xData = new LatencyData(latencyDataPoints);
   private LatencyData yData = new LatencyData(latencyDataPoints);
+  private boolean usingVision = false;
 
   private double baseLeftDistance;
   private double baseRightDistance;
@@ -78,6 +79,7 @@ public class RobotOdometry extends SubsystemBase {
           try {
             csvWriter.write(String.format("%.4f", Timer.getFPGATimestamp()) + ",");
             csvWriter.write(DriverStation.getInstance().isEnabled() ? "1," : "0,");
+            csvWriter.write(usingVision ? "1," : "0,");
             csvWriter.write(String.format("%.2f", pose.getX()) + ",");
             csvWriter.write(String.format("%.2f", pose.getY()) + ",");
             csvWriter.write(String.format("%.2f", pose.getRotation().getDegrees()) + "\n");
@@ -98,7 +100,7 @@ public class RobotOdometry extends SubsystemBase {
             new File(logPath).createNewFile();
             csvWriter = new FileWriter(logPath);
             csvWriter.write(DriverStation.getInstance().getAlliance().name() + "\n");
-            csvWriter.write("Timestamp,Enabled,X,Y,Rotation\n");
+            csvWriter.write("Timestamp,Enabled,Vision,X,Y,Rotation\n");
             csvWriter.flush();
             System.out.println("Successfully opened log file '" + logPath + "'");
           } catch (IOException e) {
@@ -251,5 +253,19 @@ public class RobotOdometry extends SubsystemBase {
     Translation2d currentTranslation = getCurrentPose().getTranslation();
     driveOdometry.resetPosition(new Pose2d(currentTranslation, rotation), getCurrentRotation());
     resetBaseDistances();
+  }
+
+  /**
+   * Records whether odometry is being actively updated based on vision data.
+   */
+  public void setUsingVision(boolean usingVision) {
+    this.usingVision = usingVision;
+  }
+
+  /**
+   * Checks whether odometry is being actively updated based on vision data.
+   */
+  public boolean isUsingVision() {
+    return usingVision;
   }
 }
