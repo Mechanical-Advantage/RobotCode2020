@@ -144,9 +144,9 @@ function getPose(timestamp) {
   }
   var next = fileData[index]
   var prev = fileData[index - 1]
+  var timePortion = (timestamp - prev.timestamp) / (next.timestamp - prev.timestamp)
   var dist = Math.sqrt((next.x - prev.x) * (next.x - prev.x) + (next.y - prev.y) * (next.y - prev.y))
   if (dist <= maxConnectorInches * inchesToPixels) {
-    var timePortion = (timestamp - prev.timestamp) / (next.timestamp - prev.timestamp)
     return {
       "timestamp": timestamp,
       "enabled": prev.enabled,
@@ -156,7 +156,7 @@ function getPose(timestamp) {
       "rotation": (simplifyAngle(next.rotation - prev.rotation) * timePortion) + prev.rotation
     }
   } else {
-    return prev
+    return timePortion < 0.5 ? prev : next
   }
 }
 
