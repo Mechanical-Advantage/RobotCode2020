@@ -62,7 +62,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         kDLow = 0.0015;
         kFLow = 0.0001821213133;
         kIZoneLow = 0;
-        wheelDiameter = 3.12207 * 2;
+        wheelDiameter = 5.8074934358;
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
