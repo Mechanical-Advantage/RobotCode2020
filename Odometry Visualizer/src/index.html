@@ -1,0 +1,37 @@
+<html>
+
+<head>
+  <title>Odometry Visualizer</title>
+  <style>
+    $(index.css)
+  </style>
+</head>
+
+<body>
+  <input class="file-picker" id="filePicker" type="file">
+
+  <div class="field-container">
+    <canvas class="field" id="field"></canvas>
+    <img src="$(2021-field-b.png)" id="fieldImg" onload="setTimeout(function() {setupCanvas()},100)" hidden>
+  </div>
+
+  <div class="controls-container">
+    <img class="play-button" onclick="playpause()" id="play" src="$(play.png)">
+    <img class="play-button" onclick="playpause()" id="pause" src="$(pause.png)" hidden>
+
+    <div class="timestamp" id="timestamp">
+      0.00
+    </div>
+
+    <div class="timeline-container">
+      <div class="timeline-marker-container" id="markerContainer"></div>
+      <input class="timeline-slider" id="timeline" type="range" value="0" min="0" max="60" step="0.001"></input>
+    </div>
+  </div>
+
+  <script>
+    $(index.js)
+  </script>
+</body>
+
+</html>

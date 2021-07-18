@@ -1,0 +1,107 @@
+input.file-picker {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+}
+
+div.field-container {
+  position: absolute;
+  top: 40px;
+  bottom: 50px;
+  left: 0px;
+  right: 0px;
+}
+
+canvas.field {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 100%;
+  max-width: 100%;
+}
+
+div.controls-container {
+  position: absolute;
+  bottom: 0px;
+  height: 50px;
+  left: 0px;
+  right: 0px;
+  background: lightgray;
+  box-shadow: 0px 0px 15px 2px gray;
+}
+
+img.play-button {
+  position: absolute;
+  top: 10px;
+  height: 30px;
+  left: 10px;
+}
+
+div.timestamp {
+  position: absolute;
+  top: 10px;
+  height: 30px;
+  left: 50px;
+  width: 80px;
+
+  font-family: monospace;
+  font-size: 25px;
+  text-align: center;
+  line-height: 30px;
+}
+
+div.timeline-container {
+  position: absolute;
+  top: 10px;
+  height: 30px;
+  left: 140px;
+  right: 10px;
+}
+
+input.timeline-slider {
+  position: absolute;
+  margin: 0px;
+  top: 0px;
+  height: 23px;
+  left: 0px;
+  width: 100%;
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: #969696;
+}
+
+input.timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 23px;
+  width: 8px;
+  background: black;
+  cursor: pointer;
+}
+
+input.timeline-slider::-moz-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 23px;
+  width: 8px;
+  background: black;
+  cursor: pointer;
+}
+
+div.timeline-marker-container {
+  position: absolute;
+  bottom: 0px;
+  height: 7px;
+  left: 0px;
+  right: 0px;
+  background: red;
+}
+
+div.timeline-marker {
+  position: absolute;
+  height: 100%;
+}
