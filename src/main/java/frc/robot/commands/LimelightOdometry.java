@@ -26,8 +26,8 @@ import frckit.vision.corner.*;
 public class LimelightOdometry extends CommandBase {
   private static final Transform2d vehicleToCamera = new Transform2d(new Translation2d(1.875, 0.0), new Rotation2d());
   private static final double targetHeight = 98; // to center of target area (hexagon)
-  private static final double cameraHeight = 19.75;
-  private static final double cameraVertAngle = 29.8; // 0 is straight forward
+  private static final double cameraHeight = 18.25;
+  private static final double cameraVertAngle = 30; // 0 is straight forward
   private static final int odometryPipeline = 1; // Data will be ignored for other pipelines
 
   private LimelightInterface limelight;
