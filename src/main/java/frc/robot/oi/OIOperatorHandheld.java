@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.util.DoublePressTrigger;
 
 /**
  * Set of operator controls for an XBox style controller
@@ -29,8 +30,8 @@ public class OIOperatorHandheld implements IOperatorOI {
     private Button intakeForwardsButton;
     private Button intakeBackwardsButton;
 
-    private Button climbEnableButton;
-    private Button climbDisableButton;
+    private Trigger climbEnableButton;
+    private Trigger climbDisableButton;
     private Trigger fakeClimbEnableSwitch;
 
     private Button wallButton;
@@ -60,10 +61,10 @@ public class OIOperatorHandheld implements IOperatorOI {
         intakeForwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kRight) > 0.5);
         intakeBackwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kLeft) > 0.5);
 
-        // climbEnableButton = new Button(controller::getStartButton);
-        // climbEnableButton.whenPressed(() -> climbEnabled = true);
-        // climbDisableButton = new Button(controller::getBackButton);
-        // climbDisableButton.whenPressed(() -> climbEnabled = false);
+        climbEnableButton = new DoublePressTrigger(new Button(controller::getXButton));
+        climbEnableButton.whenActive(() -> climbEnabled = true);
+        climbDisableButton = new Button(controller::getYButton);
+        climbDisableButton.whenActive(() -> climbEnabled = false);
 
         manualHoodButton = new Button(controller::getStartButton);
         manualHoodButton.whenPressed(() -> manualHood = true);
