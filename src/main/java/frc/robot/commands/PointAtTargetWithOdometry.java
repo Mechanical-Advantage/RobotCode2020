@@ -29,6 +29,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
   private final double kP;
   private final double kI;
   private final double kD;
+  private final double integralMaxError = 10.0;
   private final double minVelocity;
   private final double toleranceDegrees;
   private final double toleranceTime;
@@ -47,9 +48,9 @@ public class PointAtTargetWithOdometry extends CommandBase {
       case ROBOT_2020:
       case ROBOT_2020_DRIVE:
         kP = 0.01;
-        kI = 0;
+        kI = 0.006;
         kD = 0.0003;
-        minVelocity = 0.05;
+        minVelocity = 0.045;
         toleranceDegrees = 1;
         toleranceTime = 0.25;
         break;
@@ -94,6 +95,11 @@ public class PointAtTargetWithOdometry extends CommandBase {
     }
 
     // Update output speeds
+    if (Math.abs(turnController.getPositionError()) < integralMaxError) {
+      turnController.setI(kI);
+    } else {
+      turnController.setI(0);
+    }
     double output = turnController.calculate(fieldToVehicle.getRotation().getDegrees());
     if (Math.abs(output) < minVelocity) {
       output = Math.copySign(minVelocity, output);

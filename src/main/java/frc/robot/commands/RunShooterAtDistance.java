@@ -17,9 +17,9 @@ public class RunShooterAtDistance extends CommandBase {
   private static final double maxWallDistance = 110; // inches to center of robot
   private static final double minFrontLineDistance = 104; // inches to center of robot
   private static final double maxFrontLineDistance = 169; // inches to center of robot
-  private static final double minBackLineDistance = 155; // inches to center of robot
-  private static final double maxBackLineDistance = 239; // inches to center of robot
-  private static final double minTrenchDistance = 219; // inches to center of robot
+  private static final double minBackLineDistance = 165; // inches to center of robot
+  private static final double maxBackLineDistance = 249; // inches to center of robot
+  private static final double minTrenchDistance = 239; // inches to center of robot
   private static final double maxFlywheelSpeed = 6500; // RPM
 
   private static final PolynomialRegression wallInnerRegression = new PolynomialRegression(
@@ -104,32 +104,32 @@ public class RunShooterAtDistance extends CommandBase {
     if (autoHood) {
       double wallFrontLineTransition, frontLineBackLineTransition, backLineTrenchTransition;
       switch (shooterHood.getTargetPosition()) {
-      case WALL:
-        wallFrontLineTransition = maxWallDistance;
-        frontLineBackLineTransition = maxFrontLineDistance;
-        backLineTrenchTransition = minTrenchDistance;
-        break;
-      case FRONT_LINE:
-        wallFrontLineTransition = minFrontLineDistance;
-        frontLineBackLineTransition = maxFrontLineDistance;
-        backLineTrenchTransition = minTrenchDistance;
-        break;
-      case BACK_LINE:
-        wallFrontLineTransition = maxWallDistance;
-        frontLineBackLineTransition = minBackLineDistance;
-        backLineTrenchTransition = maxBackLineDistance;
-        break;
-      case TRENCH:
-        wallFrontLineTransition = maxWallDistance;
-        frontLineBackLineTransition = minBackLineDistance;
-        backLineTrenchTransition = minTrenchDistance;
-        break;
-      case UNKNOWN:
-      default:
-        wallFrontLineTransition = (maxWallDistance + minFrontLineDistance) / 2;
-        frontLineBackLineTransition = (maxFrontLineDistance + minBackLineDistance) / 2;
-        backLineTrenchTransition = (maxBackLineDistance + minTrenchDistance) / 2;
-        break;
+        case WALL:
+          wallFrontLineTransition = maxWallDistance;
+          frontLineBackLineTransition = maxFrontLineDistance;
+          backLineTrenchTransition = minTrenchDistance;
+          break;
+        case FRONT_LINE:
+          wallFrontLineTransition = minFrontLineDistance;
+          frontLineBackLineTransition = maxFrontLineDistance;
+          backLineTrenchTransition = minTrenchDistance;
+          break;
+        case BACK_LINE:
+          wallFrontLineTransition = maxWallDistance;
+          frontLineBackLineTransition = minBackLineDistance;
+          backLineTrenchTransition = maxBackLineDistance;
+          break;
+        case TRENCH:
+          wallFrontLineTransition = maxWallDistance;
+          frontLineBackLineTransition = minBackLineDistance;
+          backLineTrenchTransition = minTrenchDistance;
+          break;
+        case UNKNOWN:
+        default:
+          wallFrontLineTransition = (maxWallDistance + minFrontLineDistance) / 2;
+          frontLineBackLineTransition = (maxFrontLineDistance + minBackLineDistance) / 2;
+          backLineTrenchTransition = (maxBackLineDistance + minTrenchDistance) / 2;
+          break;
       }
       if (distance < wallFrontLineTransition) {
         shooterHood.setTargetPosition(HoodPosition.WALL);
@@ -145,25 +145,25 @@ public class RunShooterAtDistance extends CommandBase {
     // Update flywheel speed
     double predictedSpeed;
     switch (shooterHood.getTargetPosition()) {
-    case WALL:
-      if (useInnerPort) {
-        predictedSpeed = wallInnerRegression.predict(distance);
-      } else {
-        predictedSpeed = wallOuterRegression.predict(distance);
-      }
-      break;
-    case FRONT_LINE:
-      predictedSpeed = frontLineRegression.predict(distance);
-      break;
-    case BACK_LINE:
-      predictedSpeed = backLineRegression.predict(distance);
-      break;
-    case TRENCH:
-      predictedSpeed = trenchRegression.predict(distance);
-      break;
-    default:
-      predictedSpeed = 0;
-      break;
+      case WALL:
+        if (useInnerPort) {
+          predictedSpeed = wallInnerRegression.predict(distance);
+        } else {
+          predictedSpeed = wallOuterRegression.predict(distance);
+        }
+        break;
+      case FRONT_LINE:
+        predictedSpeed = frontLineRegression.predict(distance);
+        break;
+      case BACK_LINE:
+        predictedSpeed = backLineRegression.predict(distance);
+        break;
+      case TRENCH:
+        predictedSpeed = trenchRegression.predict(distance);
+        break;
+      default:
+        predictedSpeed = 0;
+        break;
     }
     shooterFlyWheel.setShooterRPM(predictedSpeed > maxFlywheelSpeed ? maxFlywheelSpeed : predictedSpeed);
   }
