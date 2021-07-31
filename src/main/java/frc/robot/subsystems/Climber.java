@@ -30,7 +30,7 @@ public class Climber extends SubsystemBase {
   private static final boolean invertClimber = false;
   private static final int masterDeviceID = 2; // left
   private static final int followerDeviceID = 1; // right
-  private static final double followerMultiplier = 0.8;
+  private static final double followerMultiplier = 1.0;
   private static final int deploySolenoidChannel = 2;
   private static final int PCM = 0;
   private boolean climberEnabled = false;

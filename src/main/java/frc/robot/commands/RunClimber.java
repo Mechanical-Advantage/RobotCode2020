@@ -14,7 +14,7 @@ import frc.robot.subsystems.Climber;
 
 public class RunClimber extends CommandBase {
 
-  private static final double deadband = 0.07;
+  private static final double deadband = 0.12;
 
   private final Climber climber;
   private final DoubleSupplier stickAccess;
