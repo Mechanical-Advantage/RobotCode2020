@@ -19,7 +19,7 @@ import frc.robot.oi.IOperatorOI.SetPressureInterface;
  */
 public class PressureSensor extends SubsystemBase {
 
-    private static final double supplyNormalized = 4.9705882353;
+    private static final double supplyNormalized = 4.5868055556;
     private AnalogInput sensor;
     private SetPressureInterface setPressure;
 
@@ -37,7 +37,8 @@ public class PressureSensor extends SubsystemBase {
 
     public double getPressure() {
         if (available()) {
-            return ((sensor.getAverageVoltage() / supplyNormalized) * 250) - 25;
+            double pressure = ((sensor.getAverageVoltage() / supplyNormalized) * 250) - 25;
+            return pressure < 0 ? 0 : pressure;
         } else {
             return 0;
         }

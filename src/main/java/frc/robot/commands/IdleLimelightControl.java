@@ -24,12 +24,12 @@ public class IdleLimelightControl extends CommandBase {
   // Whether to blink the limelight when there is no target to try to find one
   private static final boolean blink = true;
   // How often to turn on the limelight to try to get data
-  private static final double blinkWaitTimeNoTarget = 8;
+  private static final double blinkWaitTimeNoTarget = 3;
   private static final double onTimeNoTarget = 1;
   private static final double blinkWaitTimeTarget = 3;
   private static final double onTimeTarget = 1;
   // Whether to leave the limelight on all the time when a target is visible
-  private static final boolean continuousTracking = false;
+  private static final boolean continuousTracking = true;
   // How long to wait after the target is lost before considering it out of range
   private static final double targetLossDelay = 2;
 
