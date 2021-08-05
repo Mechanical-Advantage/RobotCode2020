@@ -12,8 +12,8 @@ import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Map;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.RobotType;
+import frc.robot.util.Alert.AlertType;
 
 /**
  * Identifies a roboRIO by its MAC Address
@@ -32,13 +32,14 @@ public class RobotIdentification {
             MACAddress macAddress = new MACAddress(NetworkInterface.getByName(networkInterface).getHardwareAddress());
             RobotType robot = robotMACs.get(macAddress);
             if (robot == null) {
-                DriverStation.reportWarning("Unknown MAC: " + Arrays.toString(macAddress.getAddress()), false);
+                new Alert("Could not identify MAC '" + Arrays.toString(macAddress.getAddress())
+                        + "', using default robot instead.", AlertType.WARNING).set(true);
             } else {
                 System.out.println("Identified MAC address as " + robot);
             }
             return robot;
         } catch (SocketException | NullPointerException err) {
-            DriverStation.reportError("Failed to read MAC", false);
+            new Alert("Failed to read MAC, using default robot instead.", AlertType.WARNING).set(true);
             return null;
         }
     }

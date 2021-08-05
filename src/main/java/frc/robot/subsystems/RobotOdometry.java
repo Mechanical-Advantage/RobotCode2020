@@ -26,7 +26,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.util.Alert;
 import frc.robot.util.LatencyData;
+import frc.robot.util.Alert.AlertType;
 
 public class RobotOdometry extends SubsystemBase {
 
@@ -104,7 +106,7 @@ public class RobotOdometry extends SubsystemBase {
             csvWriter.flush();
             System.out.println("Successfully opened log file '" + logPath + "'");
           } catch (IOException e) {
-            DriverStation.reportWarning("Failed to open log file '" + logPath + "'", false);
+            new Alert("Failed to open log file '" + logPath + "'", AlertType.WARNING).set(true);
             enableLogging = false;
           }
         }

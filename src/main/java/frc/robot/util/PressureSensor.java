@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.oi.IOperatorOI.SetPressureInterface;
+import frc.robot.util.Alert.AlertType;
 
 /**
  * Class for the REV analog pressure sensor.
@@ -22,6 +23,8 @@ public class PressureSensor extends SubsystemBase {
     private static final double supplyNormalized = 4.5868055556;
     private AnalogInput sensor;
     private SetPressureInterface setPressure;
+
+    private Alert missingAlert = new Alert("Pressure sensor not connceted, unable to move hood.", AlertType.ERROR);
 
     public PressureSensor(int channel, SetPressureInterface setPressure) {
         this.setPressure = setPressure;
@@ -57,6 +60,9 @@ public class PressureSensor extends SubsystemBase {
         if (available()) {
             SmartDashboard.putNumber("Pressure Sensor", getPressure());
             setPressure.set(getPressure());
+            missingAlert.set(getVoltage() == 0.0);
+        } else {
+            missingAlert.set(false);
         }
     }
 }

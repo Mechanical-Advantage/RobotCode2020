@@ -88,6 +88,8 @@ import frc.robot.subsystems.drive.CTREDriveTrain;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 import frc.robot.subsystems.drive.SparkMAXDriveTrain;
+import frc.robot.util.Alert;
+import frc.robot.util.Alert.AlertType;
 import frc.robot.util.PressureSensor;
 
 /**
@@ -106,6 +108,9 @@ public class RobotContainer {
   private IDriverOI driverOI = dummyOI;
   private IDriverOverrideOI driverOverrideOI = dummyOI;
   private IOperatorOI operatorOI = dummyOI;
+  private Alert driverOIAlert = new Alert("No driver controller.", AlertType.WARNING);
+  private Alert driverOverrideOIAlert = new Alert("No override controller.", AlertType.WARNING);
+  private Alert operatorOIAlert = new Alert("No operator controller.", AlertType.WARNING);
   private String[] lastJoystickNames;
   private boolean changedToCoast;
 
@@ -140,6 +145,10 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    if (Constants.tuningMode) {
+      new Alert("Tuning mode active, expect decreased network performance.", AlertType.INFO).set(true);
+    }
+
     // The subsystems can't be recreated when OI changes so provide them with a
     // BooleanSupplier to access the current value from whatever OI is current
     BooleanSupplier openLoopSwitchAccess = () -> driverOverrideOI.getOpenLoopSwitch().get();
@@ -165,7 +174,7 @@ public class RobotContainer {
       Timer.delay(0.01);
     }
     if (navXTimer.get() >= navXWaitTime) {
-      DriverStation.reportError("Timeout while waiting for NavX init", false);
+      new Alert("Failed to initialize navX, odometry will likely be nonfunctional.", AlertType.ERROR).set(true);
     }
     odometry = new RobotOdometry(driveSubsystem, ahrs);
     limelightOdometry = new LimelightOdometry(limelight, odometry);
@@ -175,7 +184,7 @@ public class RobotContainer {
     limelight.setStreamingMode(LimelightStreamingMode.PIP_SECONDARY);
     galacticSearchCommand = new RunGalacticSearchVision(odometry, driveSubsystem, intake);
 
-    setupJoystickModeChooser();
+    updateOIType();
 
     autoChooser.setDefaultOption("Do Nothing", null);
     if (Constants.tuningMode) {
@@ -338,15 +347,9 @@ public class RobotContainer {
         }
       }
 
-      if (driverOI.equals(dummyOI)) {
-        DriverStation.reportWarning("No driver controller found", false);
-      }
-      if (driverOverrideOI.equals(dummyOI)) {
-        DriverStation.reportWarning("No override controller found", false);
-      }
-      if (operatorOI.equals(dummyOI)) {
-        DriverStation.reportWarning("No operator controller found", false);
-      }
+      driverOIAlert.set(driverOI.equals(dummyOI));
+      driverOverrideOIAlert.set(driverOverrideOI.equals(dummyOI));
+      operatorOIAlert.set(operatorOI.equals(dummyOI));
 
       lastJoystickNames = joystickNames;
       configureInputs();
