@@ -21,6 +21,8 @@ import frc.robot.util.Alert.AlertType;
 public class PressureSensor extends SubsystemBase {
 
     private static final double supplyNormalized = 4.5868055556;
+    private static final double disconnectedVoltage = 0.3; // When output less than this value, assume that the pressure
+                                                           // sensor is disconnected
     private AnalogInput sensor;
     private SetPressureInterface setPressure;
 
@@ -60,7 +62,7 @@ public class PressureSensor extends SubsystemBase {
         if (available()) {
             SmartDashboard.putNumber("Pressure Sensor", getPressure());
             setPressure.set(getPressure());
-            missingAlert.set(getVoltage() == 0.0);
+            missingAlert.set(getVoltage() < disconnectedVoltage);
         } else {
             missingAlert.set(false);
         }
