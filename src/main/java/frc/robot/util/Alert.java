@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Sendable;
@@ -17,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Class for managing persistent alerts to be sent over NetworkTables. */
 public class Alert {
-  private static SendableAlerts sendableAlerts;
+  private static Map<String, SendableAlerts> groups = new HashMap<String, SendableAlerts>();
 
   private final AlertType type;
   private boolean active = false;
@@ -25,21 +27,33 @@ public class Alert {
   private String text;
 
   /**
-   * Creates a new Alert. If this is the first to be instantiated,
-   * "/SmartDashboard/Alerts" will be added to NetworkTables.
+   * Creates a new Alert in the default group - "Alerts". If this is the first to
+   * be instantiated, the appropriate entries will be added to NetworkTables.
    * 
    * @param text Text to be displayed when the alert is active.
    * @param type Alert level specifying urgency.
    */
   public Alert(String text, AlertType type) {
-    if (sendableAlerts == null) {
-      sendableAlerts = new SendableAlerts();
-      SmartDashboard.putData("Alerts", sendableAlerts);
+    this("Alerts", text, type);
+  }
+
+  /**
+   * Creates a new Alert. If this is the first to be instantiated in its group,
+   * the appropriate entries will be added to NetworkTables.
+   * 
+   * @param group Group identifier, also used as NetworkTables title
+   * @param text  Text to be displayed when the alert is active.
+   * @param type  Alert level specifying urgency.
+   */
+  public Alert(String group, String text, AlertType type) {
+    if (!groups.containsKey(group)) {
+      groups.put(group, new SendableAlerts());
+      SmartDashboard.putData(group, groups.get(group));
     }
 
     this.text = text;
     this.type = type;
-    sendableAlerts.alerts.add(this);
+    groups.get(group).alerts.add(this);
   }
 
   /**
