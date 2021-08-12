@@ -4,7 +4,7 @@
 
 package frc.robot.commands;
 
-import com.kauailabs.navx.frc.AHRS;
+import java.util.ArrayList;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -20,7 +20,9 @@ public class FlywheelCharacterization extends CommandBase {
   NetworkTableEntry telemetryEntry = NetworkTableInstance.getDefault().getEntry("/robot/telemetry");
   NetworkTableEntry rotateEntry = NetworkTableInstance.getDefault().getEntry("/robot/rotate");
 
-  double[] outputArray = new double[6];
+  ArrayList<Double> entries = new ArrayList<Double>();
+
+  double[] outputArray = new double[10];
 
   /** Creates a new Characterization. */
   public FlywheelCharacterization(ShooterFlyWheel flywheel) {
@@ -41,9 +43,17 @@ public class FlywheelCharacterization extends CommandBase {
     // Get telemetry data
     outputArray[0] = Timer.getFPGATimestamp();
     outputArray[1] = RobotController.getBatteryVoltage();
+
     outputArray[3] = flywheel.getVoltage();
-    outputArray[4] = flywheel.getPosition();
-    outputArray[5] = flywheel.getSpeed();
+    outputArray[4] = 0.0;
+
+    outputArray[5] = flywheel.getPosition();
+    outputArray[6] = 0.0;
+
+    outputArray[7] = flywheel.getSpeed();
+    outputArray[8] = 0.0;
+
+    outputArray[9] = 0.0;
 
     // Run at commanded speed
     double autoSpeed = autoSpeedEntry.getDouble(0);
@@ -51,13 +61,20 @@ public class FlywheelCharacterization extends CommandBase {
 
     // Send full data set
     outputArray[2] = autoSpeed;
-    telemetryEntry.setDoubleArray(outputArray);
+    for (double num : outputArray) {
+      entries.add(num);
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     flywheel.stop();
+
+    String data = entries.toString();
+    data = data.substring(1, data.length() - 1) + ", ";
+    telemetryEntry.setString(data);
+    entries.clear();
   }
 
   // Returns true when the command should end.
