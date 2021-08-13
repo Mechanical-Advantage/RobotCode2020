@@ -14,6 +14,7 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -36,8 +37,8 @@ public class ShooterRoller extends SubsystemBase {
     switch (Constants.getRobot()) {
       case ROBOT_2020:
       case ROBOT_2020_DRIVE:
-        rollerMaster = new CANSparkMax(8, MotorType.kBrushless);
-        rollerFollower = new CANSparkMax(11, MotorType.kBrushless);
+        rollerMaster = new CANSparkMax(11, MotorType.kBrushless);
+        rollerFollower = new CANSparkMax(8, MotorType.kBrushless);
         break;
       default:
         return;
@@ -47,7 +48,7 @@ public class ShooterRoller extends SubsystemBase {
     rollerFollower.restoreFactoryDefaults();
     rollerMaster.enableVoltageCompensation(12);
     rollerFollower.enableVoltageCompensation(12);
-    rollerFollower.follow(rollerMaster, true);
+    // rollerFollower.follow(rollerMaster, true);
     rollerMaster.setSmartCurrentLimit(currentLimit);
     rollerFollower.setSmartCurrentLimit(currentLimit);
 
@@ -75,6 +76,8 @@ public class ShooterRoller extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Shooter Roller/Position", getPosition());
+    SmartDashboard.putNumber("Shooter Roller/Velocity", getVelocity());
   }
 
   public void run(double power) {

@@ -12,10 +12,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.ShooterFlyWheel;
+import frc.robot.subsystems.ShooterRoller;
 
-public class FlywheelCharacterization extends CommandBase {
-  private final ShooterFlyWheel flywheel;
+public class RollerCharacterization extends CommandBase {
+  private final ShooterRoller roller;
 
   NetworkTableEntry autoSpeedEntry = NetworkTableInstance.getDefault().getEntry("/robot/autospeed");
   NetworkTableEntry telemetryEntry = NetworkTableInstance.getDefault().getEntry("/robot/telemetry");
@@ -24,10 +24,10 @@ public class FlywheelCharacterization extends CommandBase {
   ArrayList<Double> entries = new ArrayList<Double>();
 
   /** Creates a new Characterization. */
-  public FlywheelCharacterization(ShooterFlyWheel flywheel) {
+  public RollerCharacterization(ShooterRoller roller) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(flywheel);
-    this.flywheel = flywheel;
+    addRequirements(roller);
+    this.roller = roller;
   }
 
   // Called when the command is initially scheduled.
@@ -45,26 +45,26 @@ public class FlywheelCharacterization extends CommandBase {
 
     entries.add(autoSpeedEntry.getDouble(0));
 
-    entries.add(flywheel.getVoltage());
+    entries.add(roller.getVoltage());
     entries.add(0.0);
 
-    entries.add(flywheel.getPosition());
+    entries.add(roller.getPosition());
     entries.add(0.0);
 
-    entries.add(flywheel.getSpeed());
+    entries.add(roller.getVelocity());
     entries.add(0.0);
 
     entries.add(0.0);
 
     // Run at commanded speed
     double autoSpeed = autoSpeedEntry.getDouble(0);
-    flywheel.run((rotateEntry.getBoolean(false) ? -1 : 1) * autoSpeed);
+    roller.run((rotateEntry.getBoolean(false) ? -1 : 1) * autoSpeed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    flywheel.stop();
+    roller.run(0);
 
     String data = entries.toString();
     data = data.substring(1, data.length() - 1) + ", ";

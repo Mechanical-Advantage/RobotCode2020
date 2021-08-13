@@ -47,6 +47,7 @@ import frc.robot.commands.RunAutoNavSlalom;
 import frc.robot.commands.PointAtTargetAndShootTrenchRun;
 import frc.robot.commands.PointAtTargetWithOdometry;
 import frc.robot.commands.PowerPortChallengeAuto;
+import frc.robot.commands.RollerCharacterization;
 import frc.robot.commands.RunClimber;
 import frc.robot.commands.RunGalacticSearchABlue;
 import frc.robot.commands.RunGalacticSearchARed;
@@ -210,6 +211,7 @@ public class RobotContainer {
             (position) -> operatorOI.setHoodPosition(position)));
     autoChooser.addOption("Drive characterization", new DriveCharacterization(driveSubsystem, ahrs));
     autoChooser.addOption("Flywheel characterization", new FlywheelCharacterization(shooterFlyWheel));
+    autoChooser.addOption("Roller characterization", new RollerCharacterization(shooterRoller));
     autoChooser.addOption("MOI Characterization (forward)", new MOIDrive(driveSubsystem, ahrs, false));
     autoChooser.addOption("MOI Characterization (spin)", new MOIDrive(driveSubsystem, ahrs, true));
     autoChooser.addOption("Fire loaded balls & collect trench run",
