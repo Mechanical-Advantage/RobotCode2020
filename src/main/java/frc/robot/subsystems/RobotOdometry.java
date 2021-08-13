@@ -7,8 +7,17 @@
 
 package frc.robot.subsystems;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -17,21 +26,31 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.util.Alert;
 import frc.robot.util.LatencyData;
+import frc.robot.util.Alert.AlertType;
 
 public class RobotOdometry extends SubsystemBase {
 
-  // How many historical data points to keep. Multiply by 20ms to get time
-  private static final int latencyDataPoints = 20;
+  private static final int latencyDataPoints = 50; // How many historical data points to keep
+
+  private boolean enableLogging = true;
+  private static final double logRateSecs = 0.1;
+  private static final String logFolder = "/media/sda2/";
+  private static final String logTitle = "'OdometryLog'_yy-MM-dd_HH-mm-ss'.csv'";
 
   private DriveTrainBase driveTrain;
   private AHRS ahrs;
   private DifferentialDriveOdometry driveOdometry;
   private LatencyData xData = new LatencyData(latencyDataPoints);
   private LatencyData yData = new LatencyData(latencyDataPoints);
+  private boolean usingVision = false;
 
   private double baseLeftDistance;
   private double baseRightDistance;
+
+  FileWriter csvWriter;
+  private Timer logTimer = new Timer();
 
   /**
    * Creates a new RobotOdometry. Commands can require this subsystem to prevent
@@ -54,6 +73,44 @@ public class RobotOdometry extends SubsystemBase {
       SmartDashboard.putNumber("Pose x", pose.getTranslation().getX());
       SmartDashboard.putNumber("Pose y", pose.getTranslation().getY());
       SmartDashboard.putNumber("Pose angle", pose.getRotation().getDegrees());
+    }
+
+    if (enableLogging) {
+      if (csvWriter != null) { // Check if log file ready
+        if (logTimer.advanceIfElapsed(logRateSecs)) {
+          try {
+            csvWriter.write(String.format("%.4f", Timer.getFPGATimestamp()) + ",");
+            csvWriter.write(DriverStation.getInstance().isEnabled() ? "1," : "0,");
+            csvWriter.write(usingVision ? "1," : "0,");
+            csvWriter.write(String.format("%.2f", pose.getX()) + ",");
+            csvWriter.write(String.format("%.2f", pose.getY()) + ",");
+            csvWriter.write(String.format("%.2f", pose.getRotation().getDegrees()) + "\n");
+            csvWriter.flush();
+          } catch (IOException e) {
+            DriverStation.reportWarning("Failed to log odometry values.", false);
+          }
+        }
+      } else {
+
+        // Open log file after time is retrieved from DS
+        if (DriverStation.getInstance().getAlliance() != Alliance.Invalid
+            && System.currentTimeMillis() > 946702800000L) {
+          String logPath = logFolder + new SimpleDateFormat(logTitle).format(new Date());
+          try {
+            logTimer.reset();
+            logTimer.start();
+            new File(logPath).createNewFile();
+            csvWriter = new FileWriter(logPath);
+            csvWriter.write(DriverStation.getInstance().getAlliance().name() + "\n");
+            csvWriter.write("Timestamp,Enabled,Vision,X,Y,Rotation\n");
+            csvWriter.flush();
+            System.out.println("Successfully opened log file '" + logPath + "'");
+          } catch (IOException e) {
+            new Alert("Failed to open log file '" + logPath + "'", AlertType.WARNING).set(true);
+            enableLogging = false;
+          }
+        }
+      }
     }
   }
 
@@ -104,6 +161,16 @@ public class RobotOdometry extends SubsystemBase {
    */
   public void setPosition(Pose2d position) {
     driveOdometry.resetPosition(position, getCurrentRotation());
+    resetBaseDistances();
+  }
+
+  /**
+   * Sets the robot's current position to the given Translation2d.
+   * 
+   * @param position The position (translation only)
+   */
+  public void setPosition(Translation2d position) {
+    driveOdometry.resetPosition(new Pose2d(position, getCurrentPose().getRotation()), getCurrentRotation());
     resetBaseDistances();
   }
 
@@ -188,5 +255,19 @@ public class RobotOdometry extends SubsystemBase {
     Translation2d currentTranslation = getCurrentPose().getTranslation();
     driveOdometry.resetPosition(new Pose2d(currentTranslation, rotation), getCurrentRotation());
     resetBaseDistances();
+  }
+
+  /**
+   * Records whether odometry is being actively updated based on vision data.
+   */
+  public void setUsingVision(boolean usingVision) {
+    this.usingVision = usingVision;
+  }
+
+  /**
+   * Checks whether odometry is being actively updated based on vision data.
+   */
+  public boolean isUsingVision() {
+    return usingVision;
   }
 }

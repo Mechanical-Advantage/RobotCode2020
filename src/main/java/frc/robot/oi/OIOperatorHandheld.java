@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.util.DoublePressTrigger;
 
 /**
  * Set of operator controls for an XBox style controller
@@ -29,16 +30,23 @@ public class OIOperatorHandheld implements IOperatorOI {
     private Button intakeForwardsButton;
     private Button intakeBackwardsButton;
 
-    private Button climbEnableButton;
-    private Button climbDisableButton;
+    private Trigger climbEnableButton;
+    private Trigger climbDisableButton;
     private Trigger fakeClimbEnableSwitch;
 
     private Button wallButton;
-    private Button lineButton;
+    private Button frontLineButton;
+    private Button backLineButton;
     private Button trenchButton;
-    private Trigger fakeManualHoodSwitch = dummyTrigger.negate();
+    private Button manualHoodButton;
+    private Button autoHoodButton;
+    private Trigger fakeManualHoodSwitch;
 
-    private boolean climbEnabled;
+    private boolean climbEnabled = false;
+    private boolean manualHood = false;
+
+    private Trigger galacticSearchButton;
+    private Trigger powerPortAutoButton;
 
     public OIOperatorHandheld(int ID) {
         controller = new XboxController(ID);
@@ -50,19 +58,30 @@ public class OIOperatorHandheld implements IOperatorOI {
 
         intakeExtendButton = new Button(() -> controller.getBumper(Hand.kRight));
         intakeRetractButton = new Button(() -> controller.getBumper(Hand.kLeft));
-        ;
         intakeForwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kRight) > 0.5);
         intakeBackwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kLeft) > 0.5);
 
-        climbEnableButton = new Button(controller::getStartButton);
-        climbEnableButton.whenPressed(() -> climbEnabled = true);
-        climbDisableButton = new Button(controller::getBackButton);
-        climbDisableButton.whenPressed(() -> climbEnabled = false);
+        climbEnableButton = new DoublePressTrigger(new Button(controller::getXButton));
+        climbEnableButton.whenActive(() -> climbEnabled = true);
+        climbDisableButton = new Button(controller::getYButton);
+        climbDisableButton.whenActive(() -> climbEnabled = false);
+
+        manualHoodButton = new Button(controller::getStartButton);
+        manualHoodButton.whenPressed(() -> manualHood = true);
+        autoHoodButton = new Button(controller::getBackButton);
+        autoHoodButton.whenPressed(() -> manualHood = false);
+
         fakeClimbEnableSwitch = new Trigger(() -> climbEnabled);
+        fakeManualHoodSwitch = new Trigger(() -> manualHood);
 
         wallButton = new POVButton(controller, 0);
-        lineButton = new POVButton(controller, 270);
+        frontLineButton = new POVButton(controller, 270);
+        backLineButton = new POVButton(controller, 90);
         trenchButton = new POVButton(controller, 180);
+
+        galacticSearchButton = new Button(() -> controller.getBumper(Hand.kLeft))
+                .and(new Button(() -> controller.getBumper(Hand.kRight)));
+        powerPortAutoButton = new Trigger(() -> controller.getY(Hand.kLeft) < -0.5);
     }
 
     @Override
@@ -124,8 +143,13 @@ public class OIOperatorHandheld implements IOperatorOI {
     }
 
     @Override
-    public Trigger getHoodLineButton() {
-        return lineButton;
+    public Trigger getHoodFrontLineButton() {
+        return frontLineButton;
+    }
+
+    @Override
+    public Trigger getHoodBackLineButton() {
+        return backLineButton;
     }
 
     @Override
@@ -136,5 +160,15 @@ public class OIOperatorHandheld implements IOperatorOI {
     @Override
     public Trigger getManualHoodSwitch() {
         return fakeManualHoodSwitch;
+    }
+
+    @Override
+    public Trigger getGalacticSearchButton() {
+        return galacticSearchButton;
+    }
+
+    @Override
+    public Trigger getPowerPortAutoButton() {
+        return powerPortAutoButton;
     }
 }

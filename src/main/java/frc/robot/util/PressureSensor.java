@@ -13,15 +13,20 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
 import frc.robot.oi.IOperatorOI.SetPressureInterface;
+import frc.robot.util.Alert.AlertType;
 
 /**
  * Class for the REV analog pressure sensor.
  */
 public class PressureSensor extends SubsystemBase {
 
-    private static final double supplyNormalized = 4.9705882353;
+    private static final double supplyNormalized = 4.5868055556;
+    private static final double disconnectedVoltage = 0.3; // When output less than this value, assume that the pressure
+                                                           // sensor is disconnected
     private AnalogInput sensor;
     private SetPressureInterface setPressure;
+
+    private Alert missingAlert = new Alert("Pressure sensor not connceted, unable to move hood.", AlertType.ERROR);
 
     public PressureSensor(int channel, SetPressureInterface setPressure) {
         this.setPressure = setPressure;
@@ -37,7 +42,8 @@ public class PressureSensor extends SubsystemBase {
 
     public double getPressure() {
         if (available()) {
-            return ((sensor.getAverageVoltage() / supplyNormalized) * 250) - 25;
+            double pressure = ((sensor.getAverageVoltage() / supplyNormalized) * 250) - 25;
+            return pressure < 0 ? 0 : pressure;
         } else {
             return 0;
         }
@@ -56,6 +62,9 @@ public class PressureSensor extends SubsystemBase {
         if (available()) {
             SmartDashboard.putNumber("Pressure Sensor", getPressure());
             setPressure.set(getPressure());
+            missingAlert.set(getVoltage() < disconnectedVoltage);
+        } else {
+            missingAlert.set(false);
         }
     }
 }

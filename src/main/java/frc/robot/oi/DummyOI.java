@@ -22,7 +22,7 @@ public class DummyOI implements IDriverOI, IDriverOverrideOI, IOperatorOI {
 
     @Override
     public Trigger getDriveDisableSwitch() {
-        return IDriverOverrideOI.dummyTrigger.negate();
+        return IDriverOverrideOI.dummyTrigger;
     }
 
     @Override

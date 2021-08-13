@@ -7,6 +7,7 @@
 
 package frc.robot.oi;
 
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -24,6 +25,8 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     private Button intakeForwardsButton;
     private Button intakeBackwardsButton;
 
+    private Trigger galacticSearchButton;
+
     public OIHandheldAllInOne(int ID) {
         super(ID);
 
@@ -35,6 +38,18 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
         intakeForwardsButton = new POVButton(driverController, 0);
         intakeBackwardsButton = new POVButton(driverController, 180);
 
+        galacticSearchButton = new Button(() -> driverController.getBumper(Hand.kLeft))
+                .and(new Button(() -> driverController.getBumper(Hand.kRight)));
+    }
+
+    @Override
+    public Trigger getJoysticksForwardButton() {
+        return IOperatorOI.dummyTrigger;
+    }
+
+    @Override
+    public Trigger getJoysticksReverseButton() {
+        return IOperatorOI.dummyTrigger;
     }
 
     @Override
@@ -65,5 +80,10 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
     @Override
     public Trigger getRunIntakeBackwardsButton() {
         return intakeBackwardsButton;
+    }
+
+    @Override
+    public Trigger getGalacticSearchButton() {
+        return galacticSearchButton;
     }
 }

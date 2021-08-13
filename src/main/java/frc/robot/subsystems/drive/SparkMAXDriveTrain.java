@@ -62,7 +62,7 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
         kDLow = 0.0015;
         kFLow = 0.0001821213133;
         kIZoneLow = 0;
-        wheelDiameter = 5.7769344286;
+        wheelDiameter = 5.8074934358;
         smartCurrentLimit = 80;
         reverseOutputLeft = true;
         reverseOutputRight = false;
@@ -121,11 +121,11 @@ public class SparkMAXDriveTrain extends DriveTrainBase {
     if (Constants.tuningMode) {
       SmartDashboard.putNumber("Drive L Velocity", getVelocityLeft());
       SmartDashboard.putNumber("Drive R Velocity", getVelocityRight());
+      SmartDashboard.putNumber("Drive L Radians", getRotationsLeft() * 2 * Math.PI);
+      SmartDashboard.putNumber("Drive R Radians", getRotationsRight() * 2 * Math.PI);
       SmartDashboard.putNumber("Drive L Output", leftMaster.getAppliedOutput() * 100);
       SmartDashboard.putNumber("Drive R Output", rightMaster.getAppliedOutput() * 100);
     }
-    SmartDashboard.putNumber("Drive L Radians", getRotationsLeft() * 2 * Math.PI);
-    SmartDashboard.putNumber("Drive R Radians", getRotationsRight() * 2 * Math.PI);
   }
 
   @Override

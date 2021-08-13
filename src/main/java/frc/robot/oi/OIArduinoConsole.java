@@ -45,7 +45,8 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     // private Button shooterUnstickButton;
 
     private Button hoodWallButton;
-    private Button hoodLineButton;
+    private Button hoodFrontLineButton;
+    private Button hoodBackLineButton;
     private Button hoodTrenchButton;
 
     NetworkTable ledTable;
@@ -58,11 +59,12 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
 
     private static final Map<OILED, Integer> ledMap = Map.ofEntries(Map.entry(OILED.OPEN_LOOP, 0),
             Map.entry(OILED.DRIVE_DISABLE, 1), Map.entry(OILED.LIMELIGHT_DISABLE, 2), Map.entry(OILED.MANUAL_HOOD, 3),
-            Map.entry(OILED.BUDDY_CLIMB, 4), Map.entry(OILED.CLIMB_ENABLE, 5), Map.entry(OILED.HOOD_BOTTOM, 7),
-            Map.entry(OILED.HOOD_MIDDLE, 8), Map.entry(OILED.HOOD_TOP, 9), Map.entry(OILED.INTAKE_EXTEND, 10),
-            Map.entry(OILED.INTAKE_RETRACT, 11), Map.entry(OILED.INTAKE_FORWARD, 12),
-            Map.entry(OILED.INTAKE_BACKWARD, 13), Map.entry(OILED.SHOOTER_STOP, 16), Map.entry(OILED.SHOOTER_RUN, 17),
-            Map.entry(OILED.SHOOTER_UNSTICK, 18), Map.entry(OILED.SHOOTER_SHOOT, 19));
+            Map.entry(OILED.BUDDY_CLIMB, 4), Map.entry(OILED.CLIMB_ENABLE, 5), Map.entry(OILED.HOOD_WALL, 6),
+            Map.entry(OILED.HOOD_FRONT_LINE, 7), Map.entry(OILED.HOOD_BACK_LINE, 8), Map.entry(OILED.HOOD_TRENCH, 9),
+            Map.entry(OILED.INTAKE_EXTEND, 10), Map.entry(OILED.INTAKE_RETRACT, 11),
+            Map.entry(OILED.INTAKE_FORWARD, 12), Map.entry(OILED.INTAKE_BACKWARD, 13),
+            Map.entry(OILED.SHOOTER_STOP, 16), Map.entry(OILED.SHOOTER_RUN, 17), Map.entry(OILED.SHOOTER_UNSTICK, 18),
+            Map.entry(OILED.SHOOTER_SHOOT, 19));
 
     public OIArduinoConsole(int firstID, int secondID) {
         arduinoController1 = new Joystick(firstID);
@@ -85,8 +87,9 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         // shooterRollerButton = new JoystickButton(arduinoController2, 5); // 17
         // shooterUnstickButton = new JoystickButton(arduinoController2, 3); // 15
 
-        hoodWallButton = new JoystickButton(arduinoController2, 6); // 18
-        hoodLineButton = new JoystickButton(arduinoController2, 7); // 19
+        hoodWallButton = new JoystickButton(arduinoController2, 5); // 17
+        hoodFrontLineButton = new JoystickButton(arduinoController2, 6); // 18
+        hoodBackLineButton = new JoystickButton(arduinoController2, 7); // 19
         hoodTrenchButton = new JoystickButton(arduinoController2, 8); // 20
 
         // Set up LCD fields
@@ -182,8 +185,13 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     }
 
     @Override
-    public Trigger getHoodLineButton() {
-        return hoodLineButton;
+    public Trigger getHoodFrontLineButton() {
+        return hoodFrontLineButton;
+    }
+
+    @Override
+    public Trigger getHoodBackLineButton() {
+        return hoodBackLineButton;
     }
 
     @Override
@@ -239,18 +247,21 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
     public void setHoodPosition(HoodPosition position) {
         String text;
         switch (position) {
-            case BOTTOM:
-                text = "Wall";
-                break;
-            case MIDDLE:
-                text = "Line";
-                break;
-            case TOP:
-                text = "Trench";
-                break;
-            default:
-                text = "Unknown";
-                break;
+        case WALL:
+            text = "Wall";
+            break;
+        case FRONT_LINE:
+            text = "Front Line";
+            break;
+        case BACK_LINE:
+            text = "Back Line";
+            break;
+        case TRENCH:
+            text = "Trench";
+            break;
+        default:
+            text = "Unknown";
+            break;
         }
         LCDHoodPosition.setValue("Hood: " + text);
     }

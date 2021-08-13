@@ -8,6 +8,12 @@ targetCompatibility = JavaVersion.VERSION_11
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
+repositories {
+    maven {
+        url "http://maven.came20.net/artifactory/devel"
+    }
+}
+
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project EmbeddedTools.
 deploy {
@@ -57,6 +63,11 @@ dependencies {
     // Enable simulation gui support. Must check the box in vscode to enable support
     // upon debugging
     simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
+
+    implementation "frckit.tools:pathview:0.0.30"
+    implementation "frckit.lib:util:0.0.24"
+    implementation 'gov.nist.math:jama:1.0.3'
+    implementation "frckit.lib:pvision:0.0.22"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')

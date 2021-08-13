@@ -7,36 +7,42 @@
 
 package frc.robot.commands;
 
+import java.util.Optional;
+
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Transform2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.LinearFilter;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
-import frc.robot.util.UtilFunctions;
+import frckit.vision.DualCornerVisionKinematics;
+import frckit.vision.corner.*;
 
 public class LimelightOdometry extends CommandBase {
-
-  private static final double targetHeight = 89.75; // in to center of target
-  private static final double cameraHeight = 20;
-  private static final double targetHorizLocation = Constants.visionTargetHorizDist; // in left of center line for close
-                                                                                     // target
-  // Can use the Limelight crosshair calibration instead of the next two options
-  // (it's easier and compensates for the mount angle of the camera in the
-  // Limelight)
-  // To calibrate the Y value, put something at the same height as the camera and
-  // adjust the crosshair Y until the crosshair lines up with the object
-  // For our Limelight, set crosshair Y to -0.13 to make 0 degrees be directly in
-  // front of the camera
-  private static final double cameraVertAngle = 29; // 0 = straight forward, positive=up
-  private static final double cameraHorizAngle = 0; // positive = right
-  private static final double cameraHorizOffset = 0; // positive = right
+  private static final Transform2d vehicleToCamera = new Transform2d(new Translation2d(1.875, 0.0), new Rotation2d());
+  private static final double targetHeight = 98; // to center of target area (hexagon)
+  private static final double cameraHeight = 18.25;
+  private static final double cameraVertAngle = 30; // 0 is straight forward
   private static final int odometryPipeline = 1; // Data will be ignored for other pipelines
 
-  private static final double heightDifference = targetHeight - cameraHeight; // How far above the camera the target is
   private LimelightInterface limelight;
   private RobotOdometry odometry;
-  private boolean xCorrectionEnabled = true;
+
+  // Perspective testing
+  private final LimelightCornerSupplier cornerSupplier = new LimelightCornerSupplier("limelight");
+  private final DualTopCornerSupplier topCornerSupplier = new DualTopCornerSupplier(cornerSupplier);
+  private final DualCornerVisionKinematics visionKinematics = new DualCornerVisionKinematics(topCornerSupplier,
+      Rotation2d.fromDegrees(cameraVertAngle), cameraHeight, targetHeight);
+
+  private static final int averagingTapsTotal = 25;
+  private int averagingTapsCurrent = 0;
+  private final LinearFilter xAveraging = LinearFilter.movingAverage(averagingTapsTotal);
+  private final LinearFilter yAveraging = LinearFilter.movingAverage(averagingTapsTotal);
 
   /**
    * Creates a new LimelightOdometry. Note that this command does not require the
@@ -53,61 +59,72 @@ public class LimelightOdometry extends CommandBase {
   @Override
   public void initialize() {
     limelight.setLEDMode(LimelightLEDMode.PIPELINE);
+    xAveraging.reset();
+    yAveraging.reset();
+    averagingTapsCurrent = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  @SuppressWarnings("all")
   public void execute() {
     if (hasUseableTarget()) {
-      double poseAngle = odometry.getCurrentPose().getRotation().getDegrees() * -1;
-      boolean farTarget = true;
-      // Handle either target (always -90 to 90)
-      if (poseAngle > 90) {
-        poseAngle -= 180;
-        farTarget = false;
-      } else if (poseAngle < -90) {
-        poseAngle += 180;
-        farTarget = false;
-      }
-      poseAngle = UtilFunctions.boundHalfDegrees(poseAngle);
+      Optional<Translation2d> cameraToTargetTranslationOptional = visionKinematics.forwardKinematics();
+      if (cameraToTargetTranslationOptional.isPresent()) {
+        // Use vision kinematics (perspective transform) to calculate the transform
+        // between the camera and the target
+        Transform2d cameraToTarget = new Transform2d(cameraToTargetTranslationOptional.get(), new Rotation2d());
 
-      double distance;
-      if (xCorrectionEnabled) {
-        distance = heightDifference
-            / Math.tan(Math.toRadians(Math.abs(limelight.getTargetVertAngle() + cameraVertAngle)));
-      } else {
-        distance = odometry.getCurrentPose().getTranslation().getX();
-        if (farTarget) {
-          distance = Constants.fieldLength - distance;
+        // Caputre the latest estimated pose from the odometry. We call this drifted
+        // because we know the odometry algorithm has drifted from the actual field
+        // frame
+        Pose2d driftedFieldToVehiclePose = odometry.getCurrentPose();
+        Transform2d driftedFieldToVehicle = new Transform2d(driftedFieldToVehiclePose.getTranslation(),
+            driftedFieldToVehiclePose.getRotation());
+
+        // Fuse odoetry measurement and camera measurement to get the field to target
+        // transform *in our drifted coordinate system*
+        Pose2d driftedFieldToTargetPose = driftedFieldToVehiclePose.transformBy(vehicleToCamera)
+            .transformBy(cameraToTarget);
+        Transform2d driftedFieldToTarget = new Transform2d(driftedFieldToTargetPose.getTranslation(), new Rotation2d());
+
+        // Select the correct target
+        Pose2d fieldToTarget;
+        if (Math.abs(driftedFieldToVehicle.getRotation().getDegrees()) < 90 || Constants.halfField) {
+          fieldToTarget = new Pose2d(Constants.fieldLength, Constants.visionTargetHorizDist * -1, new Rotation2d());
+        } else {
+          fieldToTarget = new Pose2d(0, Constants.visionTargetHorizDist, new Rotation2d());
         }
-      }
-      double horizAngle = limelight.getTargetHorizAngle() - cameraHorizAngle;
-      if (cameraHorizOffset != 0) {
-        // This is NOT the X dimension
-        double horizDistance = Math.tan(Math.toRadians(horizAngle)) * distance;
-        horizDistance += cameraHorizOffset;
-        horizAngle = Math.toDegrees(Math.atan(horizDistance / distance));
-      }
-      // angle: In x y space, 0 = perpendicular to target
-      double angle = poseAngle + horizAngle;
-      // Sign of angle and xDist should be opposite
-      double xDistance = Math.tan(Math.toRadians(angle)) * distance * -1;
-      // Pass x/y to odometry as WPILib coordinate system
-      double y = (xDistance + targetHorizLocation) * (farTarget ? -1 : 1);
-      double timestamp = Timer.getFPGATimestamp() - (limelight.getLatency() / 1000);
-      if (xCorrectionEnabled) {
-        odometry.setPosition(farTarget ? Constants.fieldLength - distance : distance, y, timestamp);
-      } else {
-        odometry.setY(y, timestamp);
+
+        // Transform our drifted coordinate system by known field values to obtain the
+        // corrected field to vehicle
+        Pose2d fieldToVehicle = fieldToTarget.transformBy(driftedFieldToTarget.inverse()) // field to drifted field
+            .transformBy(driftedFieldToVehicle); // field to vehicle
+        double averageX = xAveraging.calculate(fieldToVehicle.getTranslation().getX());
+        double averageY = yAveraging.calculate(fieldToVehicle.getTranslation().getY());
+        if (averagingTapsCurrent < averagingTapsTotal) {
+          averagingTapsCurrent++;
+          odometry.setUsingVision(false);
+        } else {
+          double latency = (averagingTapsTotal * Constants.loopPeriodSeconds * 0.5) + (limelight.getLatency() / 1000);
+          odometry.setPosition(averageX, averageY, Timer.getFPGATimestamp() - latency);
+          odometry.setUsingVision(true);
+        }
+        return; // Exit before averaging data is reset
       }
     }
+
+    // Reset if no target found
+    xAveraging.reset();
+    yAveraging.reset();
+    averagingTapsCurrent = 0;
+    odometry.setUsingVision(false);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     limelight.setLEDMode(LimelightLEDMode.OFF);
+    odometry.setUsingVision(false);
   }
 
   // Returns true when the command should end.
@@ -119,17 +136,6 @@ public class LimelightOdometry extends CommandBase {
   @Override
   public boolean runsWhenDisabled() {
     return true;
-  }
-
-  /**
-   * Set whether this command will change the x value in addition to the y value.
-   * This is useful if the robot is at a known x value already. This can be
-   * changed at any time.
-   * 
-   * @param enable Whether to enable x correction
-   */
-  public void enableXCorrection(boolean enable) {
-    xCorrectionEnabled = enable;
   }
 
   /**

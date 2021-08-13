@@ -169,12 +169,19 @@ public class RunMotionProfile extends CommandBase {
         maxVelocity = 150;
         maxAcceleration = 50;
         break;
-      case ROBOT_2020:
       case ROBOT_2020_DRIVE:
         kS = 0.14;
         kV = 0.0758;
         kA = 0.0128;
         trackWidth = 24.890470780033485;
+        maxVelocity = 120;
+        maxAcceleration = 50;
+        break;
+      case ROBOT_2020:
+        kS = 0.119;
+        kV = 0.081;
+        kA = 0.00958;
+        trackWidth = 25.737;
         maxVelocity = 120;
         maxAcceleration = 50;
         break;
@@ -312,7 +319,7 @@ public class RunMotionProfile extends CommandBase {
    * @param input The list to modify
    */
   private void convertTranslationList(List<Translation2d> input) {
-    input.replaceAll(point -> point.rotateBy(Rotation2d.fromDegrees(90)));
+    input.replaceAll(point -> new Translation2d(point.getY(), point.getX() * -1));
   }
 
   private static class MPGenerator extends Thread {
