@@ -46,6 +46,9 @@ public class DriveCharacterization extends CommandBase {
     entries.add(Timer.getFPGATimestamp());
     entries.add(RobotController.getBatteryVoltage());
 
+    double autoSpeed = autoSpeedEntry.getDouble(0);
+    entries.add(autoSpeed);
+
     entries.add(driveTrain.getVoltageLeft());
     entries.add(driveTrain.getVoltageRight());
 
@@ -58,7 +61,6 @@ public class DriveCharacterization extends CommandBase {
     entries.add(ahrs.getAngle() * (Math.PI / 180));
 
     // Run at commanded speed
-    double autoSpeed = autoSpeedEntry.getDouble(0);
     driveTrain.drive((rotateEntry.getBoolean(false) ? -1 : 1) * autoSpeed, autoSpeed);
   }
 
@@ -70,6 +72,7 @@ public class DriveCharacterization extends CommandBase {
     String data = entries.toString();
     data = data.substring(1, data.length() - 1) + ", ";
     telemetryEntry.setString(data);
+    NetworkTableInstance.getDefault().flush();
     entries.clear();
   }
 

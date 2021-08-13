@@ -43,7 +43,8 @@ public class RollerCharacterization extends CommandBase {
     entries.add(Timer.getFPGATimestamp());
     entries.add(RobotController.getBatteryVoltage());
 
-    entries.add(autoSpeedEntry.getDouble(0));
+    double autoSpeed = autoSpeedEntry.getDouble(0);
+    entries.add(autoSpeed);
 
     entries.add(roller.getVoltage());
     entries.add(0.0);
@@ -57,7 +58,6 @@ public class RollerCharacterization extends CommandBase {
     entries.add(0.0);
 
     // Run at commanded speed
-    double autoSpeed = autoSpeedEntry.getDouble(0);
     roller.run((rotateEntry.getBoolean(false) ? -1 : 1) * autoSpeed);
   }
 
