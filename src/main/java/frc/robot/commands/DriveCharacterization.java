@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import java.util.ArrayList;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -21,7 +23,7 @@ public class DriveCharacterization extends CommandBase {
   NetworkTableEntry telemetryEntry = NetworkTableInstance.getDefault().getEntry("/robot/telemetry");
   NetworkTableEntry rotateEntry = NetworkTableInstance.getDefault().getEntry("/robot/rotate");
 
-  double[] outputArray = new double[10];
+  ArrayList<Double> entries = new ArrayList<Double>();
 
   /** Creates a new Characterization. */
   public DriveCharacterization(DriveTrainBase driveTrain, AHRS ahrs) {
@@ -41,33 +43,34 @@ public class DriveCharacterization extends CommandBase {
   @Override
   public void execute() {
     // Get telemetry data
-    outputArray[0] = Timer.getFPGATimestamp();
-    outputArray[1] = RobotController.getBatteryVoltage();
+    entries.add(Timer.getFPGATimestamp());
+    entries.add(RobotController.getBatteryVoltage());
 
-    outputArray[3] = driveTrain.getVoltageLeft();
-    outputArray[4] = driveTrain.getVoltageRight();
+    entries.add(driveTrain.getVoltageLeft());
+    entries.add(driveTrain.getVoltageRight());
 
-    outputArray[5] = driveTrain.getRotationsLeft() * (2 * (Math.PI));
-    outputArray[6] = driveTrain.getRotationsRight() * (2 * (Math.PI));
+    entries.add(driveTrain.getRotationsLeft() * (2 * (Math.PI)));
+    entries.add(driveTrain.getRotationsRight() * (2 * (Math.PI)));
 
-    outputArray[7] = driveTrain.getRPSLeft() * (2 * (Math.PI));
-    outputArray[8] = driveTrain.getRPSRight() * (2 * (Math.PI));
+    entries.add(driveTrain.getRPSLeft() * (2 * (Math.PI)));
+    entries.add(driveTrain.getRPSRight() * (2 * (Math.PI)));
 
-    outputArray[9] = ahrs.getAngle() * (Math.PI / 180);
+    entries.add(ahrs.getAngle() * (Math.PI / 180));
 
     // Run at commanded speed
     double autoSpeed = autoSpeedEntry.getDouble(0);
     driveTrain.drive((rotateEntry.getBoolean(false) ? -1 : 1) * autoSpeed, autoSpeed);
-
-    // Send full data set
-    outputArray[2] = autoSpeed;
-    telemetryEntry.setDoubleArray(outputArray);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     driveTrain.stop();
+
+    String data = entries.toString();
+    data = data.substring(1, data.length() - 1) + ", ";
+    telemetryEntry.setString(data);
+    entries.clear();
   }
 
   // Returns true when the command should end.
