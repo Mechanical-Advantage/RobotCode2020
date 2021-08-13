@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -26,6 +27,7 @@ public class ShooterRoller extends SubsystemBase {
 
   CANSparkMax rollerMaster;
   CANSparkMax rollerFollower;
+  CANEncoder encoder;
 
   /**
    * Creates a new ShooterRoller.
@@ -43,9 +45,13 @@ public class ShooterRoller extends SubsystemBase {
 
     rollerMaster.restoreFactoryDefaults();
     rollerFollower.restoreFactoryDefaults();
+    rollerMaster.enableVoltageCompensation(12);
+    rollerFollower.enableVoltageCompensation(12);
     rollerFollower.follow(rollerMaster, true);
     rollerMaster.setSmartCurrentLimit(currentLimit);
     rollerFollower.setSmartCurrentLimit(currentLimit);
+
+    encoder = rollerMaster.getEncoder();
 
     // Stop by default
     final ShooterRoller subsystem = this;
@@ -76,5 +82,26 @@ public class ShooterRoller extends SubsystemBase {
       return;
     }
     rollerMaster.set(power * (invertRollers ? -1 : 1));
+  }
+
+  public double getVoltage() {
+    if (rollerMaster == null) {
+      return 0;
+    }
+    return rollerMaster.getAppliedOutput() * 12;
+  }
+
+  public double getPosition() {
+    if (rollerMaster == null) {
+      return 0;
+    }
+    return encoder.getPosition();
+  }
+
+  public double getVelocity() {
+    if (rollerMaster == null) {
+      return 0;
+    }
+    return encoder.getVelocity();
   }
 }
