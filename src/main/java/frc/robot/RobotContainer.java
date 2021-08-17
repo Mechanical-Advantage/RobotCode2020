@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AccurateFeed;
 import frc.robot.commands.DriveDistanceOnHeading;
@@ -373,6 +374,9 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(driveCommand);
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
+
+    new Trigger(driverOI::getQuickTurn).whileActiveContinuous(
+        new StartEndCommand(() -> driveSubsystem.driveInchesPerSec(1, 1), driveSubsystem::stop, driveSubsystem));
 
     driverOverrideOI.getOpenLoopSwitch()
         .whenActive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.ON, operatorOI::updateLED));
