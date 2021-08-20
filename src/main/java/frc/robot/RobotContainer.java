@@ -414,7 +414,7 @@ public class RobotContainer {
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.NORMAL))
-        .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::safeToFeed))
+        .and(new Trigger(shooterHood::atTargetPosition))
         .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO))
         .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::atSetpoint))
