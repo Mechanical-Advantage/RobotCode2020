@@ -66,9 +66,9 @@ public class ShooterRoller extends SubsystemBase {
     followerEncoder = rollerFollower.getEncoder();
     pidController = rollerMaster.getPIDController();
 
-    kP.setDefault(0);
+    kP.setDefault(0.00016);
     kI.setDefault(0);
-    kD.setDefault(0);
+    kD.setDefault(1);
 
     pidController.setP(kP.get());
     pidController.setI(kI.get());
