@@ -34,6 +34,7 @@ import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticks.JoystickMode;
 import frc.robot.commands.RunShooterPreset.ShooterPreset;
 import frc.robot.commands.FeedUnstick;
+import frc.robot.commands.HoldPosition;
 import frc.robot.commands.IdleLimelightControl;
 import frc.robot.commands.LimelightOdometry;
 import frc.robot.commands.LimelightTest;
@@ -375,8 +376,7 @@ public class RobotContainer {
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
 
-    new Trigger(driverOI::getQuickTurn).whileActiveContinuous(
-        new StartEndCommand(() -> driveSubsystem.driveInchesPerSec(1, 1), driveSubsystem::stop, driveSubsystem));
+    new Trigger(driverOI::getQuickTurn).whileActiveContinuous(new HoldPosition(driveSubsystem));
 
     driverOverrideOI.getOpenLoopSwitch()
         .whenActive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.ON, operatorOI::updateLED));
