@@ -57,6 +57,7 @@ import frc.robot.commands.RunIntakeBackwards;
 import frc.robot.commands.RunIntakeForwards;
 import frc.robot.commands.RunMotionProfile;
 import frc.robot.commands.RunShooterAtDistance;
+import frc.robot.commands.RunShooterFlyWheel;
 import frc.robot.commands.RunShooterPreset;
 import frc.robot.commands.RunShooterRoller;
 import frc.robot.commands.SetLEDOverride;
@@ -414,13 +415,15 @@ public class RobotContainer {
     driverOI.getVisionTestButton().whenActive(new LimelightTest(limelight, ahrs));
 
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.NORMAL))
-        .and(new Trigger(shooterHood::atTargetPosition))
-        .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
+        .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::safeToFeed))
+        .whileActiveContinuous(
+            new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller), new HoldPosition(driveSubsystem)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO))
         .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::atSetpoint))
         .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.ACCURACY))
-        .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood));
+        .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood)
+            .alongWith(new HoldPosition(driveSubsystem)));
     driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
@@ -443,7 +446,8 @@ public class RobotContainer {
 
     Trigger demoFeed = new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO);
     Command runShooterAutoHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, true);
-    Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
+    // Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
+    Command runShooterManualHood = new RunShooterFlyWheel(shooterFlyWheel);
     Command runShooterPreset = new RunShooterPreset(shooterFlyWheel, shooterHood, shootingPresetChooser);
     operatorOI.getShooterFlywheelRunButton().and(manualHood).and(demoFeed.negate()).whenActive(runShooterManualHood);
     operatorOI.getShooterFlywheelRunButton().and(autoHood).and(demoFeed.negate()).whenActive(runShooterAutoHood);
