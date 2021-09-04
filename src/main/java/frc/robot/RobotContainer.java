@@ -377,8 +377,6 @@ public class RobotContainer {
     driverOI.getJoysticksForwardButton().whenActive(() -> driveCommand.setReversed(false));
     driverOI.getJoysticksReverseButton().whenActive(() -> driveCommand.setReversed(true));
 
-    new Trigger(driverOI::getQuickTurn).whileActiveContinuous(new HoldPosition(driveSubsystem));
-
     driverOverrideOI.getOpenLoopSwitch()
         .whenActive(new SetLEDOverride(OILED.OPEN_LOOP, OILEDState.ON, operatorOI::updateLED));
     driverOverrideOI.getOpenLoopSwitch()
@@ -446,7 +444,8 @@ public class RobotContainer {
 
     Trigger demoFeed = new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO);
     Command runShooterAutoHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, true);
-    // Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
+    // Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel,
+    // shooterHood, odometry, false);
     Command runShooterManualHood = new RunShooterFlyWheel(shooterFlyWheel);
     Command runShooterPreset = new RunShooterPreset(shooterFlyWheel, shooterHood, shootingPresetChooser);
     operatorOI.getShooterFlywheelRunButton().and(manualHood).and(demoFeed.negate()).whenActive(runShooterManualHood);
