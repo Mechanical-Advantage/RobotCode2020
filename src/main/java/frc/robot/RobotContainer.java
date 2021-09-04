@@ -444,9 +444,7 @@ public class RobotContainer {
 
     Trigger demoFeed = new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO);
     Command runShooterAutoHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, true);
-    // Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel,
-    // shooterHood, odometry, false);
-    Command runShooterManualHood = new RunShooterFlyWheel(shooterFlyWheel);
+    Command runShooterManualHood = new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false);
     Command runShooterPreset = new RunShooterPreset(shooterFlyWheel, shooterHood, shootingPresetChooser);
     operatorOI.getShooterFlywheelRunButton().and(manualHood).and(demoFeed.negate()).whenActive(runShooterManualHood);
     operatorOI.getShooterFlywheelRunButton().and(autoHood).and(demoFeed.negate()).whenActive(runShooterAutoHood);
