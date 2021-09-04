@@ -71,8 +71,8 @@ public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
                 new PointAtTargetWithOdometry(driveTrain, odometry, limelight).withTimeout(4),
                 new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint())),
                 new WaitUntilCommand(() -> hood.atTargetPosition())),
-            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(1.5)))
-                .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, false)),
+            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
+                new WaitCommand(1.5))).deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, false)),
         new SequentialCommandGroup(new InstantCommand(() -> hood.setTargetPosition(HoodPosition.BACK_LINE)),
             new TurnToAngle(driveTrain, ahrs, 135, true, 15), new InstantCommand(intake::extend),
             new NewRunMotionProfile(driveTrain, odometry, List.of(trenchStart, trenchEnd), 0, false, false,
@@ -82,8 +82,8 @@ public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
                 new ArrayList<>()),
             new PointAtTargetWithOdometry(driveTrain, odometry, limelight).withTimeout(5),
             new InstantCommand(intake::extend), new WaitUntilCommand(() -> hood.atTargetPosition()),
-            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new RunIntakeBackwards(intake),
-                new WaitCommand(5))).deadlineWith(
+            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
+                new RunIntakeBackwards(intake), new WaitCommand(5))).deadlineWith(
                     new RunShooterAtDistance(flywheel, hood, secondShotPosition.getTranslation(), false)));
   }
 }

@@ -44,8 +44,8 @@ public class PointAtTargetAndShoot extends SequentialCommandGroup {
             new ParallelCommandGroup(new InstantCommand(() -> hood.setTargetPosition(HoodPosition.FRONT_LINE)),
                 new PointAtTargetWithOdometry(driveTrain, odometry, limelight),
                 new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint()))),
-            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new WaitCommand(1.5)))
-                .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, false)),
+            new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
+                new WaitCommand(1.5))).deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, false)),
         new DriveDistanceOnHeading(driveTrain, ahrs, -60));
   }
 }
