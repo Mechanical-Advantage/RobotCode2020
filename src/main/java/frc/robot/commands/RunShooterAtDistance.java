@@ -15,35 +15,36 @@ import frc.robot.util.PolynomialRegression;
 
 public class RunShooterAtDistance extends CommandBase {
   private static final double maxWallDistance = 110; // inches to center of robot
-  private static final double minFrontLineDistance = 104; // inches to center of robot
-  private static final double maxFrontLineDistance = 169; // inches to center of robot
-  private static final double minBackLineDistance = 165; // inches to center of robot
-  private static final double maxBackLineDistance = 249; // inches to center of robot
-  private static final double minTrenchDistance = 239; // inches to center of robot
-  private static final double maxFlywheelSpeed = 6500; // RPM
+  private static final double minFrontLineDistance = 105; // inches to center of robot
+  private static final double maxFrontLineDistance = 180; // inches to center of robot
+  private static final double minBackLineDistance = 170; // inches to center of robot
+  private static final double maxBackLineDistance = 260; // inches to center of robot
+  private static final double minTrenchDistance = 220; // inches to center of robot
+  private static final double maxFlywheelSpeed = 7000; // RPM
 
-  private static final PolynomialRegression wallInnerRegression = new PolynomialRegression(
-      new double[] { 31 + Constants.innerPortDepth, 42 + Constants.innerPortDepth, 56 + Constants.innerPortDepth,
-          75 + Constants.innerPortDepth, 90 + Constants.innerPortDepth },
-      new double[] { 6000, 4700, 3400, 3200, 3300 }, 2);
-  private static final PolynomialRegression wallOuterRegression = new PolynomialRegression(
-      new double[] { 33.5, 36.5, 42.5, 48.5, 54.5, 60.5 }, new double[] { 6500, 4300, 4100, 3100, 3000, 3100 }, 2);
+  private static final PolynomialRegression wallRegression = new PolynomialRegression(
+      new double[] { Constants.innerPortDepth + 26, Constants.innerPortDepth + 30, Constants.innerPortDepth + 36,
+          Constants.innerPortDepth + 42, Constants.innerPortDepth + 48, Constants.innerPortDepth + 54,
+          Constants.innerPortDepth + 60, Constants.innerPortDepth + 66, Constants.innerPortDepth + 72,
+          Constants.innerPortDepth + 78 },
+      new double[] { 6500, 5500, 3300, 3100, 3100, 3100, 3100, 3100, 3150, 5000 }, 4, "x");
   private static final PolynomialRegression frontLineRegression = new PolynomialRegression(
-      new double[] { 75 + Constants.innerPortDepth, 81 + Constants.innerPortDepth, 87 + Constants.innerPortDepth,
-          93 + Constants.innerPortDepth, 99 + Constants.innerPortDepth, 105 + Constants.innerPortDepth,
-          111 + Constants.innerPortDepth, 117 + Constants.innerPortDepth, 123 + Constants.innerPortDepth,
-          129 + Constants.innerPortDepth, 132.5 + Constants.innerPortDepth, 135 + Constants.innerPortDepth,
-          138 + Constants.innerPortDepth, 144 + Constants.innerPortDepth, 147 + Constants.innerPortDepth },
-      new double[] { 3625, 3600, 3600, 3625, 3650, 3675, 3700, 3750, 3750, 3800, 3800, 3825, 3875, 3925, 3925 }, 2);
+      new double[] { Constants.innerPortDepth + 78, Constants.innerPortDepth + 90, Constants.innerPortDepth + 102,
+          Constants.innerPortDepth + 114, Constants.innerPortDepth + 126, Constants.innerPortDepth + 138,
+          Constants.innerPortDepth + 150, Constants.innerPortDepth + 156 },
+      new double[] { 3800, 3500, 3550, 3600, 3650, 3700, 3750, 3800 }, 4, "x");
   private static final PolynomialRegression backLineRegression = new PolynomialRegression(
-      new double[] { 123 + Constants.innerPortDepth, 145 + Constants.innerPortDepth, 169 + Constants.innerPortDepth,
-          195 + Constants.innerPortDepth, 226 + Constants.innerPortDepth },
-      new double[] { 5700, 5500, 5100, 5100, 5100 }, 2);
+      new double[] { Constants.innerPortDepth + 138, Constants.innerPortDepth + 144, Constants.innerPortDepth + 156,
+          Constants.innerPortDepth + 168, Constants.innerPortDepth + 180, Constants.innerPortDepth + 192,
+          Constants.innerPortDepth + 204, Constants.innerPortDepth + 216, Constants.innerPortDepth + 228,
+          Constants.innerPortDepth + 240 },
+      new double[] { 6500, 6000, 5600, 5600, 5600, 5600, 5600, 5600, 5600, 5200 }, 3, "x");
   private static final PolynomialRegression trenchRegression = new PolynomialRegression(
-      new double[] { 172 + Constants.innerPortDepth, 181 + Constants.innerPortDepth, 203 + Constants.innerPortDepth,
-          226 + Constants.innerPortDepth, 244 + Constants.innerPortDepth, 263 + Constants.innerPortDepth,
-          286 + Constants.innerPortDepth },
-      new double[] { 6300, 6100, 6000, 6000, 5900, 6050, 6050 }, 2);
+      new double[] { Constants.innerPortDepth + 180, Constants.innerPortDepth + 186, Constants.innerPortDepth + 192,
+          Constants.innerPortDepth + 198, Constants.innerPortDepth + 204, Constants.innerPortDepth + 216,
+          Constants.innerPortDepth + 228, Constants.innerPortDepth + 240, Constants.innerPortDepth + 252,
+          Constants.innerPortDepth + 264, Constants.innerPortDepth + 276 },
+      new double[] { 6800, 6600, 6600, 6600, 6600, 6200, 6200, 6400, 6300, 6300, 6300 }, 2, "x");
 
   private final ShooterFlyWheel shooterFlyWheel;
   private final ShooterHood shooterHood;
@@ -146,11 +147,7 @@ public class RunShooterAtDistance extends CommandBase {
     double predictedSpeed;
     switch (shooterHood.getTargetPosition()) {
       case WALL:
-        if (useInnerPort) {
-          predictedSpeed = wallInnerRegression.predict(distance);
-        } else {
-          predictedSpeed = wallOuterRegression.predict(distance);
-        }
+        predictedSpeed = wallRegression.predict(distance);
         break;
       case FRONT_LINE:
         predictedSpeed = frontLineRegression.predict(distance);

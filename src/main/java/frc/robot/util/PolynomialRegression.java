@@ -186,11 +186,11 @@ public class PolynomialRegression implements Comparable<PolynomialRegression> {
     // create remaining terms
     while (j >= 0) {
       if (j == 0)
-        s.append(String.format("%.2f ", beta(j)));
+        s.append(String.format("%.10f ", beta(j)));
       else if (j == 1)
-        s.append(String.format("%.2f %s + ", beta(j), variableName));
+        s.append(String.format("%.10f %s + ", beta(j), variableName));
       else
-        s.append(String.format("%.2f %s^%d + ", beta(j), variableName, j));
+        s.append(String.format("%.10f %s^%d + ", beta(j), variableName, j));
       j--;
     }
     s = s.append("  (R^2 = " + String.format("%.3f", R2()) + ")");
