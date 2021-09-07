@@ -48,7 +48,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
       case ROBOT_2020:
       case ROBOT_2020_DRIVE:
         kP = 0.01;
-        kI = 0.006;
+        kI = 0.007;
         kD = 0.0003;
         minVelocity = 0.045;
         toleranceDegrees = 1;
