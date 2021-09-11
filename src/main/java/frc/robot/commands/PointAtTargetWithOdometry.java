@@ -9,12 +9,14 @@ import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.LimelightInterface.LimelightLEDMode;
 import frc.robot.subsystems.drive.DriveTrainBase;
+import frc.robot.util.TunableNumber;
 
 public class PointAtTargetWithOdometry extends CommandBase {
   public static final Translation2d innerPortTranslation = new Translation2d(
@@ -26,13 +28,13 @@ public class PointAtTargetWithOdometry extends CommandBase {
   private final RobotOdometry odometry;
   private final LimelightInterface limelight;
   private final DriveTrainBase driveTrain;
-  private final double kP;
-  private final double kI;
-  private final double kD;
-  private final double integralMaxError = 10.0;
-  private final double minVelocity;
-  private final double toleranceDegrees;
-  private final double toleranceTime;
+  private final TunableNumber kP = new TunableNumber("PointAtTarget/kP");
+  private final TunableNumber kI = new TunableNumber("PointAtTarget/kI");
+  private final TunableNumber kD = new TunableNumber("PointAtTarget/kD");
+  private final TunableNumber integralMaxError = new TunableNumber("PointAtTarget/IntegralMaxError");
+  private final TunableNumber minVelocity = new TunableNumber("PointAtTarget/MinVelocity");
+  private final TunableNumber toleranceDegrees = new TunableNumber("PointAtTarget/ToleranceDegrees");
+  private final TunableNumber toleranceTime = new TunableNumber("PointAtTarget/ToleranceTime");
 
   private PIDController turnController;
   private Timer toleranceTimer = new Timer();
@@ -47,24 +49,26 @@ public class PointAtTargetWithOdometry extends CommandBase {
     switch (Constants.getRobot()) {
       case ROBOT_2020:
       case ROBOT_2020_DRIVE:
-        kP = 0.01;
-        kI = 0.007;
-        kD = 0.0003;
-        minVelocity = 0.045;
-        toleranceDegrees = 1;
-        toleranceTime = 0.25;
+        kP.setDefault(0.012);
+        kI.setDefault(0.01);
+        kD.setDefault(0.0005);
+        integralMaxError.setDefault(10);
+        minVelocity.setDefault(0.045);
+        toleranceDegrees.setDefault(1);
+        toleranceTime.setDefault(0.25);
         break;
       default:
-        kP = 0;
-        kI = 0;
-        kD = 0;
-        minVelocity = 0;
-        toleranceDegrees = 1;
-        toleranceTime = 0.25;
+        kP.setDefault(0);
+        kI.setDefault(0);
+        kD.setDefault(0);
+        integralMaxError.setDefault(10);
+        minVelocity.setDefault(0);
+        toleranceDegrees.setDefault(1);
+        toleranceTime.setDefault(0.25);
         break;
     }
-    turnController = new PIDController(kP, kI, kD);
-    turnController.setTolerance(toleranceDegrees);
+    turnController = new PIDController(kP.get(), 0, kD.get());
+    turnController.setTolerance(toleranceDegrees.get());
     turnController.enableContinuousInput(-180, 180);
   }
 
@@ -80,11 +84,17 @@ public class PointAtTargetWithOdometry extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    // Update tunable numbers
+    if (Constants.tuningMode) {
+      turnController.setP(kP.get());
+      turnController.setD(kD.get());
+      turnController.setTolerance(toleranceDegrees.get());
+    }
+
     // Update setpoint
     Pose2d fieldToVehicle = odometry.getCurrentPose();
-
-    Translation2d targetPosition = useInnerPort(fieldToVehicle.getTranslation()) ? innerPortTranslation
-        : outerPortTranslation;
+    boolean useInner = useInnerPort(fieldToVehicle.getTranslation());
+    Translation2d targetPosition = useInner ? innerPortTranslation : outerPortTranslation;
     Translation2d targetRelative = targetPosition.minus(fieldToVehicle.getTranslation());
     Rotation2d targetRotation = new Rotation2d(targetRelative.getX(), targetRelative.getY());
     turnController.setSetpoint(targetRotation.getDegrees());
@@ -95,16 +105,22 @@ public class PointAtTargetWithOdometry extends CommandBase {
     }
 
     // Update output speeds
-    if (Math.abs(turnController.getPositionError()) < integralMaxError) {
-      turnController.setI(kI);
+    if (Math.abs(turnController.getPositionError()) < integralMaxError.get()) {
+      turnController.setI(kI.get());
     } else {
       turnController.setI(0);
     }
     double output = turnController.calculate(fieldToVehicle.getRotation().getDegrees());
-    if (Math.abs(output) < minVelocity) {
-      output = Math.copySign(minVelocity, output);
+    if (Math.abs(output) < minVelocity.get()) {
+      output = Math.copySign(minVelocity.get(), output);
     }
     driveTrain.drive(output * -1, output);
+
+    // Log in tuning mode
+    if (Constants.tuningMode) {
+      SmartDashboard.putNumber("PointAtTarget/ErrorDegrees", turnController.getPositionError());
+      SmartDashboard.putBoolean("PointAtTarget/UsingInner", useInner);
+    }
   }
 
   /**
@@ -129,6 +145,6 @@ public class PointAtTargetWithOdometry extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return toleranceTimer.hasElapsed(toleranceTime) && odometry.isUsingVision();
+    return toleranceTimer.hasElapsed(toleranceTime.get()) && odometry.isUsingVision();
   }
 }
