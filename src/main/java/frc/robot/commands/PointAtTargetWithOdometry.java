@@ -50,7 +50,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
       case ROBOT_2020:
       case ROBOT_2020_DRIVE:
         kP.setDefault(0.012);
-        kI.setDefault(0.01);
+        kI.setDefault(0.004);
         kD.setDefault(0.0005);
         integralMaxError.setDefault(10);
         minVelocity.setDefault(0.045);
