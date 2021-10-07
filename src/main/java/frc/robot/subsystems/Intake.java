@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.EncoderType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Solenoid;
@@ -44,7 +45,8 @@ public class Intake extends SubsystemBase {
 
     switch (Constants.getRobot()) {
       case ROBOT_2020:
-        intake = new CANSparkMax(5, MotorType.kBrushless);
+        intake = new CANSparkMax(5, MotorType.kBrushed);
+        intake.getEncoder(EncoderType.kNoSensor, 0);
         intakeSolenoid = new Solenoid(PCM, solenoidChannel);
         break;
       case ROBOT_2020_DRIVE:
