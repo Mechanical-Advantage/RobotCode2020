@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
 import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.Hopper;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
@@ -35,7 +36,7 @@ public class PointAtTargetAndShoot extends SequentialCommandGroup {
    * Creates a new PointAtTargetAndShoot.
    */
   public PointAtTargetAndShoot(DriveTrainBase driveTrain, RobotOdometry odometry, LimelightInterface limelight,
-      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood,
+      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, Intake intake,
       PressureSensor pressureSensor, UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
@@ -45,7 +46,8 @@ public class PointAtTargetAndShoot extends SequentialCommandGroup {
                 new PointAtTargetWithOdometry(driveTrain, odometry, limelight),
                 new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint()))),
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
-                new WaitCommand(1.5))).deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, false)),
+                new RunIntakeForwards(intake), new WaitCommand(1.5)))
+                    .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, false)),
         new DriveDistanceOnHeading(driveTrain, ahrs, -60));
   }
 }

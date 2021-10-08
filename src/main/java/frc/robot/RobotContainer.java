@@ -203,7 +203,7 @@ public class RobotContainer {
     }
     autoChooser.addOption("Fire loaded balls",
         new PointAtTargetAndShoot(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel,
-            shooterHood, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
+            shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
     autoChooser.addOption("Fire loaded balls & collect trench run",
         new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller,
@@ -412,14 +412,15 @@ public class RobotContainer {
 
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.NORMAL))
         .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::safeToFeed))
-        .whileActiveContinuous(
-            new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller), new HoldPosition(driveSubsystem)));
+        .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller),
+            new HoldPosition(driveSubsystem), new RunIntakeForwards(intake)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.DEMO))
         .and(new Trigger(shooterHood::atTargetPosition)).and(new Trigger(shooterFlyWheel::atSetpoint))
-        .whileActiveContinuous(new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller)));
+        .whileActiveContinuous(
+            new RunHopper(hopper).alongWith(new RunShooterRoller(shooterRoller), new RunIntakeForwards(intake)));
     driverOI.getShooterRollerButton().and(new Trigger(() -> feedModeChooser.getSelected() == FeedMode.ACCURACY))
         .whileActiveContinuous(new AccurateFeed(shooterRoller, hopper, shooterFlyWheel, shooterHood)
-            .alongWith(new HoldPosition(driveSubsystem)));
+            .alongWith(new HoldPosition(driveSubsystem), new RunIntakeForwards(intake)));
     driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
