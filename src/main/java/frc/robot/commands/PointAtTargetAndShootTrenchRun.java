@@ -79,11 +79,11 @@ public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
                 List.of(trenchVelocityConstraint)).deadlineWith(new RunIntakeForwards(intake)),
             new InstantCommand(intake::retract),
             new NewRunMotionProfile(driveTrain, odometry, 0, List.of(trenchEnd, secondShotPosition), 0, true, false,
-                new ArrayList<>()),
+                new ArrayList<>()).alongWith(new RunIntakeForwards(intake).withTimeout(1)),
             new PointAtTargetWithOdometry(driveTrain, odometry, limelight).withTimeout(5),
             new InstantCommand(intake::extend), new WaitUntilCommand(() -> hood.atTargetPosition()),
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
-                new RunIntakeBackwards(intake), new WaitCommand(5))).deadlineWith(
+                new WaitCommand(5))).deadlineWith(
                     new RunShooterAtDistance(flywheel, hood, secondShotPosition.getTranslation(), false)));
   }
 }

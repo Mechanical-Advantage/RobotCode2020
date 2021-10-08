@@ -423,8 +423,9 @@ public class RobotContainer {
     driverOI.getShooterUnstickButton()
         .whileActiveContinuous(new FeedUnstick(shooterRoller, hopper, operatorOI::updateLED));
 
-    operatorOI.getIntakeExtendButton().whenActive(intake::extend, intake);
-    operatorOI.getIntakeRetractButton().whenActive(intake::retract, intake);
+    operatorOI.getIntakeExtendButton().whenActive(intake::extend);
+    operatorOI.getIntakeRetractButton()
+        .whenActive(new InstantCommand(intake::retract, intake).andThen(new RunIntakeForwards(intake).withTimeout(1)));
 
     RunIntakeForwards runIntakeForwards = new RunIntakeForwards(intake);
     RunIntakeBackwards runIntakeBackwards = new RunIntakeBackwards(intake);
