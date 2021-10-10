@@ -30,7 +30,7 @@ public class RunIntakeForwards extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(0.8);
+    setpoint.setDefault(0.5);
     intake.run(setpoint.get());
   }
 

@@ -9,11 +9,11 @@ package frc.robot.commands;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
 import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.Hopper;
@@ -23,7 +23,6 @@ import frc.robot.subsystems.RobotOdometry;
 import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.ShooterRoller;
-import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.subsystems.drive.DriveTrainBase;
 import frc.robot.util.PressureSensor;
 
@@ -42,12 +41,12 @@ public class PointAtTargetAndShoot extends SequentialCommandGroup {
     // super(new FooCommand(), new BarCommand());
     super(
         new SequentialCommandGroup(
-            new ParallelCommandGroup(new InstantCommand(() -> hood.setTargetPosition(HoodPosition.FRONT_LINE)),
-                new PointAtTargetWithOdometry(driveTrain, odometry, limelight),
+            new ParallelCommandGroup(new PointAtTargetWithOdometry(driveTrain, odometry, limelight).withTimeout(3),
                 new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint()))),
+            new WaitUntilCommand(() -> hood.atTargetPosition()),
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
                 new RunIntakeForwards(intake), new WaitCommand(1.5)))
-                    .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, false)),
+                    .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, true)),
         new DriveDistanceOnHeading(driveTrain, ahrs, -60));
   }
 }

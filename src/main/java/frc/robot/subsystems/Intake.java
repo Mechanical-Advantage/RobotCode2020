@@ -107,6 +107,13 @@ public class Intake extends SubsystemBase {
     setExtendRetractLEDs(false);
   }
 
+  public boolean isExtended() {
+    if (intakeSolenoid == null) {
+      return false;
+    }
+    return intakeSolenoid.get();
+  }
+
   private void setExtendRetractLEDs(boolean extended) {
     updateLED.update(OILED.INTAKE_EXTEND, extended ? OILEDState.MED : OILEDState.OFF);
     updateLED.update(OILED.INTAKE_RETRACT, extended ? OILEDState.OFF : OILEDState.MED);
