@@ -23,7 +23,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
       Constants.fieldLength + Constants.innerPortDepth, Constants.visionTargetHorizDist * -1);
   public static final Translation2d outerPortTranslation = new Translation2d(Constants.fieldLength,
       Constants.visionTargetHorizDist * -1);
-  private static final double innerPortMaxDegrees = 15; // If angle outside this value, aim at outer
+  private static final double innerPortMaxDegrees = 12; // If angle outside this value, aim at outer
 
   private final RobotOdometry odometry;
   private final LimelightInterface limelight;

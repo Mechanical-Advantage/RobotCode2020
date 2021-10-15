@@ -131,8 +131,8 @@ public class TurnToAngle extends CommandBase {
   @Override
   public boolean isFinished() {
     // The moving average and current value must both be within tolerance
-    return turnController.atSetpoint()
-        && Math.abs(movingAverageFilter.calculate(ahrs.getYaw()) - currentTargetAngle) <= toleranceDegrees;
+    return turnController.atSetpoint() && Math.abs(UtilFunctions
+        .boundHalfDegrees(movingAverageFilter.calculate(ahrs.getYaw()) - currentTargetAngle)) <= toleranceDegrees;
   }
 
   @Override

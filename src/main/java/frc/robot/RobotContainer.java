@@ -201,14 +201,14 @@ public class RobotContainer {
       autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
-    autoChooser.addOption("Fire loaded balls",
+    autoChooser.addOption("Three ball auto",
         new PointAtTargetAndShoot(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel,
             shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
             (position) -> operatorOI.setHoodPosition(position)));
-    autoChooser.addOption("Fire loaded balls & collect trench run",
-        new PointAtTargetAndShootTrenchRun(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller,
-            shooterFlyWheel, shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
-            (position) -> operatorOI.setHoodPosition(position)));
+    autoChooser.addOption("Six ball auto (center start)", new PointAtTargetAndShootTrenchRun(true, driveSubsystem,
+        odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood, intake));
+    autoChooser.addOption("Six ball auto (right start)", new PointAtTargetAndShootTrenchRun(false, driveSubsystem,
+        odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood, intake));
     autoChooser.addOption("Galactic Search (Vision)", galacticSearchCommand);
     autoChooser.addOption("Galactic Search (A/Blue)", new RunGalacticSearchABlue(odometry, driveSubsystem, intake));
     autoChooser.addOption("Galactic Search (A/Red)", new RunGalacticSearchARed(odometry, driveSubsystem, intake));
