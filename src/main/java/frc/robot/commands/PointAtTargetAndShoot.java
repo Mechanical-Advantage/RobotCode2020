@@ -14,8 +14,6 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.oi.IOperatorOI.SetHoodPositionLCDInterface;
-import frc.robot.oi.IOperatorOI.UpdateLEDInterface;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightInterface;
@@ -24,7 +22,6 @@ import frc.robot.subsystems.ShooterFlyWheel;
 import frc.robot.subsystems.ShooterHood;
 import frc.robot.subsystems.ShooterRoller;
 import frc.robot.subsystems.drive.DriveTrainBase;
-import frc.robot.util.PressureSensor;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -35,8 +32,7 @@ public class PointAtTargetAndShoot extends SequentialCommandGroup {
    * Creates a new PointAtTargetAndShoot.
    */
   public PointAtTargetAndShoot(DriveTrainBase driveTrain, RobotOdometry odometry, LimelightInterface limelight,
-      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, Intake intake,
-      PressureSensor pressureSensor, UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
+      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, Intake intake) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(

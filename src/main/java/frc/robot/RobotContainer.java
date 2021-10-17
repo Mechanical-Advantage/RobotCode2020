@@ -79,6 +79,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimelightInterface;
+import frc.robot.subsystems.Pneumatics;
 import frc.robot.subsystems.LimelightInterface.LimelightStreamingMode;
 import frc.robot.subsystems.ShooterHood.HoodPosition;
 import frc.robot.subsystems.RobotOdometry;
@@ -91,7 +92,6 @@ import frc.robot.subsystems.drive.DriveTrainBase.DriveGear;
 import frc.robot.subsystems.drive.SparkMAXDriveTrain;
 import frc.robot.util.Alert;
 import frc.robot.util.Alert.AlertType;
-import frc.robot.util.PressureSensor;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -122,9 +122,9 @@ public class RobotContainer {
   private final ShooterFlyWheel shooterFlyWheel = new ShooterFlyWheel((led, state) -> operatorOI.updateLED(led, state),
       (double rpm) -> operatorOI.setFlyWheelSpeed(rpm));
   private final ShooterRoller shooterRoller = new ShooterRoller();
-  private final PressureSensor pressureSensor = new PressureSensor(0, (pressure) -> operatorOI.setPressure(pressure));
-  private final ShooterHood shooterHood = new ShooterHood(pressureSensor,
-      (led, state) -> operatorOI.updateLED(led, state), (position) -> operatorOI.setHoodPosition(position));
+  private final Pneumatics pneumatics = new Pneumatics(0, (pressure) -> operatorOI.setPressure(pressure));
+  private final ShooterHood shooterHood = new ShooterHood(pneumatics, (led, state) -> operatorOI.updateLED(led, state),
+      (position) -> operatorOI.setHoodPosition(position));
   private final Intake intake = new Intake((led, state) -> operatorOI.updateLED(led, state));
   private final Hopper hopper = new Hopper();
   private final Climber climber = new Climber();
@@ -201,10 +201,8 @@ public class RobotContainer {
       autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
-    autoChooser.addOption("Three ball auto",
-        new PointAtTargetAndShoot(driveSubsystem, odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel,
-            shooterHood, intake, pressureSensor, (led, state) -> operatorOI.updateLED(led, state),
-            (position) -> operatorOI.setHoodPosition(position)));
+    autoChooser.addOption("Three ball auto", new PointAtTargetAndShoot(driveSubsystem, odometry, limelight, ahrs,
+        hopper, shooterRoller, shooterFlyWheel, shooterHood, intake));
     autoChooser.addOption("Six ball auto (center start)", new PointAtTargetAndShootTrenchRun(true, driveSubsystem,
         odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood, intake));
     autoChooser.addOption("Six ball auto (right start)", new PointAtTargetAndShootTrenchRun(false, driveSubsystem,

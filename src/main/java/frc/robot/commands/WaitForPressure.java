@@ -8,19 +8,19 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.util.PressureSensor;
+import frc.robot.subsystems.Pneumatics;
 
 public class WaitForPressure extends CommandBase {
 
   private final double requiredPressure = 40.0;
-  private final PressureSensor pressureSensor;
+  private final Pneumatics pneumatics;
 
   /**
    * Creates a new WaitForPressure.
    */
-  public WaitForPressure(PressureSensor pressureSensor) {
+  public WaitForPressure(Pneumatics pneumatics) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.pressureSensor = pressureSensor;
+    this.pneumatics = pneumatics;
   }
 
   // Called when the command is initially scheduled.
@@ -41,6 +41,6 @@ public class WaitForPressure extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return pressureSensor.getPressure() >= requiredPressure;
+    return pneumatics.getPressure() >= requiredPressure;
   }
 }
