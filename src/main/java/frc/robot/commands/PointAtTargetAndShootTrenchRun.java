@@ -67,9 +67,8 @@ public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
     // super(new FooCommand(), new BarCommand());
     super(
         new SequentialCommandGroup(
-            centerStart ? new InstantCommand()
-                : new InstantCommand(() -> odometry.setPosition(initialPositionRight), odometry),
-            new ParallelCommandGroup(new PointAtTargetWithOdometry(driveTrain, odometry, limelight).withTimeout(3),
+            centerStart ? new InstantCommand() : new InstantCommand(() -> odometry.setPosition(initialPositionRight)),
+            new ParallelCommandGroup(new PointAtTargetWithOdometry(driveTrain, odometry, limelight),
                 new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint())),
                 new WaitUntilCommand(() -> hood.atTargetPosition())),
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
