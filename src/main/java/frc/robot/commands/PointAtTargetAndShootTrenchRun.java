@@ -38,6 +38,8 @@ import frc.robot.subsystems.drive.DriveTrainBase;
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
 public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
 
+  private static final Pose2d initialPositionRight = new Pose2d(Constants.fieldLength - Constants.initiationLine - 16,
+      -Constants.visionTargetHorizDist - 48, Rotation2d.fromDegrees(0));
   private static final double powerCellLineY = Constants.fieldWidth / -2 + Constants.trenchRunWidth / 2 + 6;
   private static final Pose2d trenchStartCenter = new Pose2d(Constants.fieldLength / 2 + Constants.trenchRunLength / 2,
       powerCellLineY + 2, Rotation2d.fromDegrees(-170));
@@ -65,13 +67,15 @@ public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
     // super(new FooCommand(), new BarCommand());
     super(
         new SequentialCommandGroup(
+            centerStart ? new InstantCommand()
+                : new InstantCommand(() -> odometry.setPosition(initialPositionRight), odometry),
             new ParallelCommandGroup(new PointAtTargetWithOdometry(driveTrain, odometry, limelight).withTimeout(3),
                 new WaitCommand(1).andThen(new WaitCommand(6).withInterrupt(() -> flywheel.atSetpoint())),
                 new WaitUntilCommand(() -> hood.atTargetPosition())),
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
                 new RunIntakeForwards(intake), new WaitCommand(1.5)))
                     .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, true)),
-        new SequentialCommandGroup(new TurnToAngle(driveTrain, ahrs, centerStart ? 135 : 180, true, 15),
+        new SequentialCommandGroup(new TurnToAngleFast(driveTrain, ahrs, centerStart ? 135 : 175, true, 0.4),
             new InstantCommand(intake::extend),
             new NewRunMotionProfile(driveTrain, odometry,
                 List.of(centerStart ? trenchStartCenter : trenchStartRight, trenchEnd), 0, false, false,
