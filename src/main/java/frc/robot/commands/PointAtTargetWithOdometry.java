@@ -47,25 +47,25 @@ public class PointAtTargetWithOdometry extends CommandBase {
     this.odometry = odometry;
     this.limelight = limelight;
     switch (Constants.getRobot()) {
-      case ROBOT_2020:
-      case ROBOT_2020_DRIVE:
-        kP.setDefault(0.012);
-        kI.setDefault(0.004);
-        kD.setDefault(0.0005);
-        integralMaxError.setDefault(10);
-        minVelocity.setDefault(0.045);
-        toleranceDegrees.setDefault(1);
-        toleranceTime.setDefault(0.25);
-        break;
-      default:
-        kP.setDefault(0);
-        kI.setDefault(0);
-        kD.setDefault(0);
-        integralMaxError.setDefault(10);
-        minVelocity.setDefault(0);
-        toleranceDegrees.setDefault(1);
-        toleranceTime.setDefault(0.25);
-        break;
+    case ROBOT_2020:
+    case ROBOT_2020_DRIVE:
+      kP.setDefault(0.012);
+      kI.setDefault(0.004);
+      kD.setDefault(0.0005);
+      integralMaxError.setDefault(10);
+      minVelocity.setDefault(0.045);
+      toleranceDegrees.setDefault(1.5);
+      toleranceTime.setDefault(0.25);
+      break;
+    default:
+      kP.setDefault(0);
+      kI.setDefault(0);
+      kD.setDefault(0);
+      integralMaxError.setDefault(10);
+      minVelocity.setDefault(0);
+      toleranceDegrees.setDefault(1);
+      toleranceTime.setDefault(0.25);
+      break;
     }
     turnController = new PIDController(kP.get(), 0, kD.get());
     turnController.setTolerance(toleranceDegrees.get());
