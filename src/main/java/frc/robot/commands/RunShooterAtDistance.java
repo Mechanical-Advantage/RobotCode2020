@@ -105,32 +105,32 @@ public class RunShooterAtDistance extends CommandBase {
     if (autoHood) {
       double wallFrontLineTransition, frontLineBackLineTransition, backLineTrenchTransition;
       switch (shooterHood.getTargetPosition()) {
-        case WALL:
-          wallFrontLineTransition = maxWallDistance;
-          frontLineBackLineTransition = maxFrontLineDistance;
-          backLineTrenchTransition = minTrenchDistance;
-          break;
-        case FRONT_LINE:
-          wallFrontLineTransition = minFrontLineDistance;
-          frontLineBackLineTransition = maxFrontLineDistance;
-          backLineTrenchTransition = minTrenchDistance;
-          break;
-        case BACK_LINE:
-          wallFrontLineTransition = maxWallDistance;
-          frontLineBackLineTransition = minBackLineDistance;
-          backLineTrenchTransition = maxBackLineDistance;
-          break;
-        case TRENCH:
-          wallFrontLineTransition = maxWallDistance;
-          frontLineBackLineTransition = minBackLineDistance;
-          backLineTrenchTransition = minTrenchDistance;
-          break;
-        case UNKNOWN:
-        default:
-          wallFrontLineTransition = (maxWallDistance + minFrontLineDistance) / 2;
-          frontLineBackLineTransition = (maxFrontLineDistance + minBackLineDistance) / 2;
-          backLineTrenchTransition = (maxBackLineDistance + minTrenchDistance) / 2;
-          break;
+      case WALL:
+        wallFrontLineTransition = maxWallDistance;
+        frontLineBackLineTransition = maxFrontLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
+        break;
+      case FRONT_LINE:
+        wallFrontLineTransition = minFrontLineDistance;
+        frontLineBackLineTransition = maxFrontLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
+        break;
+      case BACK_LINE:
+        wallFrontLineTransition = maxWallDistance;
+        frontLineBackLineTransition = minBackLineDistance;
+        backLineTrenchTransition = maxBackLineDistance;
+        break;
+      case TRENCH:
+        wallFrontLineTransition = maxWallDistance;
+        frontLineBackLineTransition = minBackLineDistance;
+        backLineTrenchTransition = minTrenchDistance;
+        break;
+      case UNKNOWN:
+      default:
+        wallFrontLineTransition = (maxWallDistance + minFrontLineDistance) / 2;
+        frontLineBackLineTransition = (maxFrontLineDistance + minBackLineDistance) / 2;
+        backLineTrenchTransition = (maxBackLineDistance + minTrenchDistance) / 2;
+        break;
       }
       if (distance < wallFrontLineTransition) {
         shooterHood.setTargetPosition(HoodPosition.WALL);
@@ -146,21 +146,21 @@ public class RunShooterAtDistance extends CommandBase {
     // Update flywheel speed
     double predictedSpeed;
     switch (shooterHood.getTargetPosition()) {
-      case WALL:
-        predictedSpeed = wallRegression.predict(distance);
-        break;
-      case FRONT_LINE:
-        predictedSpeed = frontLineRegression.predict(distance);
-        break;
-      case BACK_LINE:
-        predictedSpeed = backLineRegression.predict(distance);
-        break;
-      case TRENCH:
-        predictedSpeed = trenchRegression.predict(distance);
-        break;
-      default:
-        predictedSpeed = 0;
-        break;
+    case WALL:
+      predictedSpeed = wallRegression.predict(distance);
+      break;
+    case FRONT_LINE:
+      predictedSpeed = frontLineRegression.predict(distance);
+      break;
+    case BACK_LINE:
+      predictedSpeed = backLineRegression.predict(distance);
+      break;
+    case TRENCH:
+      predictedSpeed = trenchRegression.predict(distance) + 100;
+      break;
+    default:
+      predictedSpeed = 0;
+      break;
     }
     shooterFlyWheel.setShooterRPM(predictedSpeed > maxFlywheelSpeed ? maxFlywheelSpeed : predictedSpeed);
   }

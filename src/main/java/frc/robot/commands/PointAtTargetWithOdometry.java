@@ -128,10 +128,15 @@ public class PointAtTargetWithOdometry extends CommandBase {
    * type of port
    */
   public static boolean useInnerPort(Translation2d currentPosition) {
-    Translation2d innerPortRelative = innerPortTranslation.minus(currentPosition);
-    Rotation2d innerPortRotation = new Rotation2d(innerPortRelative.getX(), innerPortRelative.getY());
-
-    return Math.abs(innerPortRotation.getDegrees()) < innerPortMaxDegrees && !Constants.flatTarget;
+    return false;
+    /*
+     * Translation2d innerPortRelative =
+     * innerPortTranslation.minus(currentPosition); Rotation2d innerPortRotation =
+     * new Rotation2d(innerPortRelative.getX(), innerPortRelative.getY());
+     * 
+     * return Math.abs(innerPortRotation.getDegrees()) < innerPortMaxDegrees &&
+     * !Constants.flatTarget;
+     */
   }
 
   // Called once the command ends or is interrupted.
