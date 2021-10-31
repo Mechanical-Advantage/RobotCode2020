@@ -73,7 +73,7 @@ public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
                 new WaitUntilCommand(() -> hood.atTargetPosition())),
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
                 new RunIntakeForwards(intake), new WaitCommand(1.5)))
-                    .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, true, () -> false)),
+                    .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, true)),
         new SequentialCommandGroup(new TurnToAngleFast(driveTrain, ahrs, centerStart ? 135 : 175, true, 0.4),
             new InstantCommand(intake::extend),
             new NewRunMotionProfile(driveTrain, odometry,
@@ -85,7 +85,7 @@ public class PointAtTargetAndShootTrenchRun extends SequentialCommandGroup {
             new PointAtTargetWithOdometry(driveTrain, odometry, limelight).withTimeout(4),
             new WaitUntilCommand(() -> hood.atTargetPosition()),
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
-                new RunIntakeForwards(intake), new WaitCommand(5))).deadlineWith(
-                    new RunShooterAtDistance(flywheel, hood, secondShotPosition.getTranslation(), true, () -> false)));
+                new RunIntakeForwards(intake), new WaitCommand(5)))
+                    .deadlineWith(new RunShooterAtDistance(flywheel, hood, secondShotPosition.getTranslation(), true)));
   }
 }

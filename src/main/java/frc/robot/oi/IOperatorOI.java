@@ -69,10 +69,6 @@ public interface IOperatorOI {
         return dummyTrigger;
     }
 
-    public default boolean getLockWall() {
-        return false;
-    }
-
     public default void updateTimer() {
     }
 
