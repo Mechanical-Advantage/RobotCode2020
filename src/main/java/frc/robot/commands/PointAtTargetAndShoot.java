@@ -32,7 +32,8 @@ public class PointAtTargetAndShoot extends SequentialCommandGroup {
    * Creates a new PointAtTargetAndShoot.
    */
   public PointAtTargetAndShoot(DriveTrainBase driveTrain, RobotOdometry odometry, LimelightInterface limelight,
-      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, Intake intake) {
+      AHRS ahrs, Hopper hopper, ShooterRoller roller, ShooterFlyWheel flywheel, ShooterHood hood, Intake intake,
+      boolean driveForward) {
     // Add your commands in the super() call, e.g.
     // super(new FooCommand(), new BarCommand());
     super(
@@ -43,6 +44,6 @@ public class PointAtTargetAndShoot extends SequentialCommandGroup {
             new ParallelRaceGroup(new RunHopper(hopper), new RunShooterRoller(roller), new HoldPosition(driveTrain),
                 new RunIntakeForwards(intake), new WaitCommand(1.5)))
                     .deadlineWith(new RunShooterAtDistance(flywheel, hood, odometry, true, () -> false)),
-        new DriveDistanceOnHeading(driveTrain, ahrs, -60));
+        new DriveDistanceOnHeading(driveTrain, ahrs, driveForward ? 60 : -60));
   }
 }

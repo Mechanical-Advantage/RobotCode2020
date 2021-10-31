@@ -201,8 +201,10 @@ public class RobotContainer {
       autoChooser.addOption("Drive 5 foot arc (MP)", new RunMotionProfile(driveSubsystem, odometry, List.of(),
           new Pose2d(180, 60, Rotation2d.fromDegrees(90)), 0, false, true));
     }
-    autoChooser.addOption("Three ball auto", new PointAtTargetAndShoot(driveSubsystem, odometry, limelight, ahrs,
-        hopper, shooterRoller, shooterFlyWheel, shooterHood, intake));
+    autoChooser.addOption("Three ball auto (go forwards)", new PointAtTargetAndShoot(driveSubsystem, odometry,
+        limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood, intake, true));
+    autoChooser.addOption("Three ball auto (go backwards)", new PointAtTargetAndShoot(driveSubsystem, odometry,
+        limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood, intake, false));
     autoChooser.addOption("Six ball auto (center start)", new PointAtTargetAndShootTrenchRun(true, driveSubsystem,
         odometry, limelight, ahrs, hopper, shooterRoller, shooterFlyWheel, shooterHood, intake));
     autoChooser.addOption("Six ball auto (right start)", new PointAtTargetAndShootTrenchRun(false, driveSubsystem,

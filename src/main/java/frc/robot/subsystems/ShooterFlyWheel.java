@@ -79,18 +79,18 @@ public class ShooterFlyWheel extends SubsystemBase {
     this.updateLED = updateLED;
 
     switch (Constants.getRobot()) {
-      case ROBOT_2020:
-        flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        feedForwardModel = new SimpleMotorFeedforward(0.133, 0.00142, 0.000489);
-        break;
-      case ROBOT_2020_DRIVE:
-        flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
-        flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
-        feedForwardModel = new SimpleMotorFeedforward(0, 0, 0);
-        break;
-      default:
-        return;
+    case ROBOT_2020:
+      flywheelMaster = new CANSparkMax(14, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      feedForwardModel = new SimpleMotorFeedforward(0.133, 0.00142, 0.000489);
+      break;
+    case ROBOT_2020_DRIVE:
+      flywheelMaster = new CANSparkMax(3, MotorType.kBrushless);
+      flywheelFollower = new CANSparkMax(13, MotorType.kBrushless);
+      feedForwardModel = new SimpleMotorFeedforward(0, 0, 0);
+      break;
+    default:
+      return;
     }
 
     accurateInTimer.reset();
@@ -194,9 +194,10 @@ public class ShooterFlyWheel extends SubsystemBase {
       lastOpenLoopRampRate = currentOpenLoopRampRate;
     }
     if (Constants.tuningMode) {
-      SmartDashboard.putNumber("Shooter FlyWheel/speed", getSpeed());
+      SmartDashboard.putNumber("Shooter FlyWheel/Speed", getSpeed());
       SmartDashboard.putNumber("Shooter FlyWheel/applied output", flywheelMaster.getAppliedOutput());
     }
+    SmartDashboard.putNumber("Shooter FlyWheel/Speed", getSpeed());
     SmartDashboard.putBoolean("Shooter FlyWheel/At Speed", atSetpoint());
 
     setFlyWheelSpeed.set(getSpeed());

@@ -54,7 +54,7 @@ public class PointAtTargetWithOdometry extends CommandBase {
       kD.setDefault(0.001);
       integralMaxError.setDefault(4);
       minVelocity.setDefault(0.02);
-      toleranceDegrees.setDefault(2);
+      toleranceDegrees.setDefault(1.5);
       toleranceTime.setDefault(0.1);
       break;
     default:

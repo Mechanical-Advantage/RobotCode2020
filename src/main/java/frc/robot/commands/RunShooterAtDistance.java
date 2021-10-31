@@ -143,30 +143,33 @@ public class RunShooterAtDistance extends CommandBase {
         shooterHood.setTargetPosition(HoodPosition.WALL);
       } else if (distance < frontLineBackLineTransition) {
         shooterHood.setTargetPosition(HoodPosition.FRONT_LINE);
-      } else if (distance < backLineTrenchTransition) {
-        shooterHood.setTargetPosition(HoodPosition.BACK_LINE);
+        // } else if (distance < backLineTrenchTransition) {
+        // shooterHood.setTargetPosition(HoodPosition.BACK_LINE);
+        // } else {
+        // shooterHood.setTargetPosition(HoodPosition.TRENCH);
+        // }
       } else {
-        shooterHood.setTargetPosition(HoodPosition.TRENCH);
+        shooterHood.setTargetPosition(HoodPosition.BACK_LINE);
       }
     }
 
     // Update flywheel speed
     double predictedSpeed;
     if (lockWallSupplier.get()) {
-      predictedSpeed = 7000;
+      predictedSpeed = 5500;
     } else {
       switch (shooterHood.getTargetPosition()) {
       case WALL:
         predictedSpeed = wallRegression.predict(distance);
         break;
       case FRONT_LINE:
-        predictedSpeed = frontLineRegression.predict(distance);
+        predictedSpeed = frontLineRegression.predict(distance) + 300;
         break;
       case BACK_LINE:
-        predictedSpeed = backLineRegression.predict(distance) + 100;
+        predictedSpeed = backLineRegression.predict(distance) + 500;
         break;
       case TRENCH:
-        predictedSpeed = trenchRegression.predict(distance) + 200;
+        predictedSpeed = trenchRegression.predict(distance) + 400;
         break;
       default:
         predictedSpeed = 0;
