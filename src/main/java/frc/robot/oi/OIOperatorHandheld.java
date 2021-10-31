@@ -9,6 +9,8 @@ package frc.robot.oi;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -40,10 +42,12 @@ public class OIOperatorHandheld implements IOperatorOI {
     private Button trenchButton;
     private Button manualHoodButton;
     private Button autoHoodButton;
+    private Button lockWallToggle;
     private Trigger fakeManualHoodSwitch;
 
     private boolean climbEnabled = false;
     private boolean manualHood = false;
+    private boolean lockWall = false;
 
     private Trigger galacticSearchButton;
     private Trigger powerPortAutoButton;
@@ -70,6 +74,20 @@ public class OIOperatorHandheld implements IOperatorOI {
         manualHoodButton.whenPressed(() -> manualHood = true);
         autoHoodButton = new Button(controller::getBackButton);
         autoHoodButton.whenPressed(() -> manualHood = false);
+
+        lockWallToggle = new Button(() -> controller.getStickButton(Hand.kLeft));
+        lockWallToggle.whenActive(new InstantCommand() {
+            @Override
+            public void initialize() {
+                lockWall = !lockWall;
+                SmartDashboard.putBoolean("Lock Wall", lockWall);
+            }
+
+            @Override
+            public boolean runsWhenDisabled() {
+                return true;
+            }
+        });
 
         fakeClimbEnableSwitch = new Trigger(() -> climbEnabled);
         fakeManualHoodSwitch = new Trigger(() -> manualHood);
@@ -170,5 +188,10 @@ public class OIOperatorHandheld implements IOperatorOI {
     @Override
     public Trigger getPowerPortAutoButton() {
         return powerPortAutoButton;
+    }
+
+    @Override
+    public boolean getLockWall() {
+        return lockWall;
     }
 }

@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
@@ -51,18 +53,20 @@ public class RunShooterAtDistance extends CommandBase {
   private final RobotOdometry odometry;
   private final Translation2d staticPosition;
   private final boolean autoHood;
+  private final Supplier<Boolean> lockWallSupplier;
 
   /**
    * Creates a new RunShooterAtDistance, which updates flywheel speed and hood
    * position once based on a known pose.
    */
   public RunShooterAtDistance(ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, Translation2d position,
-      boolean autoHood) {
+      boolean autoHood, Supplier<Boolean> lockWallSupplier) {
     this.shooterFlyWheel = shooterFlyWheel;
     this.shooterHood = shooterHood;
     this.odometry = null;
     this.staticPosition = position;
     this.autoHood = autoHood;
+    this.lockWallSupplier = lockWallSupplier;
     addRequirements(shooterFlyWheel, shooterHood);
   }
 
@@ -71,12 +75,13 @@ public class RunShooterAtDistance extends CommandBase {
    * position continously based on odometry.
    */
   public RunShooterAtDistance(ShooterFlyWheel shooterFlyWheel, ShooterHood shooterHood, RobotOdometry odometry,
-      boolean autoHood) {
+      boolean autoHood, Supplier<Boolean> lockWallSupplier) {
     this.shooterFlyWheel = shooterFlyWheel;
     this.shooterHood = shooterHood;
     this.odometry = odometry;
     this.staticPosition = null;
     this.autoHood = autoHood;
+    this.lockWallSupplier = lockWallSupplier;
     addRequirements(shooterFlyWheel, shooterHood);
   }
 
@@ -102,7 +107,9 @@ public class RunShooterAtDistance extends CommandBase {
         useInnerPort ? PointAtTargetWithOdometry.innerPortTranslation : PointAtTargetWithOdometry.outerPortTranslation);
 
     // Update hood position
-    if (autoHood) {
+    if (lockWallSupplier.get()) {
+      shooterHood.setTargetPosition(HoodPosition.WALL);
+    } else if (autoHood) {
       double wallFrontLineTransition, frontLineBackLineTransition, backLineTrenchTransition;
       switch (shooterHood.getTargetPosition()) {
       case WALL:
@@ -145,22 +152,26 @@ public class RunShooterAtDistance extends CommandBase {
 
     // Update flywheel speed
     double predictedSpeed;
-    switch (shooterHood.getTargetPosition()) {
-    case WALL:
-      predictedSpeed = wallRegression.predict(distance);
-      break;
-    case FRONT_LINE:
-      predictedSpeed = frontLineRegression.predict(distance);
-      break;
-    case BACK_LINE:
-      predictedSpeed = backLineRegression.predict(distance);
-      break;
-    case TRENCH:
-      predictedSpeed = trenchRegression.predict(distance) + 100;
-      break;
-    default:
-      predictedSpeed = 0;
-      break;
+    if (lockWallSupplier.get()) {
+      predictedSpeed = 7000;
+    } else {
+      switch (shooterHood.getTargetPosition()) {
+      case WALL:
+        predictedSpeed = wallRegression.predict(distance);
+        break;
+      case FRONT_LINE:
+        predictedSpeed = frontLineRegression.predict(distance);
+        break;
+      case BACK_LINE:
+        predictedSpeed = backLineRegression.predict(distance) + 100;
+        break;
+      case TRENCH:
+        predictedSpeed = trenchRegression.predict(distance) + 200;
+        break;
+      default:
+        predictedSpeed = 0;
+        break;
+      }
     }
     shooterFlyWheel.setShooterRPM(predictedSpeed > maxFlywheelSpeed ? maxFlywheelSpeed : predictedSpeed);
   }

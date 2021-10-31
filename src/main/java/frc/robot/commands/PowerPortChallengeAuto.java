@@ -48,7 +48,7 @@ public class PowerPortChallengeAuto extends SequentialCommandGroup {
             readyToShoot.andThen(new RunHopper(hopper).alongWith(new RunShooterRoller(roller)).withTimeout(1.5)),
             driveToTarget,
             new InstantCommand(() -> shooterHood.setTargetPosition(HoodPosition.BACK_LINE))
-                .andThen(new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false)),
+                .andThen(new RunShooterAtDistance(shooterFlyWheel, shooterHood, odometry, false, () -> false)),
             new StartEndCommand(intake::retract, intake::extend, intake),
             new StartEndCommand(() -> limelight.setLEDMode(LimelightLEDMode.ON),
                 () -> limelight.setLEDMode(LimelightLEDMode.OFF), limelight)),

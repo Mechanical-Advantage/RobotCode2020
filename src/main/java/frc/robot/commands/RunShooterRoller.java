@@ -30,7 +30,7 @@ public class RunShooterRoller extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    setpoint.setDefault(7500);
+    setpoint.setDefault(8500);
     shooterRoller.runClosedLoop(setpoint.get());
   }
 
