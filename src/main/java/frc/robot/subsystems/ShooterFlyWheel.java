@@ -197,7 +197,6 @@ public class ShooterFlyWheel extends SubsystemBase {
       SmartDashboard.putNumber("Shooter FlyWheel/speed", getSpeed());
       SmartDashboard.putNumber("Shooter FlyWheel/applied output", flywheelMaster.getAppliedOutput());
     }
-    SmartDashboard.putNumber("Shooter FlyWheel/Speed", getSpeed());
     SmartDashboard.putBoolean("Shooter FlyWheel/At Speed", atSetpoint());
 
     setFlyWheelSpeed.set(getSpeed());
