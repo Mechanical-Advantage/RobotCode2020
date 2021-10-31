@@ -59,8 +59,11 @@ public class ShooterHood extends SubsystemBase {
 
     if (DriverStation.getInstance().isEnabled()) {
       if (currentPosition != targetPosition && targetPosition != HoodPosition.UNKNOWN
-          && moveTimer.hasElapsed(currentMoveWait)) { // We need to move
-                                                      // and are able to
+          && moveTimer.hasElapsed(currentMoveWait)
+          && (pneumatics.getPressure() > minPressure || !pneumatics.isSensorConnected())) { // We need to move and are
+                                                                                            // able to. Override
+                                                                                            // pressure check if sensor
+                                                                                            // disconnects.
         currentMoveWait = liftMoveWait; // Wait for lift by default
         switch (currentPosition) {
         case FRONT_LINE:

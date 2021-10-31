@@ -69,6 +69,10 @@ public class Pneumatics extends SubsystemBase {
     }
   }
 
+  public boolean isSensorConnected() {
+    return getVoltage() >= disconnectedVoltage;
+  }
+
   @Override
   public void periodic() {
     if (available()) {
