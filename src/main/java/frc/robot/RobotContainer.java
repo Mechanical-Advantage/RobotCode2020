@@ -227,6 +227,7 @@ public class RobotContainer {
     shootingPresetChooser.addOption("Demo: Play Long Catch", new ShooterPreset(HoodPosition.FRONT_LINE, 5000));
     shootingPresetChooser.addOption("Demo: Play Short Catch", new ShooterPreset(HoodPosition.FRONT_LINE, 3000));
     shootingPresetChooser.addOption("Demo: Tall Shot", new ShooterPreset(HoodPosition.WALL, 6000));
+    shootingPresetChooser.addOption("Demo: Very Gentle", new ShooterPreset(HoodPosition.WALL, 3000));
     SmartDashboard.putData("Demo/Shooting Preset", shootingPresetChooser);
 
     feedModeChooser.setDefaultOption("--Competition Mode--", FeedMode.NORMAL);
