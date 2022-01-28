@@ -201,7 +201,7 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
 
     @Override
     public void updateTimer() {
-        int time = (int) DriverStation.getInstance().getMatchTime();
+        int time = (int) DriverStation.getMatchTime();
         String timeString = "?:??";
         if (time >= 0) {
             int minutes = Math.floorDiv(time, 60);
@@ -214,9 +214,9 @@ public class OIArduinoConsole implements IOperatorOI, IDriverOverrideOI {
         }
 
         String mode = "Teleop";
-        if (DriverStation.getInstance().isDisabled()) {
+        if (DriverStation.isDisabled()) {
             mode = "Disabled";
-        } else if (DriverStation.getInstance().isAutonomous()) {
+        } else if (DriverStation.isAutonomous()) {
             mode = "Auto";
         }
 

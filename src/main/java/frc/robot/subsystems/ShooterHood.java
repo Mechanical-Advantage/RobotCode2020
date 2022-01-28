@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,8 +42,8 @@ public class ShooterHood extends SubsystemBase {
    */
   public ShooterHood(Pneumatics pneumatics, UpdateLEDInterface updateLED, SetHoodPositionLCDInterface setHoodLCD) {
     if (Constants.getRobot() == RobotType.ROBOT_2020) {
-      liftSolenoid = new Solenoid(liftSolenoidChannel);
-      stopSolenoid = new Solenoid(stopSolenoidChannel);
+      liftSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM, liftSolenoidChannel);
+      stopSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM, stopSolenoidChannel);
     }
     this.pneumatics = pneumatics;
     this.updateLED = updateLED;
@@ -57,7 +58,7 @@ public class ShooterHood extends SubsystemBase {
       return;
     }
 
-    if (DriverStation.getInstance().isEnabled()) {
+    if (DriverStation.isEnabled()) {
       if (currentPosition != targetPosition && targetPosition != HoodPosition.UNKNOWN
           && moveTimer.hasElapsed(currentMoveWait)
           && (pneumatics.getPressure() > minPressure || !pneumatics.isSensorConnected())) { // We need to move and are
@@ -66,35 +67,35 @@ public class ShooterHood extends SubsystemBase {
                                                                                             // disconnects.
         currentMoveWait = liftMoveWait; // Wait for lift by default
         switch (currentPosition) {
-        case FRONT_LINE:
-          stopSolenoid.set(false);
-          liftSolenoid.set(false);
-          currentPosition = HoodPosition.WALL;
-          break;
-        case WALL:
-          stopSolenoid.set(targetPosition == HoodPosition.FRONT_LINE);
-          liftSolenoid.set(true);
-          currentPosition = targetPosition == HoodPosition.FRONT_LINE ? HoodPosition.FRONT_LINE : HoodPosition.TRENCH;
-          break;
-        case TRENCH:
-          if (stopSolenoid.get() != (targetPosition == HoodPosition.BACK_LINE)) {
-            stopSolenoid.set(targetPosition == HoodPosition.BACK_LINE);
-            currentMoveWait = stopMoveWait; // We don't need to wait as long for the stops
-          } else {
+          case FRONT_LINE:
+            stopSolenoid.set(false);
             liftSolenoid.set(false);
-            currentPosition = targetPosition == HoodPosition.BACK_LINE ? HoodPosition.BACK_LINE : HoodPosition.WALL;
-          }
-          break;
-        case BACK_LINE:
-          liftSolenoid.set(true);
-          stopSolenoid.set(targetPosition == HoodPosition.TRENCH);
-          currentPosition = HoodPosition.TRENCH;
-          break;
-        case UNKNOWN:
-          liftSolenoid.set(true);
-          stopSolenoid.set(false);
-          currentPosition = HoodPosition.TRENCH;
-          break;
+            currentPosition = HoodPosition.WALL;
+            break;
+          case WALL:
+            stopSolenoid.set(targetPosition == HoodPosition.FRONT_LINE);
+            liftSolenoid.set(true);
+            currentPosition = targetPosition == HoodPosition.FRONT_LINE ? HoodPosition.FRONT_LINE : HoodPosition.TRENCH;
+            break;
+          case TRENCH:
+            if (stopSolenoid.get() != (targetPosition == HoodPosition.BACK_LINE)) {
+              stopSolenoid.set(targetPosition == HoodPosition.BACK_LINE);
+              currentMoveWait = stopMoveWait; // We don't need to wait as long for the stops
+            } else {
+              liftSolenoid.set(false);
+              currentPosition = targetPosition == HoodPosition.BACK_LINE ? HoodPosition.BACK_LINE : HoodPosition.WALL;
+            }
+            break;
+          case BACK_LINE:
+            liftSolenoid.set(true);
+            stopSolenoid.set(targetPosition == HoodPosition.TRENCH);
+            currentPosition = HoodPosition.TRENCH;
+            break;
+          case UNKNOWN:
+            liftSolenoid.set(true);
+            stopSolenoid.set(false);
+            currentPosition = HoodPosition.TRENCH;
+            break;
         }
         moveTimer.reset();
       }

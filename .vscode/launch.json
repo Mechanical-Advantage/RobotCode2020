@@ -5,23 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "java",
-      "name": "Attach to roboRIO",
-      "request": "attach",
-      "hostName": "10.63.28.2",
-      "port": 8349
-    },
-    {
       "type": "wpilib",
       "name": "WPILib Desktop Debug",
       "request": "launch",
-      "desktop": true,
+      "desktop": true
     },
     {
       "type": "wpilib",
       "name": "WPILib roboRIO Debug",
       "request": "launch",
-      "desktop": false,
+      "desktop": false
     }
   ]
 }

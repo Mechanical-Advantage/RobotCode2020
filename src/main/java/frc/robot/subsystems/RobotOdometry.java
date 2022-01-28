@@ -18,10 +18,10 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -80,7 +80,7 @@ public class RobotOdometry extends SubsystemBase {
         if (logTimer.advanceIfElapsed(logRateSecs)) {
           try {
             csvWriter.write(String.format("%.4f", Timer.getFPGATimestamp()) + ",");
-            csvWriter.write(DriverStation.getInstance().isEnabled() ? "1," : "0,");
+            csvWriter.write(DriverStation.isEnabled() ? "1," : "0,");
             csvWriter.write(usingVision ? "1," : "0,");
             csvWriter.write(String.format("%.2f", pose.getX()) + ",");
             csvWriter.write(String.format("%.2f", pose.getY()) + ",");
@@ -93,7 +93,7 @@ public class RobotOdometry extends SubsystemBase {
       } else {
 
         // Open log file after time is retrieved from DS
-        if (DriverStation.getInstance().getAlliance() != Alliance.Invalid
+        if (DriverStation.getAlliance() != Alliance.Invalid
             && System.currentTimeMillis() > 946702800000L) {
           String logPath = logFolder + new SimpleDateFormat(logTitle).format(new Date());
           try {
@@ -101,7 +101,7 @@ public class RobotOdometry extends SubsystemBase {
             logTimer.start();
             new File(logPath).createNewFile();
             csvWriter = new FileWriter(logPath);
-            csvWriter.write(DriverStation.getInstance().getAlliance().name() + "\n");
+            csvWriter.write(DriverStation.getAlliance().name() + "\n");
             csvWriter.write("Timestamp,Enabled,Vision,X,Y,Rotation\n");
             csvWriter.flush();
             System.out.println("Successfully opened log file '" + logPath + "'");

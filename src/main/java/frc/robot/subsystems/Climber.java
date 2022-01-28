@@ -15,6 +15,7 @@ import com.revrobotics.EncoderType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -48,7 +49,7 @@ public class Climber extends SubsystemBase {
       return;
     }
 
-    climberDeploySolenoid = new Solenoid(PCM, deploySolenoidChannel);
+    climberDeploySolenoid = new Solenoid(PCM, PneumaticsModuleType.CTREPCM, deploySolenoidChannel);
     climberMaster = new CANSparkMax(masterDeviceID, MotorType.kBrushed);
     climberFollower = new CANSparkMax(followerDeviceID, MotorType.kBrushed);
 

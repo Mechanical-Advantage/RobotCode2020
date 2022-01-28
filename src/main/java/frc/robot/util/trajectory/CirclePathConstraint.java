@@ -4,8 +4,8 @@
 
 package frc.robot.util.trajectory;
 
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
 
 /**
  * Limits velocity and acceleration using a different constraint for a circle

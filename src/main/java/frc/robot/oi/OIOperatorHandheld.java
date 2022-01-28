@@ -8,7 +8,6 @@
 package frc.robot.oi;
 
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -56,10 +55,10 @@ public class OIOperatorHandheld implements IOperatorOI {
         // shooterRollerButton = new Button(controller::getXButton);
         // shooterUnstickButton = new Button(controller::getYButton);
 
-        intakeExtendButton = new Button(() -> controller.getBumper(Hand.kRight));
-        intakeRetractButton = new Button(() -> controller.getBumper(Hand.kLeft));
-        intakeForwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kRight) > 0.5);
-        intakeBackwardsButton = new Button(() -> controller.getTriggerAxis(Hand.kLeft) > 0.5);
+        intakeExtendButton = new Button(() -> controller.getRightBumper());
+        intakeRetractButton = new Button(() -> controller.getLeftBumper());
+        intakeForwardsButton = new Button(() -> controller.getRightTriggerAxis() > 0.5);
+        intakeBackwardsButton = new Button(() -> controller.getLeftTriggerAxis() > 0.5);
 
         climbEnableButton = new DoublePressTrigger(new Button(controller::getXButton));
         climbEnableButton.whenActive(() -> climbEnabled = true);
@@ -79,9 +78,9 @@ public class OIOperatorHandheld implements IOperatorOI {
         backLineButton = new POVButton(controller, 90);
         trenchButton = new POVButton(controller, 180);
 
-        galacticSearchButton = new Button(() -> controller.getBumper(Hand.kLeft))
-                .and(new Button(() -> controller.getBumper(Hand.kRight)));
-        powerPortAutoButton = new Trigger(() -> controller.getY(Hand.kLeft) < -0.5);
+        galacticSearchButton = new Button(() -> controller.getLeftBumper())
+                .and(new Button(() -> controller.getRightBumper()));
+        powerPortAutoButton = new Trigger(() -> controller.getLeftY() < -0.5);
     }
 
     @Override
@@ -129,12 +128,12 @@ public class OIOperatorHandheld implements IOperatorOI {
 
     @Override
     public double getClimbStickY() {
-        return controller.getY(Hand.kRight);
+        return controller.getRightY();
     }
 
     @Override
     public double getClimbStickX() {
-        return controller.getX(Hand.kRight);
+        return controller.getRightX();
     }
 
     @Override

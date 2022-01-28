@@ -1,6 +1,5 @@
 package frc.robot.oi;
 
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -30,7 +29,7 @@ public class OIHandheld implements IDriverOI {
         joysticksForward = new POVButton(driverController, 0);
         joysticksReverse = new POVButton(driverController, 180);
 
-        autoAimButton = new Button(() -> driverController.getBumper(Hand.kLeft));
+        autoAimButton = new Button(() -> driverController.getLeftBumper());
         autoDriveButton = new POVButton(driverController, 90);
 
         shooterRollerButton = new Button(driverController::getXButton);
@@ -41,37 +40,37 @@ public class OIHandheld implements IDriverOI {
 
     @Override
     public double getLeftDriveY() {
-        return driverController.getY(Hand.kLeft);
+        return driverController.getLeftY();
     }
 
     @Override
     public double getLeftDriveX() {
-        return driverController.getX(Hand.kLeft);
+        return driverController.getLeftX();
     }
 
     @Override
     public double getLeftDriveTrigger() {
-        return driverController.getTriggerAxis(Hand.kLeft);
+        return driverController.getLeftTriggerAxis();
     }
 
     @Override
     public double getRightDriveY() {
-        return driverController.getY(Hand.kRight);
+        return driverController.getRightY();
     }
 
     @Override
     public double getRightDriveX() {
-        return driverController.getX(Hand.kRight);
+        return driverController.getRightX();
     }
 
     @Override
     public double getRightDriveTrigger() {
-        return driverController.getTriggerAxis(Hand.kRight);
+        return driverController.getRightTriggerAxis();
     }
 
     @Override
     public boolean getQuickTurn() {
-        return driverController.getBumper(Hand.kRight);
+        return driverController.getRightBumper();
     }
 
     @Override
@@ -116,7 +115,7 @@ public class OIHandheld implements IDriverOI {
 
     // @Override
     // public boolean getSniperHigh() {
-    // return driverController.getBumper(Hand.kRight);
+    // return driverController.getRightBumper();
     // }
 
     // @Override

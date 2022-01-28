@@ -14,6 +14,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.EncoderType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -47,7 +48,7 @@ public class Intake extends SubsystemBase {
       case ROBOT_2020:
         intake = new CANSparkMax(5, MotorType.kBrushed);
         intake.getEncoder(EncoderType.kNoSensor, 0);
-        intakeSolenoid = new Solenoid(PCM, solenoidChannel);
+        intakeSolenoid = new Solenoid(PCM, PneumaticsModuleType.CTREPCM, solenoidChannel);
         break;
       case ROBOT_2020_DRIVE:
         // This is temporary for testing

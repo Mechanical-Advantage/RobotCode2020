@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -101,7 +102,7 @@ public class LimelightInterface extends SubsystemBase {
     crosshairBY = table.getEntry("cy1");
 
     if (enablePCMLight) {
-      PCMLight = new Solenoid(PCMID, lightSolenoid);
+      PCMLight = new Solenoid(PCMID, PneumaticsModuleType.CTREPCM, lightSolenoid);
     }
   }
 

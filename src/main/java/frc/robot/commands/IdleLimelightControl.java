@@ -68,7 +68,7 @@ public class IdleLimelightControl extends CommandBase {
     } else if (ledsOn && targetLossTimer.hasElapsed(targetLossDelay)) {
       hasTarget = false;
     }
-    if (blink && DriverStation.getInstance().isEnabled() && !disableSwitch.getAsBoolean()) {
+    if (blink && DriverStation.isEnabled() && !disableSwitch.getAsBoolean()) {
       double currentStageTime;
       if (ledsOn) {
         if (hasTarget) {

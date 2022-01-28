@@ -2,8 +2,8 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
-import edu.wpi.cscore.MjpegServer;
-import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.cscore.MjpegServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -60,8 +60,8 @@ public class CameraSystem extends SubsystemBase {
   // effect
   private UsbCamera setupServer(int id) {
     serverCreated = true;
-    UsbCamera camera = CameraServer.getInstance().startAutomaticCapture("Video Feed", id);
-    ((MjpegServer) CameraServer.getInstance().getServer()).setCompression(compressionQuality);
+    UsbCamera camera = CameraServer.startAutomaticCapture("Video Feed", id);
+    ((MjpegServer) CameraServer.getServer()).setCompression(compressionQuality);
     return camera;
   }
 
@@ -79,7 +79,7 @@ public class CameraSystem extends SubsystemBase {
       }
       frontCameraAdded = true;
     }
-    CameraServer.getInstance().getServer().setSource(frontCamera);
+    CameraServer.getServer().setSource(frontCamera);
     System.out.println("Switching to front camera");
     SmartDashboard.putString("Current Camera", "Front");
   }
@@ -96,7 +96,7 @@ public class CameraSystem extends SubsystemBase {
         secondCamera.setFPS(15);
         secondCameraAdded = true;
       }
-      CameraServer.getInstance().getServer().setSource(secondCamera);
+      CameraServer.getServer().setSource(secondCamera);
       System.out.println("Switching to second camera");
       SmartDashboard.putString("Current Camera", "Second");
     }

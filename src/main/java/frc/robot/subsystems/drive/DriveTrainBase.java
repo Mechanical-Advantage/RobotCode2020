@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -73,14 +74,16 @@ public abstract class DriveTrainBase extends SubsystemBase {
    */
   protected void initialize() {
     if (dualGear) {
-      leftGearSolenoid = new DoubleSolenoid(leftGearPCM, leftGearSolenoid1, leftGearSolenoid2);
-      rightGearSolenoid = new DoubleSolenoid(rightGearPCM, rightGearSolenoid1, rightGearSolenoid2);
+      leftGearSolenoid = new DoubleSolenoid(leftGearPCM, PneumaticsModuleType.CTREPCM, leftGearSolenoid1,
+          leftGearSolenoid2);
+      rightGearSolenoid = new DoubleSolenoid(rightGearPCM, PneumaticsModuleType.CTREPCM, rightGearSolenoid1,
+          rightGearSolenoid2);
       setPID(1, kPHigh, kIHigh, kDHigh, kFHigh, kIZoneHigh);
       switchGear(DriveGear.HIGH);
     }
     setPID(0, kPLow, kILow, kDLow, kFLow, kIZoneLow);
     if (hasPTO) {
-      pto = new DoubleSolenoid(ptoPCM, ptoSolenoid1, ptoSolenoid2);
+      pto = new DoubleSolenoid(ptoPCM, PneumaticsModuleType.CTREPCM, ptoSolenoid1, ptoSolenoid2);
       disablePTO();
     }
   }
@@ -454,23 +457,23 @@ public abstract class DriveTrainBase extends SubsystemBase {
   public void switchGear(DriveGear gear) {
     if (dualGear && !shiftLockSwitchAccess.getAsBoolean()) {
       switch (gear) {
-      case HIGH:
-        leftGearSolenoid.set(Value.kForward);
-        rightGearSolenoid.set(Value.kForward);
-        setProfileSlot(1);
-        currentGear = DriveGear.HIGH;
-        SmartDashboard.putBoolean("High Gear", true);
-        break;
-      case LOW:
-        leftGearSolenoid.set(Value.kReverse);
-        rightGearSolenoid.set(Value.kReverse);
-        setProfileSlot(0);
-        currentGear = DriveGear.LOW;
-        SmartDashboard.putBoolean("High Gear", false);
-        break;
-      case UNSUPPORTED:
-      default:
-        break;
+        case HIGH:
+          leftGearSolenoid.set(Value.kForward);
+          rightGearSolenoid.set(Value.kForward);
+          setProfileSlot(1);
+          currentGear = DriveGear.HIGH;
+          SmartDashboard.putBoolean("High Gear", true);
+          break;
+        case LOW:
+          leftGearSolenoid.set(Value.kReverse);
+          rightGearSolenoid.set(Value.kReverse);
+          setProfileSlot(0);
+          currentGear = DriveGear.LOW;
+          SmartDashboard.putBoolean("High Gear", false);
+          break;
+        case UNSUPPORTED:
+        default:
+          break;
       }
     }
   }
@@ -536,12 +539,12 @@ public abstract class DriveTrainBase extends SubsystemBase {
 
     public DriveGear invert() {
       switch (this) {
-      case HIGH:
-        return LOW;
-      case LOW:
-        return HIGH;
-      default:
-        return UNSUPPORTED;
+        case HIGH:
+          return LOW;
+        case LOW:
+          return HIGH;
+        default:
+          return UNSUPPORTED;
       }
     }
   }

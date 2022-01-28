@@ -7,7 +7,6 @@
 
 package frc.robot.oi;
 
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -38,8 +37,8 @@ public class OIHandheldAllInOne extends OIHandheldWithOverrides implements IOper
         intakeForwardsButton = new POVButton(driverController, 0);
         intakeBackwardsButton = new POVButton(driverController, 180);
 
-        galacticSearchButton = new Button(() -> driverController.getBumper(Hand.kLeft))
-                .and(new Button(() -> driverController.getBumper(Hand.kRight)));
+        galacticSearchButton = new Button(() -> driverController.getLeftBumper())
+                .and(new Button(() -> driverController.getRightBumper()));
     }
 
     @Override

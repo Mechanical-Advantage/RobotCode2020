@@ -8,7 +8,7 @@ import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
-import edu.wpi.cscore.CvSource;
+import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,7 +28,7 @@ public class RunGalacticSearchVision extends CommandBase {
   private final GalacticSearchPipeline pipeline = new GalacticSearchPipeline();
   private VideoCapture video = new VideoCapture();
   private Mat image = new Mat();
-  private CvSource output = CameraServer.getInstance().putVideo("Galactic Search", cameraWidth, cameraHeight);
+  private CvSource output = CameraServer.putVideo("Galactic Search", cameraWidth, cameraHeight);
 
   private GalacticSearchPath path;
   private Command runGalacticSearchABlue;
@@ -93,8 +93,8 @@ public class RunGalacticSearchVision extends CommandBase {
     if (!video.open(cameraId)) { // Reconnect each time to ensure we get a new frame
       DriverStation.reportWarning("Failed to connect to Galactic Search camera. Is it plugged in?", false);
     } else {
-      video.set(Videoio.CV_CAP_PROP_FRAME_WIDTH, cameraWidth);
-      video.set(Videoio.CV_CAP_PROP_FRAME_HEIGHT, cameraHeight);
+      video.set(Videoio.CAP_PROP_FRAME_WIDTH, cameraWidth);
+      video.set(Videoio.CAP_PROP_FRAME_HEIGHT, cameraHeight);
 
       // Capture an image from the camera
       if (video.read(image)) {

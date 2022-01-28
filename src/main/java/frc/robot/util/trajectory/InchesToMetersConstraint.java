@@ -4,9 +4,9 @@
 
 package frc.robot.util.trajectory;
 
-import edu.wpi.first.wpilibj.geometry.Pose2d;
-import edu.wpi.first.wpilibj.trajectory.constraint.TrajectoryConstraint;
-import edu.wpi.first.wpilibj.util.Units;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.constraint.TrajectoryConstraint;
+import edu.wpi.first.math.util.Units;
 import frckit.util.GeomUtil;
 
 /**
