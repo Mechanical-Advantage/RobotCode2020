@@ -47,7 +47,7 @@ public class Intake extends SubsystemBase {
     switch (Constants.getRobot()) {
       case ROBOT_2020:
         intake = new CANSparkMax(5, MotorType.kBrushed);
-        intake.getEncoder(EncoderType.kNoSensor, 0);
+        intake.getEncoder(EncoderType.kNoSensor, 1);
         intakeSolenoid = new Solenoid(PCM, PneumaticsModuleType.CTREPCM, solenoidChannel);
         break;
       case ROBOT_2020_DRIVE:

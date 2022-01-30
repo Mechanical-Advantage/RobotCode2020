@@ -58,8 +58,8 @@ public class Climber extends SubsystemBase {
     climberMaster.setSmartCurrentLimit(currentLimit);
     climberFollower.setSmartCurrentLimit(currentLimit);
     // Default feedback device is hall effect sensor so need to change it
-    climberMaster.getEncoder(EncoderType.kNoSensor, 0);
-    climberFollower.getEncoder(EncoderType.kNoSensor, 0);
+    climberMaster.getEncoder(EncoderType.kNoSensor, 1);
+    climberFollower.getEncoder(EncoderType.kNoSensor, 1);
     climberMaster.setIdleMode(idleMode);
     climberFollower.setIdleMode(idleMode);
 
